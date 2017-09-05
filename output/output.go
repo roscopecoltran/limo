@@ -19,6 +19,13 @@ type Output interface {
 	StarLine(*model.Star)
 	Star(*model.Star)
 	Tag(*model.Tag)
+	Topic(*model.Topic)
+	Academic(*model.Academic)
+	Software(*model.Software)
+	Tree(*model.Tree)
+	LanguageDetected(*model.LanguageDetected)
+	Pkg(*model.Pkg)
+	Readme(*model.Readme)
 	Tick()
 }
 

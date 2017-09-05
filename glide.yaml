@@ -1,0 +1,52 @@
+package: github.com/hoop33/limo
+import:
+- package: github.com/blevesearch/bleve
+  version: v0.5.0
+  subpackages:
+  - analysis/analyzers/keyword_analyzer
+  - analysis/analyzers/simple_analyzer
+  - analysis/language/en
+- package: github.com/briandowns/spinner
+  version: v1.0.0
+- package: github.com/cep21/xdgbasedir
+  version: master
+- package: github.com/sirupsen/logrus
+  version: master
+- package: github.com/golang/glog
+  version: master
+- package: github.com/dustin/go-humanize
+  version: master
+- package: github.com/fatih/color
+  version: v1.5.0
+- package: github.com/google/go-github
+  subpackages:
+  - github
+- package: github.com/jinzhu/configor
+  version: master
+- package: github.com/boltdb/bolt
+  version: v1.3.1
+- package: github.com/hoop33/entrevista
+  version: master
+- package: github.com/jinzhu/gorm
+  version: v1.0.0
+  subpackages:
+  - dialects/sqlite
+  - dialects/msyql
+- package: github.com/qor/admin
+  version: master
+- package: github.com/qor/qor
+  version: master
+- package: github.com/skratchdot/open-golang
+  version: master
+  subpackages:
+  - open
+- package: github.com/spf13/cobra
+- package: github.com/xanzy/go-gitlab
+  version: v0.5.1
+- package: golang.org/x/oauth2
+  version: master
+- package: gopkg.in/yaml.v2
+testImport:
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert

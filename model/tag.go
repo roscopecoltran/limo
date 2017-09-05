@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"log"
 	"strings"
-
+    // "github.com/qor/qor"
+    // "github.com/qor/admin"
 	"github.com/jinzhu/gorm"
 )
 
 // Tag represents a tag in the database
 type Tag struct {
 	gorm.Model
-	Name      string
-	StarCount int    `gorm:"-"`
-	Stars     []Star `gorm:"many2many:star_tags;"`
+	Name      	string
+	TagCount 	int    `gorm:"-"`
+	StarCount 	int    `gorm:"-"`
+	Stars     	[]Star `gorm:"many2many:star_tags;"`
 }
 
 // FindTags finds all tags
@@ -27,6 +29,10 @@ func FindTags(db *gorm.DB) ([]Tag, error) {
 // FindTagsWithStarCount finds all tags and gets their count of stars
 func FindTagsWithStarCount(db *gorm.DB) ([]Tag, error) {
 	var tags []Tag
+
+	// Create resources from GORM-backend model
+	// Admin.AddResource(&Tag{})
+
 	rows, err := db.Raw(`
 		SELECT T.NAME, COUNT(ST.TAG_ID) AS STARCOUNT
 		FROM TAGS T

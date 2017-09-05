@@ -37,9 +37,15 @@ func buildIndexMapping() *bleve.IndexMapping {
 	starMapping.AddFieldMappingsAt("Description", englishTextFieldMapping)
 	starMapping.AddFieldMappingsAt("Language", keywordFieldMapping)
 	starMapping.AddFieldMappingsAt("Tags.Name", keywordFieldMapping)
+	starMapping.AddFieldMappingsAt("Topics.Name", keywordFieldMapping)
+	starMapping.AddFieldMappingsAt("Languages.Name", keywordFieldMapping)
+	// starMapping.AddFieldMappingsAt("Readmes.Content", keywordFieldMapping)
 
 	indexMapping := bleve.NewIndexMapping()
 	indexMapping.AddDocumentMapping("Star", starMapping)
+
+	// indexMapping.AddDocumentMapping("Repo", starMapping)
+
 
 	return indexMapping
 }

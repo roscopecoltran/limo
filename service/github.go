@@ -37,6 +37,8 @@ func (g *Github) Login(ctx context.Context) (string, error) {
 
 // GetStars returns the stars for the specified user (empty string for authenticated user)
 func (g *Github) GetStars(ctx context.Context, starChan chan<- *model.StarResult, token string, user string) {
+
+	//"application/vnd.github.mercy-preview+json"
 	client := g.getClient(token)
 
 	// The first response will give us the correct value for the last page

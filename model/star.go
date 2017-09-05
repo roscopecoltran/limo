@@ -12,22 +12,31 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/xanzy/go-gitlab"
+
+    // "github.com/qor/qor"
+    // "github.com/qor/admin"
+
 )
+
+// https://github.com/Termina1/starlight/blob/master/handlers/repo_info_extractor.go
+// https://github.com/Termina1/starlight/blob/master/star_extractor.go
 
 // Star represents a starred repository
 type Star struct {
 	gorm.Model
-	RemoteID    string
-	Name        *string
-	FullName    *string
-	Description *string
-	Homepage    *string
-	URL         *string
-	Language    *string
-	Stargazers  int
-	StarredAt   time.Time
-	ServiceID   uint
-	Tags        []Tag `gorm:"many2many:star_tags;"`
+	RemoteID    		string
+	Name        		*string
+	FullName    		*string
+	Description 		*string
+	Homepage    		*string
+	URL         		*string
+	Language    		*string
+	Stargazers  		int
+	StarredAt   		time.Time
+	ServiceID   		uint
+	Tags        		[]Tag `gorm:"many2many:star_tags;"`
+	Topics      		[]Topic `gorm:"many2many:star_topics;"`
+	LanguagesDetected   []LanguageDetected `gorm:"many2many:star_languages;"`
 }
 
 // StarResult wraps a star and an error
@@ -80,6 +89,11 @@ func NewStarFromGitlab(star gitlab.Project) (*Star, error) {
 		Stargazers:  star.StarCount,
 		StarredAt:   time.Now(), // OK, so this is a lie, but not in payload
 	}, nil
+}
+
+// not ready yet !
+func DumpStarInfo(db *gorm.DB, star *Star, service *Service) (bool, error) {
+	return false, db.Save(star).Error
 }
 
 // CreateOrUpdateStar creates or updates a star and returns true if the star was created (vs updated)
@@ -251,6 +265,16 @@ func (star *Star) LoadTags(db *gorm.DB) error {
 		return fmt.Errorf("Star '%d' not found", star.ID)
 	}
 	return db.Model(star).Association("Tags").Find(&star.Tags).Error
+}
+
+// LoadTags loads the tags for a star
+func (star *Star) LoadTopics(db *gorm.DB) error {
+	// Make sure star exists in database, or we will panic
+	var existing Star
+	if db.Where("id = ?", star.ID).First(&existing).RecordNotFound() {
+		return fmt.Errorf("Star '%d' not found", star.ID)
+	}
+	return db.Model(star).Association("Topics").Find(&star.Topics).Error
 }
 
 // RemoveAllTags removes all tags for a star

@@ -74,6 +74,30 @@
   revision = "53e6ce116135b80d037921a7fdd5138cf32d7a8a"
 
 [[projects]]
+  name = "github.com/gorilla/context"
+  packages = ["."]
+  revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
+  version = "v1.1"
+
+[[projects]]
+  name = "github.com/gorilla/securecookie"
+  packages = ["."]
+  revision = "667fe4e3466a040b780561fe9b51a83a3753eefc"
+  version = "v1.1"
+
+[[projects]]
+  name = "github.com/gorilla/sessions"
+  packages = ["."]
+  revision = "ca9ada44574153444b00d3fd9c8559e4cc95f896"
+  version = "v1.1"
+
+[[projects]]
+  name = "github.com/gosimple/slug"
+  packages = ["."]
+  revision = "e9f42fa127660e552d0ad2b589868d403a9be7c6"
+  version = "v1.1.1"
+
+[[projects]]
   branch = "master"
   name = "github.com/hoop33/entrevista"
   packages = ["."]
@@ -104,6 +128,24 @@
   revision = "1c35d901db3da928c72a72d8458480cc9ade058f"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/jinzhu/now"
+  packages = ["."]
+  revision = "d939ba741945c047cac69c329c5fb0d6b4a06520"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/kr/pretty"
+  packages = ["."]
+  revision = "cfb55aafdaf3ec08f0db22699ab822c50091b1c4"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/kr/text"
+  packages = ["."]
+  revision = "7cafcd837844e784b526369c9bce262804aebc60"
+
+[[projects]]
   name = "github.com/mattn/go-colorable"
   packages = ["."]
   revision = "941b50ebc6efddf4c41c8e4537a5f68a4e686b24"
@@ -122,10 +164,70 @@
   version = "v1.2.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/microcosm-cc/bluemonday"
+  packages = ["."]
+  revision = "68fecaef60268522d2ac3f0123cec9d3bcab7b6e"
+
+[[projects]]
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/qor/admin"
+  packages = ["."]
+  revision = "ff60b6de25de121caf73fc4b222ce6574b827b06"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/qor/assetfs"
+  packages = ["."]
+  revision = "ff57fdc13a148d39c3e930cb27c7eaf82e376891"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/qor/middlewares"
+  packages = ["."]
+  revision = "781378b69454a545d08058d8154aca40d079e7ab"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/qor/qor"
+  packages = [".","resource","utils"]
+  revision = "cabe53cec1c395e4a372dcf5256769b08dd98056"
+
+[[projects]]
+  name = "github.com/qor/responder"
+  packages = ["."]
+  revision = "ecae0be66c1a6a441001b0b5eeef51f8bc27d42a"
+  version = "v1.0"
+
+[[projects]]
+  name = "github.com/qor/roles"
+  packages = ["."]
+  revision = "f1e05694734518c0ce2dc21151e0ecfccf4db8f4"
+  version = "v1.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/qor/session"
+  packages = [".","gorilla","manager"]
+  revision = "ae68ed83e777c8a1ca2731166bf7156a551e7cb4"
+
+[[projects]]
+  name = "github.com/qor/validations"
+  packages = ["."]
+  revision = "87c1296c75e72a8f3247beab65c48c50b7b66a7a"
+  version = "v1.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/rainycape/unidecode"
+  packages = ["."]
+  revision = "cb7f23ec59bec0d61b19c56cd88cee3d0cc1870c"
 
 [[projects]]
   branch = "master"
@@ -158,10 +260,22 @@
   version = "v1.1.4"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/theplant/cldr"
+  packages = ["."]
+  revision = "b97a4c2a76cf8ba21d1cb8ed2f4c8ee103371e2d"
+
+[[projects]]
   name = "github.com/xanzy/go-gitlab"
   packages = ["."]
   revision = "5b756e2fdc9f21fd4791fa1453b8fe01af0f82e2"
   version = "v0.5.1"
+
+[[projects]]
+  branch = "master"
+  name = "go4.org"
+  packages = ["reflectutil","sort"]
+  revision = "034d17a462f7b2dcd1a4a73553ec5357ff6e6c6e"
 
 [[projects]]
   branch = "master"
@@ -172,7 +286,7 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["context","context/ctxhttp"]
+  packages = ["context","context/ctxhttp","html","html/atom"]
   revision = "f01ecb60fe3835d80d9a0b7b2bf24b228c89260e"
 
 [[projects]]
@@ -186,6 +300,12 @@
   name = "golang.org/x/sys"
   packages = ["unix"]
   revision = "abf9c25f54453410d0c6668e519582a9e1115027"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/text"
+  packages = ["internal/gen","unicode/cldr"]
+  revision = "bd91bbf73e9a4a801adbfb97133c992678533126"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -202,6 +322,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9cbdfea1b46545ba781430a1a03ae64f5022af59e9f0b53fbccc993d8b9d4a4c"
+  inputs-digest = "d3aa634b9d7da5a44b41e0d6822cd3755e6cac8820483310d512ee170d3a2f6f"
   solver-name = "gps-cdcl"
   solver-version = 1

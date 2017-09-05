@@ -108,6 +108,42 @@ func (t *Text) Tag(tag *model.Tag) {
 	fmt.Printf("%s *:%d\n", tag.Name, tag.StarCount)
 }
 
+// Topic displays a topic
+func (t *Text) Topic(topic *model.Topic) {
+	fmt.Printf("%s *:%d\n", topic.Name, topic.StarCount)
+}
+
+// Academic displays a academic
+func (t *Text) Academic(academic *model.Academic) {
+	fmt.Printf("%s *:%d\n", academic.Name, academic.StarCount)
+}
+
+// Software displays a software
+func (t *Text) Software(software *model.Software) {
+	fmt.Printf("%s *:%d\n", software.Name, software.StarCount)
+}
+
+// Tree displays a tree
+func (t *Text) Tree(file *model.Tree) {
+	fmt.Printf("%s *:%d\n", file.Name, file.StarCount)
+}
+
+// Software displays a software
+func (t *Text) LanguageDetected(LanguageDetected *model.LanguageDetected) {
+	fmt.Printf("%s *:%d\n", LanguageDetected.Name, LanguageDetected.StarCount)
+}
+
+// Pkg displays a pkg
+func (t *Text) Pkg(pkg *model.Pkg) {
+	fmt.Printf("%s *:%d\n", pkg.Name, pkg.StarCount)
+}
+
+// Readme displays a readme
+func (t *Text) Readme(file *model.Readme) {
+	fmt.Printf("%s *:%d\n", file.Name, file.StarCount)
+}
+
+
 // Tick displays evidence that the program is working
 func (t *Text) Tick() {
 	fmt.Print(".")

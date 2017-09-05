@@ -4,7 +4,13 @@ import (
 	"github.com/jinzhu/gorm"
 	// Use the sqlite dialect
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
+    // "github.com/qor/qor"
+    // "github.com/qor/admin"
 )
+
+// https://github.com/qor/qor-example/blob/master/db/db.go
 
 // InitDB initializes the database at the specified path
 func InitDB(filepath string, verbose bool) (*gorm.DB, error) {
@@ -14,7 +20,12 @@ func InitDB(filepath string, verbose bool) (*gorm.DB, error) {
 	}
 
 	db.LogMode(verbose)
-	db.AutoMigrate(&Service{}, &Star{}, &Tag{})
+	// , &Deps{}, &Patterns{}, &Snippets{}
+	db.AutoMigrate(&Service{}, &Star{}, &Tag{}, &Topic{}, &LanguageDetected{}, &Tree{}, &Readme{}, &Academic{}, &Pkg{}, &Software{})
+
+	// Initalize
+	// Admin := admin.New(&qor.Config{DB: db})
 
 	return db, nil
 }
+
