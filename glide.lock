@@ -1,8 +1,6 @@
-hash: a82ae460d4c14ea9db4121b3145bb3f6a519587424cfdd8bb5ba0908b9918696
-updated: 2017-09-05T22:56:36.842004441+02:00
+hash: b967c14e541a392acce83dafa45cfff46032769bf5e28a0e6ee9e02f705717b1
+updated: 2017-09-05T23:59:54.027517448+02:00
 imports:
-- name: github.com/asaskevich/govalidator
-  version: 73945b6115bfbbcc57d89b7316e28109364124e1
 - name: github.com/blevesearch/bleve
   version: 97393d027342f43b17da2f02c090a4e728ac929f
   subpackages:
@@ -54,6 +52,10 @@ imports:
   version: 79e699ccd02f240a1f1fbbdcee7e64c1c12e41aa
 - name: github.com/fatih/color
   version: 570b54cabe6b8eb0bc2dfce68d964677d63b5260
+- name: github.com/go-sql-driver/mysql
+  version: 26471af196a17ee75a22e6481b5a5897fb16b081
+- name: github.com/golang/glog
+  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 - name: github.com/golang/protobuf
   version: 655cdfa588ea190e901bc5590e65d5621688847c
   repo: https://github.com/golang/protobuf
@@ -67,14 +69,6 @@ imports:
   version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
   subpackages:
   - query
-- name: github.com/gorilla/context
-  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
-- name: github.com/gorilla/securecookie
-  version: e59506cc896acb7f7bf732d4fdf5e25f7ccd8983
-- name: github.com/gorilla/sessions
-  version: b61c93cb7f67533c8bfbb5ea450efc07e5833c5e
-- name: github.com/gosimple/slug
-  version: e9f42fa127660e552d0ad2b589868d403a9be7c6
 - name: github.com/hoop33/entrevista
   version: 419a1a2be5540cc6d77b54236bea2fdff096c993
 - name: github.com/howeyc/gopass
@@ -88,11 +82,16 @@ imports:
   version: 5174cc5c242a728b435ea2be8a2f7f998e15429b
   subpackages:
   - dialects/msyql
+  - dialects/mysql
+  - dialects/postgres
   - dialects/sqlite
 - name: github.com/jinzhu/inflection
   version: 1c35d901db3da928c72a72d8458480cc9ade058f
-- name: github.com/jinzhu/now
-  version: d939ba741945c047cac69c329c5fb0d6b4a06520
+- name: github.com/lib/pq
+  version: e42267488fe361b9dc034be7a6bffef5b195bceb
+  subpackages:
+  - hstore
+  - oid
 - name: github.com/mattn/go-colorable
   version: 5411d3eea5978e6cdc258b30de592b60df6aba96
   repo: https://github.com/mattn/go-colorable
@@ -101,32 +100,12 @@ imports:
   repo: https://github.com/mattn/go-isatty
 - name: github.com/mattn/go-sqlite3
   version: 05548ff55570cdb9ac72ff4a25a3b5e77a6fb7e5
-- name: github.com/microcosm-cc/bluemonday
-  version: 68fecaef60268522d2ac3f0123cec9d3bcab7b6e
 - name: github.com/qor/admin
   version: ff60b6de25de121caf73fc4b222ce6574b827b06
-- name: github.com/qor/assetfs
-  version: ff57fdc13a148d39c3e930cb27c7eaf82e376891
-- name: github.com/qor/middlewares
-  version: 781378b69454a545d08058d8154aca40d079e7ab
 - name: github.com/qor/qor
   version: cabe53cec1c395e4a372dcf5256769b08dd98056
-  subpackages:
-  - resource
-  - utils
-- name: github.com/qor/responder
-  version: 2d882089748afcf4e729334d7bb7fa17057de2e9
-- name: github.com/qor/roles
-  version: 4b5e54326f5b13fe76cfb6206ee53f547250c700
-- name: github.com/qor/session
-  version: ae68ed83e777c8a1ca2731166bf7156a551e7cb4
-  subpackages:
-  - gorilla
-  - manager
-- name: github.com/qor/validations
-  version: c8be0f7b95080477388bac66d3ee4379e96a9b38
-- name: github.com/rainycape/unidecode
-  version: cb7f23ec59bec0d61b19c56cd88cee3d0cc1870c
+- name: github.com/sirupsen/logrus
+  version: 89742aefa4b206dcf400792f3bd35b542998eb3b
 - name: github.com/skratchdot/open-golang
   version: 75fb7ed4208cf72d323d7d02fd1a5964a7a9073c
   subpackages:
@@ -138,15 +117,8 @@ imports:
 - name: github.com/steveyen/gtreap
   version: 0abe01ef9be25c4aedc174758ec2d917314d6d70
   repo: https://github.com/steveyen/gtreap
-- name: github.com/theplant/cldr
-  version: b97a4c2a76cf8ba21d1cb8ed2f4c8ee103371e2d
 - name: github.com/xanzy/go-gitlab
   version: 5b756e2fdc9f21fd4791fa1453b8fe01af0f82e2
-- name: go4.org
-  version: 034d17a462f7b2dcd1a4a73553ec5357ff6e6c6e
-  subpackages:
-  - reflectutil
-  - sort
 - name: golang.org/x/crypto
   version: dd96d35c1b251a7ef77f057fc5c4f92ea2b285b4
   repo: https://go.googlesource.com/crypto
@@ -158,8 +130,6 @@ imports:
   subpackages:
   - context
   - context/ctxhttp
-  - html
-  - html/atom
 - name: golang.org/x/oauth2
   version: d89af98d7c6bba047c5a2622f36bc14b8766df85
   subpackages:

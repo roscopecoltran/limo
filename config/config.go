@@ -6,9 +6,8 @@ import (
 	"log"
 	"os"
 	"path"
-
 	"github.com/cep21/xdgbasedir"
-
+	//"github.com/jinzhu/configor"
 	"gopkg.in/yaml.v2"
 )
 

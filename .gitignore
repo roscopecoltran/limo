@@ -33,3 +33,7 @@ limo
 vendor
 vendor/
 vendor/**
+
+dist/linux/limo*
+dist/macos/limo*
+dist/windows/limo*
