@@ -12,6 +12,9 @@ build: check
 
 dist: macos linux windows
 
+darwin:
+	gox -verbose -os="darwin" -arch="amd64" -output="{{.Dir}}" $(glide novendor)
+
 macos:
 	GOOS=darwin go build -o $(DIST_DIR)/macos/$(PROG_NAME)
 

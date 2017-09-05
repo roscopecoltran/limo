@@ -12,6 +12,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/xanzy/go-gitlab"
+	// tablib "github.com/agrison/go-tablib"
 
     // "github.com/qor/qor"
     // "github.com/qor/admin"
@@ -34,6 +35,7 @@ type Star struct {
 	Stargazers  		int
 	StarredAt   		time.Time
 	ServiceID   		uint
+	//UserName        		*string
 	Tags        		[]Tag `gorm:"many2many:star_tags;"`
 	Topics      		[]Topic `gorm:"many2many:star_topics;"`
 	LanguagesDetected   []LanguageDetected `gorm:"many2many:star_languages;"`
@@ -73,6 +75,7 @@ func NewStarFromGithub(timestamp *github.Timestamp, star github.Repository) (*St
 		Language:    star.Language,
 		Stargazers:  stargazersCount,
 		StarredAt:   starredAt,
+		//Topics:   topics,
 	}, nil
 }
 

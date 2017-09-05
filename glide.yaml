@@ -1,4 +1,13 @@
 package: github.com/hoop33/limo
+homepage: https://github.com/hoop33/limo
+license: MIT
+owners:
+- name: Rob Warner
+  email: rwarner@grailbox.com
+  homepage: http://grailbox.com
+- name: Luc Michalski
+  email: michalski.luc@gmail.com
+  homepage: https://github.com/lucmichalski
 import:
 - package: github.com/blevesearch/bleve
   version: v0.5.0
@@ -10,6 +19,10 @@ import:
   version: v1.0.0
 - package: github.com/cep21/xdgbasedir
   version: master
+- package: github.com/bassam/stargazers
+  version: pr-fix-logging
+  vcs: git
+  repo: https://github.com/bassam/stargazers.git
 - package: github.com/sirupsen/logrus
   version: master
 - package: github.com/golang/glog
@@ -19,12 +32,13 @@ import:
 - package: github.com/fatih/color
   version: v1.5.0
 - package: github.com/google/go-github
+  version: 00874eae3fbfc6750bfff364b1897101684d2f30
   subpackages:
   - github
 - package: github.com/jinzhu/configor
   version: master
 - package: github.com/boltdb/bolt
-  version: v1.3.1
+  version: 144418e1475d8bf7abbdc48583500f1a20c62ea7
 - package: github.com/hoop33/entrevista
   version: master
 - package: github.com/jinzhu/gorm
@@ -50,3 +64,4 @@ testImport:
 - package: github.com/stretchr/testify
   subpackages:
   - assert
+- package: github.com/arschles/assert

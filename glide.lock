@@ -1,6 +1,10 @@
-hash: b967c14e541a392acce83dafa45cfff46032769bf5e28a0e6ee9e02f705717b1
-updated: 2017-09-05T23:59:54.027517448+02:00
+hash: 020eecc672b47f088adb773b627e7150be128775542c75884b18e0bca04ef622
+updated: 2017-09-06T00:51:51.047921152+02:00
 imports:
+- name: github.com/bassam/stargazers
+  version: afeabe0367e0b8cae37f4c85b72d8cc2f920fef1
+  repo: https://github.com/bassam/stargazers.git
+  vcs: git
 - name: github.com/blevesearch/bleve
   version: 97393d027342f43b17da2f02c090a4e728ac929f
   subpackages:
@@ -43,7 +47,7 @@ imports:
   version: db70c57796cc8c310613541dfade3dce627d09c7
   repo: https://github.com/blevesearch/segment
 - name: github.com/boltdb/bolt
-  version: 2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8
+  version: 144418e1475d8bf7abbdc48583500f1a20c62ea7
 - name: github.com/briandowns/spinner
   version: 48dbb65d7bd5c74ab50d53d04c949f20e3d14944
 - name: github.com/cep21/xdgbasedir
@@ -62,7 +66,7 @@ imports:
   subpackages:
   - proto
 - name: github.com/google/go-github
-  version: 24139d56e97a44988087d461125ed6fab91c07ac
+  version: 00874eae3fbfc6750bfff364b1897101684d2f30
   subpackages:
   - github
 - name: github.com/google/go-querystring
@@ -143,9 +147,11 @@ imports:
   version: d9a072cfa7b9736e44311ef77b3e09d804bfa599
   subpackages:
   - internal
+  - internal/app_identity
   - internal/base
   - internal/datastore
   - internal/log
+  - internal/modules
   - internal/remote_api
   - internal/urlfetch
   - urlfetch

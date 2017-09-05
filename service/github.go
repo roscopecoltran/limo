@@ -6,10 +6,12 @@ import (
 	"time"
 
 	"golang.org/x/oauth2"
-
+	log "github.com/sirupsen/logrus"
 	"github.com/google/go-github/github"
 	"github.com/hoop33/entrevista"
 	"github.com/hoop33/limo/model"
+	// tablib "github.com/agrison/go-tablib"
+
 )
 
 // Github represents the Github service
@@ -38,6 +40,8 @@ func (g *Github) Login(ctx context.Context) (string, error) {
 // GetStars returns the stars for the specified user (empty string for authenticated user)
 func (g *Github) GetStars(ctx context.Context, starChan chan<- *model.StarResult, token string, user string) {
 
+	log.WithFields(log.Fields{"service": "GetStars"}).Infof("token: %#v", token)
+	log.WithFields(log.Fields{"service": "GetStars"}).Infof("user: %#v", user)
 	//"application/vnd.github.mercy-preview+json"
 	client := g.getClient(token)
 
@@ -46,11 +50,17 @@ func (g *Github) GetStars(ctx context.Context, starChan chan<- *model.StarResult
 	lastPage := 1
 
 	for currentPage <= lastPage {
+		// https://github.com/dougt/githubwebpush/blob/master/src/githubpusher/frontend/main.go
+
 		repos, response, err := client.Activity.ListStarred(ctx, user, &github.ActivityListStarredOptions{
 			ListOptions: github.ListOptions{
 				Page: currentPage,
 			},
 		})
+
+		// log.WithFields(log.Fields{"service": "GetStars"}).Infof("repos: %#v", repos)
+		// log.WithFields(log.Fields{"service": "GetStars"}).Infof("response: %#v", response)
+
 		// If we got an error, put it on the channel
 		if err != nil {
 			starChan <- &model.StarResult{
@@ -58,9 +68,11 @@ func (g *Github) GetStars(ctx context.Context, starChan chan<- *model.StarResult
 				Star:  nil,
 			}
 		} else {
+			// ds, _ := tablib.LoadJSON()
+			// yaml, _ := ds.YAML()
+			// fmt.Println(yaml)
 			// Set last page only if we didn't get an error
 			lastPage = response.LastPage
-
 			// Create a Star for each repository and put it on the channel
 			for _, repo := range repos {
 				star, err := model.NewStarFromGithub(repo.StarredAt, *repo.Repository)
@@ -70,6 +82,7 @@ func (g *Github) GetStars(ctx context.Context, starChan chan<- *model.StarResult
 				}
 			}
 		}
+		log.WithFields(log.Fields{"service": "GetStars"}).Infof("currentPage: %#v", currentPage)
 		// Go to the next page
 		currentPage++
 	}
@@ -109,7 +122,7 @@ func (g *Github) GetEvents(ctx context.Context, eventChan chan<- *model.EventRes
 // GetTrending returns the trending repositories
 func (g *Github) GetTrending(ctx context.Context, trendingChan chan<- *model.StarResult, token string, language string, verbose bool) {
 	client := g.getClient(token)
-
+	log.WithFields(log.Fields{"service": "GetTrending"}).Infof("token: %#v", token)
 	// TODO perhaps allow them to specify multiple pages?
 	// Might be overkill -- first page probably plenty
 
@@ -121,10 +134,12 @@ func (g *Github) GetTrending(ctx context.Context, trendingChan chan<- *model.Sta
 
 	if language != "" {
 		q = fmt.Sprintf("language:%s %s", language, q)
+		log.WithFields(log.Fields{"service": "GetTrending"}).Infof("language: %#v", language)
 	}
 
 	if verbose {
 		fmt.Println("q =", q)
+		log.WithFields(log.Fields{"service": "GetTrending"}).Infof("q: %#v", q)
 	}
 
 	result, _, err := client.Search.Repositories(ctx, q, &github.SearchOptions{
@@ -158,6 +173,7 @@ func (g *Github) getDateSearchString() string {
 	// and should be able to override from command line
 	// TODO should be able to specify whether "created" or "pushed"
 	date := time.Now().Add(-7 * (24 * time.Hour))
+	log.WithFields(log.Fields{"service": "getDateSearchString"}).Infof("date > %#v", date)
 	return fmt.Sprintf("created:>%s", date.Format("2006-01-02"))
 }
 
