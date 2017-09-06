@@ -39,3 +39,5 @@ bin/limo*
 dist/linux/limo*
 dist/macos/limo*
 dist/windows/limo*
+
+*-alpine.env

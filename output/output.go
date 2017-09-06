@@ -18,6 +18,7 @@ type Output interface {
 	Fatal(string)
 	StarLine(*model.Star)
 	Star(*model.Star)
+	Repo(*model.Repo)
 	Tag(*model.Tag)
 	Topic(*model.Topic)
 	Academic(*model.Academic)
@@ -26,6 +27,8 @@ type Output interface {
 	LanguageDetected(*model.LanguageDetected)
 	Pkg(*model.Pkg)
 	Readme(*model.Readme)
+	Keyword(*model.Keyword)
+	Pattern(*model.Pattern)
 	Tick()
 }
 

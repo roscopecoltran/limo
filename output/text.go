@@ -103,6 +103,34 @@ func (t *Text) Star(star *model.Star) {
 	fmt.Printf("Starred on %s\n", star.StarredAt.Format(time.UnixDate))
 }
 
+// Star displays a star
+func (t *Text) Repo(repo *model.Repo) {
+	t.StarLine(repo)
+
+	if len(repo.Tags) > 0 {
+		var buffer bytes.Buffer
+		leader := ""
+		for _, tag := range repo.Tags {
+			_, err := buffer.WriteString(fmt.Sprintf("%s%s", leader, tag.Name))
+			if err != nil {
+				t.Error(err.Error())
+			}
+			leader = ", "
+		}
+		fmt.Println(buffer.String())
+	}
+
+	if repo.Description != nil && *repo.Description != "" {
+		fmt.Println(*star.Description)
+	}
+
+	if repo.Homepage != nil && *repo.Homepage != "" {
+		fmt.Printf("Home page: %s\n", *repo.Homepage)
+	}
+
+	fmt.Printf("Created on %s\n", repo.CreatedAt.Format(time.UnixDate))
+}
+
 // Tag displays a tag
 func (t *Text) Tag(tag *model.Tag) {
 	fmt.Printf("%s *:%d\n", tag.Name, tag.StarCount)
@@ -143,6 +171,15 @@ func (t *Text) Readme(file *model.Readme) {
 	fmt.Printf("%s *:%d\n", file.Name, file.StarCount)
 }
 
+// Keyword displays a keyword
+func (t *Text) Keyword(keyword *model.Keyword) {
+	fmt.Printf("%s *:%d\n", keyword.Name, keyword.StarCount)
+}
+
+// Pattern displays a pattern
+func (t *Text) Pattern(pattern *model.Pattern) {
+	fmt.Printf("%s *:%d\n", pattern.Name, pattern.StarCount)
+}
 
 // Tick displays evidence that the program is working
 func (t *Text) Tick() {

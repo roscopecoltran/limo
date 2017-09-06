@@ -13,7 +13,13 @@ import (
 )
 
 // 
+// HeaderValue is the value of the custom Limo header
+var HeaderValue = fmt.Sprintf("Version %s", Version)
 
+// UserAgent is the value of the user agent header sent to the backends
+var UserAgent = fmt.Sprintf("%s Version %s", ProgramName, Version)
+
+// configuration path
 var configDirectoryPath string
 
 // ServiceConfig contains configuration information for a service

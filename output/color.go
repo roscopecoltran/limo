@@ -141,6 +141,34 @@ func (c *Color) Star(star *model.Star) {
 	color.Green(fmt.Sprintf("Starred on %s", star.StarredAt.Format(time.UnixDate)))
 }
 
+// Repo displays a repo
+func (c *Color) Repo(repo *model.Repo) {
+	c.StarLine(repo)
+
+	if len(repo.Tags) > 0 {
+		var buffer bytes.Buffer
+		leader := ""
+		for _, tag := range repo.Tags {
+			_, err := buffer.WriteString(color.MagentaString(fmt.Sprintf("%s%s", leader, tag.Name)))
+			if err != nil {
+				c.Error(err.Error())
+			}
+			leader = ", "
+		}
+		fmt.Println(buffer.String())
+	}
+
+	if repo.Description != nil && *repo.Description != "" {
+		color.White(*repo.Description)
+	}
+
+	if repo.Homepage != nil && *repo.Homepage != "" {
+		color.Red(fmt.Sprintf("Home page: %s", *repo.Homepage))
+	}
+
+	color.Green(fmt.Sprintf("Created on %s", repo.CreatedAt.Format(time.UnixDate)))
+}
+
 // Tag displays a tag
 func (c *Color) Tag(tag *model.Tag) {
 	var buffer bytes.Buffer
@@ -270,6 +298,40 @@ func (c *Color) Readme(readme *model.Readme) {
 	}
 
 	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf(" ★ :%d", readme.StarCount)))
+	if err != nil {
+		c.Error(err.Error())
+	}
+
+	fmt.Println(buffer.String())
+}
+
+// Keyword displays a keyword
+func (c *Color) Keyword(keyword *model.Keyword) {
+	var buffer bytes.Buffer
+
+	_, err := buffer.WriteString(color.BlueString(keyword.Name))
+	if err != nil {
+		c.Error(err.Error())
+	}
+
+	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf(" ★ :%d", keyword.StarCount)))
+	if err != nil {
+		c.Error(err.Error())
+	}
+
+	fmt.Println(buffer.String())
+}
+
+// Pattern displays a pattern
+func (c *Color) Pattern(pattern *model.Pattern) {
+	var buffer bytes.Buffer
+
+	_, err := buffer.WriteString(color.BlueString(pattern.Name))
+	if err != nil {
+		c.Error(err.Error())
+	}
+
+	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf(" ★ :%d", pattern.StarCount)))
 	if err != nil {
 		c.Error(err.Error())
 	}
