@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/google/go-github/github"
 	"github.com/hoop33/entrevista"
-	"github.com/hoop33/limo/model"
+	"github.com/roscopecoltran/sniperkit-limo/model"
 	// tablib "github.com/agrison/go-tablib"
 	"github.com/davecgh/go-spew/spew"
 

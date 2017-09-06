@@ -3,8 +3,8 @@ package actions
 import (
 	"fmt"
 
-	"github.com/hoop33/limo/config"
-	"github.com/hoop33/limo/model"
+	"github.com/roscopecoltran/sniperkit-limo/config"
+	"github.com/roscopecoltran/sniperkit-limo/model"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ var AddCmd = &cobra.Command{
 	Use:     "add <star|tag> <name>...",
 	Short:   "Add star(s), tag(s), academic(s), readme(s), package(s), language(s) or topic",
 	Long:    "Add star(s) or tag(s). Adding a tag adds it to your local database. Adding a star stars the repository on the specified service.",
-	Example: fmt.Sprintf("  %s add tag vim database\n  %s add star hoop33/limo --service github", config.ProgramName, config.ProgramName),
+	Example: fmt.Sprintf("  %s add tag vim database\n  %s add star roscopecoltran/sniperkit-limo --service github", config.ProgramName, config.ProgramName),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 2 {
 			getOutput().Fatal("You must specify star or tag and values")

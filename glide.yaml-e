@@ -1,5 +1,5 @@
-package: github.com/roscopecoltran/sniperkit-limo
-homepage: https://github.com/roscopecoltran/sniperkit-limo
+package: github.com/hoop33/limo
+homepage: https://github.com/hoop33/limo
 license: MIT
 owners:
 - name: Rob Warner

@@ -145,7 +145,7 @@ clear-screen:
 
 pkg-uri-fix: install-ag pkg-uri-clean clear-screen ## fix sniperkit-limo pkg uri for golang package import
 	@echo "fix sniperkit-limo pkg uri for golang package import"
-	@$(AG_EXEC) -l 'github.com/roscopecoltran/sniperkit-limo' --ignore Makefile --ignore *.md . | xargs sed -i -e 's/hoop33\/limo/roscopecoltran\/sniperkit-limo/g'
+	@$(AG_EXEC) -l 'github.com/hoop33/limo' --ignore Makefile --ignore *.md . | xargs sed -i -e 's/hoop33\/limo/roscopecoltran\/sniperkit-limo/g'
 	@find . -name "*.go-e" -exec rm -f {} \; 
 
 pkg-uri-revert: install-ag pkg-uri-clean clear-screen ## fix limo, fork, pkg uri for golang package import

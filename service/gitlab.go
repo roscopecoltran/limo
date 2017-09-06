@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/hoop33/entrevista"
-	"github.com/hoop33/limo/model"
+	"github.com/roscopecoltran/sniperkit-limo/model"
 	"github.com/xanzy/go-gitlab"
 )
 

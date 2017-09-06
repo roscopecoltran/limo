@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hoop33/limo/config"
-	"github.com/hoop33/limo/model"
-	"github.com/hoop33/limo/service"
+	"github.com/roscopecoltran/sniperkit-limo/config"
+	"github.com/roscopecoltran/sniperkit-limo/model"
+	"github.com/roscopecoltran/sniperkit-limo/service"
 	"github.com/spf13/cobra"
 )
 

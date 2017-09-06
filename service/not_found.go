@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/hoop33/limo/model"
+	"github.com/roscopecoltran/sniperkit-limo/model"
 )
 
 // NotFound is used when the specified service is not found

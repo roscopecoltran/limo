@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/hoop33/limo/config"
-	"github.com/hoop33/limo/model"
+	"github.com/roscopecoltran/sniperkit-limo/config"
+	"github.com/roscopecoltran/sniperkit-limo/model"
 )
 
 // Output represents an output option

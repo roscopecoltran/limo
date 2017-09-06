@@ -3,7 +3,7 @@ package actions
 import (
 	"fmt"
 
-	"github.com/hoop33/limo/config"
+	"github.com/roscopecoltran/sniperkit-limo/config"
 	"github.com/spf13/cobra"
 )
 
