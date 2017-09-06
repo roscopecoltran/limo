@@ -6,6 +6,10 @@ import (
     // "github.com/qor/admin"
 )
 
+// https://github.com/yoru9zine/starlink/blob/master/main.go
+// https://github.com/importre/mecca/blob/master/polymer.go
+// 
+
 // Service represents a hosting service like Github
 type Service struct {
 	gorm.Model

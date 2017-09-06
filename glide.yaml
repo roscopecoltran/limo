@@ -17,6 +17,9 @@ import:
   - analysis/language/en
 - package: github.com/briandowns/spinner
   version: v1.0.0
+- package: github.com/davecgh/go-spew
+  subpackages:
+  - spew
 - package: github.com/cep21/xdgbasedir
   version: master
 - package: github.com/bassam/stargazers
@@ -27,12 +30,17 @@ import:
   version: master
 - package: github.com/golang/glog
   version: master
+- package: github.com/roscopecoltran/sniperkit-sift
+  version: pkg
+  subpackages:
+  - sift
 - package: github.com/dustin/go-humanize
   version: master
 - package: github.com/fatih/color
   version: v1.5.0
 - package: github.com/google/go-github
-  version: 00874eae3fbfc6750bfff364b1897101684d2f30
+  version: master
+  # version: 00874eae3fbfc6750bfff364b1897101684d2f30
   subpackages:
   - github
 - package: github.com/jinzhu/configor

@@ -11,6 +11,7 @@ import (
 	"github.com/hoop33/entrevista"
 	"github.com/hoop33/limo/model"
 	// tablib "github.com/agrison/go-tablib"
+	"github.com/davecgh/go-spew/spew"
 
 )
 
@@ -29,13 +30,14 @@ func (g *Github) Login(ctx context.Context) (string, error) {
 			Hidden:   true,
 		},
 	}
-
 	answers, err := interview.Run()
 	if err != nil {
 		return "", err
 	}
 	return answers["token"].(string), nil
 }
+
+// about linting code: https://github.com/seiffert/ghrepos/blob/master/scripts/lint
 
 // GetStars returns the stars for the specified user (empty string for authenticated user)
 func (g *Github) GetStars(ctx context.Context, starChan chan<- *model.StarResult, token string, user string) {
@@ -48,6 +50,9 @@ func (g *Github) GetStars(ctx context.Context, starChan chan<- *model.StarResult
 	// The first response will give us the correct value for the last page
 	currentPage := 1
 	lastPage := 1
+
+	// , topics []string
+	// https://github.com/seiffert/ghrepos/blob/master/ghrepos.go
 
 	for currentPage <= lastPage {
 		// https://github.com/dougt/githubwebpush/blob/master/src/githubpusher/frontend/main.go
@@ -68,13 +73,18 @@ func (g *Github) GetStars(ctx context.Context, starChan chan<- *model.StarResult
 				Star:  nil,
 			}
 		} else {
-			// ds, _ := tablib.LoadJSON()
+			// ds, _ := tablib.LoadJSON(response)
 			// yaml, _ := ds.YAML()
-			// fmt.Println(yaml)
+			// fmt.Println(repos)
+			spew.Dump(repos)
+			spew.Dump(response)
 			// Set last page only if we didn't get an error
 			lastPage = response.LastPage
 			// Create a Star for each repository and put it on the channel
 			for _, repo := range repos {
+				// fmt.Println(repo)
+				spew.Dump(repo)
+				// *github.StarredRepository
 				star, err := model.NewStarFromGithub(repo.StarredAt, *repo.Repository)
 				starChan <- &model.StarResult{
 					Error: err,

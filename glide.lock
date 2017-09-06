@@ -1,5 +1,5 @@
-hash: 020eecc672b47f088adb773b627e7150be128775542c75884b18e0bca04ef622
-updated: 2017-09-06T00:51:51.047921152+02:00
+hash: 78043fa64a63209bd795808253282511a6fc744e4ad43925f328062d4a02eda4
+updated: 2017-09-06T01:55:23.785771661+02:00
 imports:
 - name: github.com/bassam/stargazers
   version: afeabe0367e0b8cae37f4c85b72d8cc2f920fef1
@@ -52,6 +52,10 @@ imports:
   version: 48dbb65d7bd5c74ab50d53d04c949f20e3d14944
 - name: github.com/cep21/xdgbasedir
   version: 21470bfc93b9903bce0beaebb037b1d04d0be523
+- name: github.com/davecgh/go-spew
+  version: 04cdfd42973bb9c8589fd6a731800cf222fde1a9
+  subpackages:
+  - spew
 - name: github.com/dustin/go-humanize
   version: 79e699ccd02f240a1f1fbbdcee7e64c1c12e41aa
 - name: github.com/fatih/color
@@ -66,7 +70,7 @@ imports:
   subpackages:
   - proto
 - name: github.com/google/go-github
-  version: 00874eae3fbfc6750bfff364b1897101684d2f30
+  version: 24139d56e97a44988087d461125ed6fab91c07ac
   subpackages:
   - github
 - name: github.com/google/go-querystring
@@ -147,21 +151,17 @@ imports:
   version: d9a072cfa7b9736e44311ef77b3e09d804bfa599
   subpackages:
   - internal
-  - internal/app_identity
   - internal/base
   - internal/datastore
   - internal/log
-  - internal/modules
   - internal/remote_api
   - internal/urlfetch
   - urlfetch
 - name: gopkg.in/yaml.v2
   version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
 testImports:
-- name: github.com/davecgh/go-spew
-  version: 04cdfd42973bb9c8589fd6a731800cf222fde1a9
-  subpackages:
-  - spew
+- name: github.com/arschles/assert
+  version: bb58b908265b5931732079df03f2818bf2167ba0
 - name: github.com/pmezard/go-difflib
   version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:

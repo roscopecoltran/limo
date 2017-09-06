@@ -10,6 +10,8 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// https://github.com/lighttiger2505/ghs/blob/master/code.go
+
 // Software represents a software in the database
 type Software struct {
 	gorm.Model

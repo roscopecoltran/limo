@@ -15,6 +15,14 @@ dist: macos linux windows
 darwin:
 	gox -verbose -os="darwin" -arch="amd64" -output="{{.Dir}}" $(glide novendor)
 
+logrus-fix:
+	#@if [ -d ./vendor ]; then rm -fr ./vendor/github.com/Sirupsen; fi
+	#@if [ -f glide.yaml ]; then find . -name glide.* -exec sed -i 's/Sirupsen/sirupsen/g' {} + ; fi
+	#@if [ -d ./vendor ]; then find ./vendor -type f -exec sed -i 's/Sirupsen/sirupsen/g' {} + ; fi
+
+go-github-fix:
+	@if [ -d ./vendor/github.com/google/go-github/github ]; then find ./vendor/github.com/google/go-github/github -name activity_star.go -exec sed -i 's/mediaTypeStarringPreview/mediaTypeTopicsPreview/g' {} + ; fi
+
 macos:
 	GOOS=darwin go build -o $(DIST_DIR)/macos/$(PROG_NAME)
 

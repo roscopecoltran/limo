@@ -11,6 +11,10 @@ import (
 )
 
 // https://github.com/grimmer0125/search-github-starred/blob/develop/githubAPI.go
+// https://github.com/google/go-github/blob/master/github/examples_test.go
+// https://github.com/google/go-github/blob/master/github/search_test.go
+// https://github.com/google/go-github/blob/master/github/activity_star_test.go
+// https://github.com/google/go-github/blob/master/github/search.go
 
 // Readme  represents a readme in the database
 type Readme  struct {
