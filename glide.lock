@@ -1,5 +1,5 @@
-hash: 78043fa64a63209bd795808253282511a6fc744e4ad43925f328062d4a02eda4
-updated: 2017-09-06T01:55:23.785771661+02:00
+hash: d7eb39f5129023bc7a4748a6c5d419d3dfa23a24f44d5518525740a4fe6c5eb7
+updated: 2017-09-06T14:34:50.783086641+02:00
 imports:
 - name: github.com/bassam/stargazers
   version: afeabe0367e0b8cae37f4c85b72d8cc2f920fef1
@@ -109,9 +109,13 @@ imports:
 - name: github.com/mattn/go-sqlite3
   version: 05548ff55570cdb9ac72ff4a25a3b5e77a6fb7e5
 - name: github.com/qor/admin
-  version: ff60b6de25de121caf73fc4b222ce6574b827b06
+  version: c433692620b559c75acb923f05b9bd5faa9559f8
 - name: github.com/qor/qor
   version: cabe53cec1c395e4a372dcf5256769b08dd98056
+- name: github.com/roscopecoltran/sniperkit-sift
+  version: cf117d0030422fdf2e65b09ac442d07f9d50dece
+  subpackages:
+  - sift
 - name: github.com/sirupsen/logrus
   version: 89742aefa4b206dcf400792f3bd35b542998eb3b
 - name: github.com/skratchdot/open-golang

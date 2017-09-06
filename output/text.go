@@ -75,6 +75,36 @@ func (t *Text) StarLine(star *model.Star) {
 	fmt.Println(buffer.String())
 }
 
+// StarLine displays a star in one line
+func (t *Text) RepoLine(repo *model.Repo) {
+	var buffer bytes.Buffer
+
+	_, err := buffer.WriteString(*repo.FullName)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	_, err = buffer.WriteString(fmt.Sprintf(" *:%d", repo.Stargazers))
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	if repo.Language != nil {
+		_, err := buffer.WriteString(fmt.Sprintf(" %s", *repo.Language))
+		if err != nil {
+			t.Error(err.Error())
+		}
+	}
+
+	if repo.URL != nil {
+		_, err := buffer.WriteString(fmt.Sprintf(" %s", *repo.URL))
+		if err != nil {
+			t.Error(err.Error())
+		}
+	}
+	fmt.Println(buffer.String())
+}
+
 // Star displays a star
 func (t *Text) Star(star *model.Star) {
 	t.StarLine(star)
@@ -105,7 +135,7 @@ func (t *Text) Star(star *model.Star) {
 
 // Star displays a star
 func (t *Text) Repo(repo *model.Repo) {
-	t.StarLine(repo)
+	t.RepoLine(repo)
 
 	if len(repo.Tags) > 0 {
 		var buffer bytes.Buffer
@@ -121,7 +151,7 @@ func (t *Text) Repo(repo *model.Repo) {
 	}
 
 	if repo.Description != nil && *repo.Description != "" {
-		fmt.Println(*star.Description)
+		fmt.Println(*repo.Description)
 	}
 
 	if repo.Homepage != nil && *repo.Homepage != "" {

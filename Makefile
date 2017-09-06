@@ -74,7 +74,11 @@ build: check
 dist: macos linux windows
 
 darwin:
-	gox -verbose -os="darwin" -arch="amd64" -output="{{.Dir}}" $(glide novendor)
+	rm -f ./limo
+	gox -verbose -os="darwin" -arch="amd64" -output="{{.Dir}}" ./cmd/...
+
+# darwin:
+# 	gox -verbose -os="darwin" -arch="amd64" -output="{{.Dir}}" ./cmd/$*/...
 
 git-status: ## checkout/check the app active branch for building the project
 	@git status
@@ -137,7 +141,7 @@ golang-fix-all: golang-fork-fix golang-logrus-fix
 
 pkg-uri-clean:
 	@rm -fR $(CURDIR)/vendor/github.com/roscopecoltran/sniperkit-limo
-	@rm -fR $(CURDIR)/vendor/github.com/roscopecoltran/sniperkit-limo
+	@rm -fR $(CURDIR)/vendor/github.com/hoop33/limo
 
 clear-screen:
 	@clear
@@ -146,12 +150,12 @@ clear-screen:
 pkg-uri-fix: install-ag pkg-uri-clean clear-screen ## fix sniperkit-limo pkg uri for golang package import
 	@echo "fix sniperkit-limo pkg uri for golang package import"
 	@$(AG_EXEC) -l 'github.com/hoop33/limo' --ignore Makefile --ignore *.md . | xargs sed -i -e 's/hoop33\/limo/roscopecoltran\/sniperkit-limo/g'
-	@find . -name "*.go-e" -exec rm -f {} \; 
+	@find . -name "*-e" -exec rm -f {} \; 
 
 pkg-uri-revert: install-ag pkg-uri-clean clear-screen ## fix limo, fork, pkg uri for golang package import
 	@echo "fix limo, fork, pkg uri for golang package import"
 	@$(AG_EXEC) -l 'github.com/roscopecoltran/sniperkit-limo' --ignore Makefile --ignore *.md . | xargs sed -i -e 's/roscopecoltran\/sniperkit-limo/hoop33\/limo/g'
-	@find . -name "*.go-e" -exec rm -f {} \; 
+	@find . -name "*-e" -exec rm -f {} \; 
 
 golang-logrus-fix: install-ag clear-screen ## fix logrus case for golang package import
 	@if [ -d $(CURDIR)/vendor/github.com/Sirupsen ]; then rm -fr vendor/github.com/Sirupsen ; fi
@@ -240,7 +244,8 @@ coverage:
 	go tool cover -html=coverage-all.out
 
 clean:
-	go clean && rm -rf dist/*
+	@go clean && rm -rf dist/*
+	@find . -name "*-e" -exec rm -f {} \; 
 
 deps:
 	go get -u github.com/FiloSottile/vendorcheck

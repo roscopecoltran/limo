@@ -113,6 +113,37 @@ func (c *Color) StarLine(star *model.Star) {
 	fmt.Println(buffer.String())
 }
 
+// RepoLine displays a repo in one line
+func (c *Color) RepoLine(repo *model.Repo) {
+	var buffer bytes.Buffer
+
+	_, err := buffer.WriteString(color.BlueString(*repo.FullName))
+	if err != nil {
+		c.Error(err.Error())
+	}
+
+	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf(" ★ :%d", repo.Stargazers)))
+	if err != nil {
+		c.Error(err.Error())
+	}
+
+	if repo.Language != nil {
+		_, err = buffer.WriteString(color.GreenString(fmt.Sprintf(" %s", *repo.Language)))
+		if err != nil {
+			c.Error(err.Error())
+		}
+	}
+
+	if repo.URL != nil {
+		_, err = buffer.WriteString(color.RedString(fmt.Sprintf(" %s", *repo.URL)))
+		if err != nil {
+			c.Error(err.Error())
+		}
+	}
+
+	fmt.Println(buffer.String())
+}
+
 // Star displays a star
 func (c *Color) Star(star *model.Star) {
 	c.StarLine(star)
@@ -143,7 +174,7 @@ func (c *Color) Star(star *model.Star) {
 
 // Repo displays a repo
 func (c *Color) Repo(repo *model.Repo) {
-	c.StarLine(repo)
+	c.RepoLine(repo)
 
 	if len(repo.Tags) > 0 {
 		var buffer bytes.Buffer

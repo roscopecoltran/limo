@@ -41,3 +41,6 @@ dist/macos/limo*
 dist/windows/limo*
 
 *-alpine.env
+
+conf.d/limo.json
+conf.d/limo.yaml

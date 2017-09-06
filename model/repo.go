@@ -31,8 +31,16 @@ type Repo struct {
 	Homepage    		*string
 	URL         		*string
 	Language    		*string
-	Repogazers  		int
-	ReporedAt   		time.Time
+	Avatar				*string
+	HasWiki 			*bool
+	// ForkedFromProject *string
+	// Snippets 		*bool
+	// Topics    		[]string
+	// SnippetsEnabled
+	Stargazers  		int
+	Watchers  			int
+	Forks  				int
+	CreatedAt   		time.Time
 	ServiceID   		uint
 	//UserName        		*string
 	Tags        		[]Tag `gorm:"many2many:repo_tags;"`
@@ -46,6 +54,7 @@ type RepoResult struct {
 	Error error
 }
 
+// https://github.com/google/go-github/blob/master/github/repos.go#L21-L117
 // NewRepoFromGithub creates a Repo from a Github repo
 func NewRepoFromGithub(timestamp *github.Timestamp, repo github.Repository) (*Repo, error) {
 	// Require the GitHub ID
@@ -54,14 +63,24 @@ func NewRepoFromGithub(timestamp *github.Timestamp, repo github.Repository) (*Re
 	}
 
 	// Set repogazers count to 0 if nil
-	repogazersCount := 0
-	if repo.RepogazersCount != nil {
-		repogazersCount = *repo.RepogazersCount
+	repoStargazersCount := 0
+	if repo.StargazersCount != nil {
+		repoStargazersCount = *repo.StargazersCount
 	}
 
-	reporedAt := time.Now()
+	repoWatchersCount := 0
+	if repo.WatchersCount != nil {
+		repoWatchersCount = *repo.WatchersCount
+	}
+
+	repoForksCount := 0
+	if repo.ForksCount != nil {
+		repoForksCount = *repo.ForksCount
+	}
+
+	repoCreatedAt := time.Now()
 	if timestamp != nil {
-		reporedAt = timestamp.Time
+		repoCreatedAt = timestamp.Time
 	}
 
 	return &Repo{
@@ -72,14 +91,41 @@ func NewRepoFromGithub(timestamp *github.Timestamp, repo github.Repository) (*Re
 		Homepage:    repo.Homepage,
 		URL:         repo.CloneURL,
 		Language:    repo.Language,
-		Repogazers:  repogazersCount,
-		ReporedAt:   reporedAt,
+		Avatar: 	 nil,
+		HasWiki: 	 repo.HasWiki,
+		// LanguagesDetected:  nil,
+		// Topics:      repo.Topics,
+		Watchers:    repoWatchersCount,
+		Stargazers:  repoStargazersCount,
+		Forks: 		 repoForksCount,
+		CreatedAt:   repoCreatedAt,
 		//Topics:   topics,
 	}, nil
 }
 
 // NewRepoFromGitlab creates a Repo from a Gitlab repo
 func NewRepoFromGitlab(repo gitlab.Project) (*Repo, error) {
+
+	/*
+	// Set repogazers count to 0 if nil
+	repoStargazersCount := 0
+	if repo.StargazersCount != nil {
+		repoStargazersCount = *repo.StargazersCount
+	}
+	*/
+
+	/*
+	repoWatchersCount := 0
+	if repo.WatchersCount != nil {
+		repoWatchersCount = *repo.WatchersCount
+	}
+
+	repoCreatedAt := time.Now()
+	if timestamp != nil {
+		repoCreatedAt = timestamp.Time
+	}
+	*/
+	// ref. https://github.com/xanzy/go-gitlab/blob/master/projects.go#L33-L175
 	return &Repo{
 		RemoteID:    strconv.Itoa(repo.ID),
 		Name:        &repo.Name,
@@ -87,9 +133,14 @@ func NewRepoFromGitlab(repo gitlab.Project) (*Repo, error) {
 		Description: &repo.Description,
 		Homepage:    &repo.WebURL,
 		URL:         &repo.HTTPURLToRepo,
+		Avatar: 	 &repo.AvatarURL,
 		Language:    nil,
-		Repogazers:  repo.RepoCount,
-		ReporedAt:   time.Now(), // OK, so this is a lie, but not in payload
+		HasWiki:	 &repo.WikiEnabled,
+		Stargazers:  repo.StarCount,
+		Forks:  	 repo.ForksCount,
+		// Snippets: repo.SnippetsEnabled,
+		//ForkedFromProject:  star.ForkedFromProject.PathWithNamespace,
+		CreatedAt:   time.Now(), // OK, so this is a lie, but not in payload
 	}, nil
 }
 
@@ -246,21 +297,24 @@ func FuzzyFindReposByName(db *gorm.DB, name string) ([]Repo, error) {
 	return repos, db.Error
 }
 
-// FindLanguages finds all languages
-func FindLanguages(db *gorm.DB) ([]string, error) {
+// enry
+// linguist
+
+// FindRepoLanguages finds all languages for this repo
+func FindRepoLanguages(db *gorm.DB) ([]string, error) {
 	var languages []string
 	db.Table("repos").Order("language").Pluck("distinct(language)", &languages)
 	return languages, db.Error
 }
 
 // AddTag adds a tag to a repo
-func (repo *Repo) AddTag(db *gorm.DB, tag *Tag) error {
+func (repo *Repo) AddRepoTag(db *gorm.DB, tag *Tag) error {
 	repo.Tags = append(repo.Tags, *tag)
 	return db.Save(repo).Error
 }
 
 // LoadTags loads the tags for a repo
-func (repo *Repo) LoadTags(db *gorm.DB) error {
+func (repo *Repo) LoadRepoTags(db *gorm.DB) error {
 	// Make sure repo exists in database, or we will panic
 	var existing Repo
 	if db.Where("id = ?", repo.ID).First(&existing).RecordNotFound() {
@@ -270,7 +324,7 @@ func (repo *Repo) LoadTags(db *gorm.DB) error {
 }
 
 // LoadTags loads the tags for a repo
-func (repo *Repo) LoadTopics(db *gorm.DB) error {
+func (repo *Repo) LoadRepoTopics(db *gorm.DB) error {
 	// Make sure repo exists in database, or we will panic
 	var existing Repo
 	if db.Where("id = ?", repo.ID).First(&existing).RecordNotFound() {
@@ -280,17 +334,17 @@ func (repo *Repo) LoadTopics(db *gorm.DB) error {
 }
 
 // RemoveAllTags removes all tags for a repo
-func (repo *Repo) RemoveAllTags(db *gorm.DB) error {
+func (repo *Repo) RemoveRepoAllTags(db *gorm.DB) error {
 	return db.Model(repo).Association("Tags").Clear().Error
 }
 
 // RemoveTag removes a tag from a repo
-func (repo *Repo) RemoveTag(db *gorm.DB, tag *Tag) error {
+func (repo *Repo) RemoveRepoTag(db *gorm.DB, tag *Tag) error {
 	return db.Model(repo).Association("Tags").Delete(tag).Error
 }
 
 // HasTag returns whether a repo has a tag. Note that you must call LoadTags first -- no reason to incur a database call each time
-func (repo *Repo) HasTag(tag *Tag) bool {
+func (repo *Repo) HasRepoTag(tag *Tag) bool {
 	if len(repo.Tags) > 0 {
 		for _, t := range repo.Tags {
 			if t.Name == tag.Name {
@@ -302,15 +356,15 @@ func (repo *Repo) HasTag(tag *Tag) bool {
 }
 
 // Index adds the repo to the index
-func (repo *Repo) Index(index bleve.Index, db *gorm.DB) error {
-	if err := repo.LoadTags(db); err != nil {
+func (repo *Repo) RepoIndex(index bleve.Index, db *gorm.DB) error {
+	if err := repo.LoadRepoTags(db); err != nil {
 		return err
 	}
 	return index.Index(fmt.Sprintf("%d", repo.ID), repo)
 }
 
 // OpenInBrowser opens the repo in the browser
-func (repo *Repo) OpenInBrowser(preferHomepage bool) error {
+func (repo *Repo) RepoOpenInBrowser(preferHomepage bool) error {
 	var URL string
 	if preferHomepage && repo.Homepage != nil && *repo.Homepage != "" {
 		URL = *repo.Homepage
@@ -322,5 +376,5 @@ func (repo *Repo) OpenInBrowser(preferHomepage bool) error {
 		}
 		return errors.New("No URL for repo")
 	}
-	return open.Repot(URL)
+	return open.Start(URL)
 }

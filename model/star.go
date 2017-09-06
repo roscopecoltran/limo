@@ -31,7 +31,14 @@ type Star struct {
 	Homepage    		*string
 	URL         		*string
 	Language    		*string
+	Avatar				*string
+	HasWiki 			*bool
+	// ForkedFromProject *string
+	// Snippets 		*bool
+	// Topics    			*[]string
 	Stargazers  		int
+	Watchers  			int
+	Forks 				int
 	StarredAt   		time.Time
 	ServiceID   		uint
 	//UserName        		*string
@@ -46,6 +53,7 @@ type StarResult struct {
 	Error error
 }
 
+// https://github.com/google/go-github/blob/master/github/repos.go#L21-L117
 // NewStarFromGithub creates a Star from a Github star
 func NewStarFromGithub(timestamp *github.Timestamp, star github.Repository) (*Star, error) {
 	// Require the GitHub ID
@@ -57,6 +65,18 @@ func NewStarFromGithub(timestamp *github.Timestamp, star github.Repository) (*St
 	stargazersCount := 0
 	if star.StargazersCount != nil {
 		stargazersCount = *star.StargazersCount
+	}
+
+	// Set stargazers count to 0 if nil
+	watchersCount := 0
+	if star.WatchersCount != nil {
+		watchersCount = *star.WatchersCount
+	}
+
+	// Set stargazers count to 0 if nil
+	forksCount := 0
+	if star.ForksCount != nil {
+		forksCount = *star.ForksCount
 	}
 
 	starredAt := time.Now()
@@ -72,24 +92,50 @@ func NewStarFromGithub(timestamp *github.Timestamp, star github.Repository) (*St
 		Homepage:    star.Homepage,
 		URL:         star.CloneURL,
 		Language:    star.Language,
+		Avatar: 	 nil,
+		HasWiki: 	 star.HasWiki,
+		// Topics:      star.Topics,
 		Stargazers:  stargazersCount,
+		Watchers:  	 watchersCount,
+		Forks:  	 forksCount,
 		StarredAt:   starredAt,
-		//Topics:   topics,
+		//Topics:    star.Topics,
 	}, nil
 }
 
+// ref. https://github.com/xanzy/go-gitlab/blob/master/projects.go#L33-L175
 // NewStarFromGitlab creates a Star from a Gitlab star
 func NewStarFromGitlab(star gitlab.Project) (*Star, error) {
+	/*
+	// Set stargazers count to 0 if nil
+	stargazersCount := 0
+	if star.StargazersCount != nil {
+		stargazersCount = *star.StargazersCount
+	}
+
+	// Set stargazers count to 0 if nil
+	watchersCount := 0
+	if star.WatchersCount != nil {
+		watchersCount = *star.WatchersCount
+	}
+	*/
 	return &Star{
-		RemoteID:    strconv.Itoa(star.ID),
-		Name:        &star.Name,
-		FullName:    &star.NameWithNamespace,
-		Description: &star.Description,
-		Homepage:    &star.WebURL,
-		URL:         &star.HTTPURLToRepo,
-		Language:    nil,
-		Stargazers:  star.StarCount,
-		StarredAt:   time.Now(), // OK, so this is a lie, but not in payload
+		RemoteID:    		strconv.Itoa(star.ID),
+		Name:        		&star.Name,
+		FullName:    		&star.NameWithNamespace,
+		Description: 		&star.Description,
+		Homepage:    		&star.WebURL,
+		URL:         		&star.HTTPURLToRepo,
+		Language:    		nil,
+		// Topics:      	   nil,
+		// LanguagesDetected:  nil,
+		Avatar: 	 		&star.AvatarURL,
+		HasWiki:			&star.WikiEnabled,
+		Stargazers:  		star.StarCount,
+		Forks:  	 		star.ForksCount,
+		//ForkedFromProject:  star.ForkedFromProject.PathWithNamespace,
+		// Snippets: repo.SnippetsEnabled,
+		StarredAt:   		time.Now(), // OK, so this is a lie, but not in payload
 	}, nil
 }
 
