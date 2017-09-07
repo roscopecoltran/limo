@@ -7,10 +7,15 @@ import (
 	"github.com/hoop33/entrevista"
 	"github.com/roscopecoltran/sniperkit-limo/model"
 	"github.com/xanzy/go-gitlab"
+	// jsoniter "github.com/json-iterator/go"
+	// tablib "github.com/agrison/go-tablib"
+	// "github.com/davecgh/go-spew/spew"
+	// fuzz "github.com/google/gofuzz"
 )
 
 // Gitlab represents the Gitlab service
 type Gitlab struct {
+
 }
 
 // Login logs in to Gitlab

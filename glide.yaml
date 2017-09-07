@@ -8,7 +8,25 @@ owners:
 - name: Luc Michalski
   email: michalski.luc@gmail.com
   homepage: https://github.com/lucmichalski
+# ignore:
+# - github.com/go-kit/kit
 import:
+- package: google.golang.org/grpc
+  version: ^1.6.0
+- package: github.com/go-kit/kit
+  version: ~0.5.0
+  subpackages:
+  - log
+  - log/level
+  - log/term
+  - endpoint
+  - transport/http
+- package: "github.com/turtlemonvh/blanket-api"
+- package: "github.com/alaska/boltqueue"
+- package: "github.com/oliveagle/boltq"
+- package: github.com/x-cray/logrus-prefixed-formatter
+- package: github.com/BurntSushi/toml
+- package: github.com/mitchellh/go-homedir  
 - package: github.com/blevesearch/bleve
   version: v0.5.0
   subpackages:
@@ -20,16 +38,63 @@ import:
 - package: github.com/davecgh/go-spew
   subpackages:
   - spew
+- package: github.com/facebookgo/httpdown
+- package: github.com/dns-gh/tojson
+- package: gopkg.in/olivere/elastic.v5
+- package: github.com/adlio/trello
+- package: github.com/qor/l10n
+- package: github.com/qor/sorting
+- package: github.com/qor/publish
+- package: github.com/qor/responder
+- package: github.com/qor/roles
+- package: github.com/qor/serializable_meta
+- package: github.com/theplant/jsonhandlerfunc
+- package: github.com/theplant/gormutils
+- package: github.com/qor/session
+- package: github.com/qor/validations
+- package: github.com/qor/widget
+- package: github.com/qor/worker
+- package: github.com/qor/publish2
+- package: github.com/qor/seo
+- package: github.com/google/zoekt
+- package: github.com/github/hub
+- package: github.com/qor/media
+  subpackages:
+  - media_library
+  - oss
+- package: github.com/asaskevich/govalidator
+- package: go4.org
+  subpackages:
+  - sort
+- package: github.com/disintegration/imaging
+  version: v1.2.1
+- package: github.com/gosimple/slug
+  version: master
+- package: github.com/jinzhu/now
+- package: github.com/qor/assetfs
+  version: master
+  subpackages:
+  - filesystem
+- package: github.com/qor/slug
+  version: master
+- package: github.com/bndr/gojenkins
+  version: master
 - package: github.com/cep21/xdgbasedir
   version: master
 - package: github.com/bassam/stargazers
   version: pr-fix-logging
-  vcs: git
   repo: https://github.com/bassam/stargazers.git
+  vcs: git
 - package: github.com/sirupsen/logrus
+  version: master
+- package: github.com/json-iterator/go
   version: master
 - package: github.com/golang/glog
   version: master
+- package: github.com/michaelsauter/crane
+  version: master
+  subpackages:
+  - crane
 - package: github.com/roscopecoltran/sniperkit-sift
   version: pkg
   subpackages:
@@ -40,7 +105,6 @@ import:
   version: v1.5.0
 - package: github.com/google/go-github
   version: master
-  # version: 00874eae3fbfc6750bfff364b1897101684d2f30
   subpackages:
   - github
 - package: github.com/jinzhu/configor
@@ -54,6 +118,7 @@ import:
   subpackages:
   - dialects/sqlite
   - dialects/msyql
+  - dialects/postgres
 - package: github.com/qor/admin
   version: master
 - package: github.com/qor/qor
@@ -69,8 +134,12 @@ import:
 - package: golang.org/x/oauth2
   version: master
 - package: gopkg.in/yaml.v2
+- package: github.com/theplant/cldr
+- package: github.com/devopsfaith/krakend
 testImport:
+- package: github.com/arschles/assert
 - package: github.com/stretchr/testify
   subpackages:
   - assert
-- package: github.com/arschles/assert
+  - mock
+  - suite

@@ -6,18 +6,33 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
+	"os"
+	"path"
+	log "github.com/sirupsen/logrus"
 	"github.com/blevesearch/bleve"
 	"github.com/google/go-github/github"
 	"github.com/jinzhu/gorm"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/xanzy/go-gitlab"
-	// tablib "github.com/agrison/go-tablib"
+	tablib "github.com/agrison/go-tablib"
+	// "github.com/davecgh/go-spew/spew"
+	jsoniter "github.com/json-iterator/go"
+	// fuzz "github.com/google/gofuzz"
     // "github.com/qor/qor"
     // "github.com/qor/admin"
-
+    // es "gopkg.in/olivere/elastic.v5"
 )
 
+// https://github.com/redite/kleng/blob/master/core/gh.go
+// 
+// https://github.com/alexchee/go-popular-repos/blob/master/cmd/go-popular-repos/main.go
+// https://github.com/caarlos0/watchub
+// https://github.com/timakin/octop/blob/master/client/sort_filter.go
+// https://github.com/motemen/github-list-starred/blob/master/main.go
+// https://github.com/kyokomi/gh-star-ranking/blob/master/github.go
+// https://github.com/monmaru/ghstar/blob/master/ghstar.go
+// https://github.com/glena/github-starred-catalog/blob/master/lib/ghclient.go
+// https://github.com/kkeuning/gobservatory/blob/master/cmd/gobservatory/stars.go#L187
 // https://github.com/Termina1/starlight/blob/master/handlers/repo_info_extractor.go
 // https://github.com/Termina1/starlight/blob/master/star_extractor.go
 
@@ -33,6 +48,7 @@ type Star struct {
 	Language    		*string
 	Avatar				*string
 	HasWiki 			*bool
+	// SHA  			*string
 	// ForkedFromProject *string
 	// Snippets 		*bool
 	// Topics    			*[]string
@@ -47,10 +63,96 @@ type Star struct {
 	LanguagesDetected   []LanguageDetected `gorm:"many2many:star_languages;"`
 }
 
+// https://github.com/GrantSeltzer/go-baseball-savant/blob/master/bbsavant/read_file.go
 // StarResult wraps a star and an error
 type StarResult struct {
-	Star  *Star
-	Error error
+	Star  	*Star
+	Error 	error
+	dataset *tablib.Dataset
+}
+
+// https://github.com/skyrunner2012/xormplus/blob/master/xorm/dataset.go
+// NewDataset creates a new Dataset.
+func NewStarDataset(headers []string) *tablib.Dataset {
+	return tablib.NewDataset(headers)
+}
+
+/*
+if data == nil {
+	return tablib.NewDatasetWithData(headers, nil), nil
+}
+n := len(headers)
+*/
+
+// NewStarDump(ds)
+func NewStarDump(content []byte, dumpPrefixPath string, dumpType string, dataFormat []string) (error) {
+	ds, err := tablib.LoadJSON(content)
+	if err != nil {
+		log.WithError(err).WithFields(log.Fields{"method": "NewStarDump", "call": "LoadJSON"}).Info("failed to load LoadJSON() with content")
+		panic(err)
+		return err
+	}
+	if err := os.MkdirAll(dumpPrefixPath, 0777); err != nil {
+		log.WithError(err).WithFields(log.Fields{"method": "NewStarDump", "call": "MkdirAll"}).Infof("MkdirAll error on %#s", dumpPrefixPath)
+		panic(err)
+		return err
+	}
+	for _, t := range dataFormat {
+		filePath  := path.Join(dumpPrefixPath, dumpType+"."+t) // fmt.Sprintf("%s/%s", dumpPrefixPath, "repository.yaml") // will create a function
+		file, err := os.Create(filePath)
+		if err != nil {
+			log.WithError(err).WithFields(log.Fields{"method": "NewStarDump", "call": "WriteTo"}).Infof("%#v Write to %#v", t, filePath)
+			panic(err)
+			return err
+		}
+		defer file.Close()
+		switch df := t; df {
+		case "json":
+			json, err := ds.JSON()
+			if err != nil {
+				panic(err)
+				return errors.New("Error while converting data to json format")
+			}
+			json.WriteTo(file)
+			log.WithFields(log.Fields{"method": "NewStarDump", "call": "WriteTo"}).Infof("%#v Write to %#v",  df, filePath)
+		case "yaml":
+			yaml, err := ds.YAML()
+			if err != nil {
+				panic(err)
+				return errors.New("Error while converting data to yaml format")
+			}
+			yaml.WriteTo(file)
+			log.WithFields(log.Fields{"method": "NewStarDump", "call": "WriteTo"}).Infof("%#v Write to %#v",  df, filePath)
+		case "csv":
+			csv, err := ds.CSV()
+			if err != nil {
+				panic(err)
+				return errors.New("Error while converting data to csv format")
+			}
+			csv.WriteTo(file)
+			log.WithFields(log.Fields{"method": "NewStarDump", "call": "WriteTo"}).Infof("%#v Write to %#v",  df, filePath)
+		case "xml":
+			xml, err := ds.XML()
+			if err != nil {
+				panic(err)
+				return errors.New("Error while converting data to csv format")
+			}
+			xml.WriteTo(file)
+			log.WithFields(log.Fields{"method": "NewStarDump", "call": "WriteTo"}).Infof("%#v Write to %#v",  df, filePath)
+		case "markdown":
+			ascii := ds.Tabular("markdown")
+			if ascii == nil {
+				panic(err)
+				return errors.New("Error while converting data to ascii format")
+			}
+			ascii.WriteTo(file)
+			log.WithFields(log.Fields{"method": "NewStarDump", "call": "WriteTo"}).Infof("%#v Write to %#v",  df, filePath)
+		default:
+			return errors.New("Unsupported data format")
+		}
+		file.Close()
+	}
+	return nil
 }
 
 // https://github.com/google/go-github/blob/master/github/repos.go#L21-L117
@@ -58,6 +160,7 @@ type StarResult struct {
 func NewStarFromGithub(timestamp *github.Timestamp, star github.Repository) (*Star, error) {
 	// Require the GitHub ID
 	if star.ID == nil {
+		log.WithFields(log.Fields{"model": "NewStarFromGithub"}).Warn("ID from GitHub is required")
 		return nil, errors.New("ID from GitHub is required")
 	}
 
@@ -84,23 +187,38 @@ func NewStarFromGithub(timestamp *github.Timestamp, star github.Repository) (*St
 		starredAt = timestamp.Time
 	}
 
-	return &Star{
-		RemoteID:    strconv.Itoa(*star.ID),
-		Name:        star.Name,
-		FullName:    star.FullName,
-		Description: star.Description,
-		Homepage:    star.Homepage,
-		URL:         star.CloneURL,
-		Language:    star.Language,
-		Avatar: 	 nil,
-		HasWiki: 	 star.HasWiki,
-		// Topics:      star.Topics,
-		Stargazers:  stargazersCount,
-		Watchers:  	 watchersCount,
-		Forks:  	 forksCount,
-		StarredAt:   starredAt,
-		//Topics:    star.Topics,
-	}, nil
+	starMetaInfo :=	&Star{
+			RemoteID:    strconv.Itoa(*star.ID),
+			Name:        star.Name,
+			FullName:    star.FullName,
+			Description: star.Description,
+			Homepage:    star.Homepage,
+			URL:         star.CloneURL,
+			Language:    star.Language,
+			Avatar: 	 nil,
+			HasWiki: 	 star.HasWiki,
+			// Topics:      star.Topics,
+			Stargazers:  stargazersCount,
+			Watchers:  	 watchersCount,
+			Forks:  	 forksCount,
+			StarredAt:   starredAt,
+			//Topics:    star.Topics,
+		}
+
+	dumpStar, err := jsoniter.Marshal(starMetaInfo)
+	if err != nil {
+		log.WithError(err).WithFields(log.Fields{"service": "GetStars"}).Warn("dump error on repo starred with jsoniter")
+	} else {
+		// https://github.com/ds0nt/hax/blob/4c9c7eca5197cf7c1b0c2d165418caab4a26d34a/gh-list/main.go
+		// fmt.Println(string(dumpStar))
+		// https://github.com/monteirocicero/golang-learning/blob/master/src/cap6-variadic-functions/files.go
+		dumpPrefixPath  := path.Join("cache", "vcs", "github.com", *star.FullName)
+		if err := NewStarDump([]byte(fmt.Sprintf("[%s]\n", dumpStar)), dumpPrefixPath, "repository", []string{"yaml", "csv", "xml", "json", "markdown"}); err != nil {
+			return nil, errors.New("Could not dump the data to file.")
+		}
+	}
+
+	return starMetaInfo, nil
 }
 
 // ref. https://github.com/xanzy/go-gitlab/blob/master/projects.go#L33-L175
@@ -370,3 +488,6 @@ func (star *Star) OpenInBrowser(preferHomepage bool) error {
 	}
 	return open.Start(URL)
 }
+
+
+

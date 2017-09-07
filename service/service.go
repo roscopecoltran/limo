@@ -11,6 +11,8 @@ import (
 	"github.com/roscopecoltran/sniperkit-limo/model"
 )
 
+// https://github.com/cloudflavor/shep/blob/master/pkg/services/system.go
+
 // Service represents a service
 type Service interface {
 	Login(ctx context.Context) (string, error)
@@ -52,3 +54,4 @@ func createInterview() *entrevista.Interview {
 	}
 	return interview
 }
+

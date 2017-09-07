@@ -3,20 +3,22 @@ package actions
 import (
 	"context"
 	"fmt"
-
 	"github.com/roscopecoltran/sniperkit-limo/config"
 	"github.com/roscopecoltran/sniperkit-limo/model"
 	"github.com/roscopecoltran/sniperkit-limo/service"
 	"github.com/spf13/cobra"
+	log "github.com/sirupsen/logrus"
 )
 
-// UpdateCmd lets you log in
-var UpdateCmd = &cobra.Command{
-	Use:     "update",
-	Short:   "Update stars from a service",
-	Long:    "Update your local database with your stars from the service specified by [--service] (default: github).",
-	Example: fmt.Sprintf("  %s update", config.ProgramName),
+// SyncCmd lets you log in
+var SyncCmd = &cobra.Command{
+	Use:     "sync",
+	Short:   "Sync stars from a service",
+	Long:    "Sync your local database with your stars from the service specified by [--service] (default: github).",
+	Aliases: []string{"synchronize", "sync", "update-bucket", "s"},
+	Example: fmt.Sprintf("  %s sync", config.ProgramName),
 	Run: func(cmd *cobra.Command, args []string) {
+
 		ctx := context.Background()
 
 		// Get configuration
@@ -26,6 +28,14 @@ var UpdateCmd = &cobra.Command{
 		// Get the database
 		db, err := getDatabase()
 		fatalOnError(err)
+
+		// Get the database
+		bucket, err := getBucket()
+		fatalOnError(err)
+
+		// Just to use it once, at least, for the moment
+		// we can put the config struct in the bucket
+		fmt.Println(bucket)
 
 		// Get the search index
 		index, err := getIndex()
@@ -48,36 +58,39 @@ var UpdateCmd = &cobra.Command{
 
 		output := getOutput()
 
-		totalCreated, totalUpdated, totalErrors := 0, 0, 0
+		totalCreated, totalSyncd, totalErrors := 0, 0, 0
 
 		for starResult := range starChan {
 			if starResult.Error != nil {
 				totalErrors++
 				output.Error(starResult.Error.Error())
 			} else {
-				created, err := model.CreateOrUpdateStar(db, starResult.Star, dbSvc)
+				created, err := model.SyncDB(db, starResult.Star, dbSvc)
 				if err != nil {
 					totalErrors++
+					log.WithError(err).WithFields(log.Fields{"config": "SyncCmd", "starResult.Star.FullName": *starResult.Star.FullName}).Warnf("error while getting creating/updating a vcs starred project. \n Error %s: %s", *starResult.Star.FullName, err.Error())
 					output.Error(fmt.Sprintf("Error %s: %s", *starResult.Star.FullName, err.Error()))
 				} else {
 					if created {
 						totalCreated++
 					} else {
-						totalUpdated++
+						totalSyncd++
 					}
 					err = starResult.Star.Index(index, db)
 					if err != nil {
 						totalErrors++
+						log.WithError(err).WithFields(log.Fields{"config": "SyncCmd", "starResult.Star.Index.FullName": *starResult.Star.FullName}).Warnf("error while getting creating/updating a vcs starred project. \n Error %s: %s", *starResult.Star.FullName, err.Error())
 						output.Error(fmt.Sprintf("Error %s: %s", *starResult.Star.FullName, err.Error()))
 					}
 					output.Tick()
 				}
 			}
 		}
-		output.Info(fmt.Sprintf("\nCreated: %d; Updated: %d; Errors: %d", totalCreated, totalUpdated, totalErrors))
+		log.WithFields(log.Fields{"config": "SyncCmd", "action": "SyncedStar"}).Infof("\nCreated: %d; Synced: %d; Errors: %d", totalCreated, totalSyncd, totalErrors)
+		output.Info(fmt.Sprintf("\nCreated: %d; Synced: %d; Errors: %d", totalCreated, totalSyncd, totalErrors))
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(UpdateCmd)
+	RootCmd.AddCommand(SyncCmd)
 }

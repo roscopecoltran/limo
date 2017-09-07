@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/google/go-github/github"
+	// "github.com/davecgh/go-spew/spew"
 )
 
 var VERBOSE = false
@@ -41,6 +42,16 @@ func ParseAsDate(timeString string) string {
 	return FormatAsDate(stringTime)
 }
 
+func iterateMonth(ctime time.Time) []string {
+	months := []string{}
+	now := time.Now()
+	for d := ctime; now.After(d); d = d.AddDate(0, 1, 0) {
+		months = append(months, fmt.Sprintf("%s", d)[0:7])
+	}
+
+	return months
+}
+
 func Println(args ...interface{}) (int, error) {
 	if VERBOSE {
 		return fmt.Println(args...)
@@ -56,6 +67,15 @@ func Printf(format string, args ...interface{}) (int, error) {
 
 	return 0, nil
 }
+
+/*
+func dumpSpew(obj interface{}) string {
+	cfg := spew.ConfigState{
+		Indent: indentStr,
+	}
+	return cfg.Sdump(obj)
+}
+*/
 
 // Private
 func extractFileBytes(fileContent *github.RepositoryContent) ([]byte, error) {

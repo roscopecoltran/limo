@@ -2,7 +2,6 @@ package actions
 
 import (
 	"fmt"
-
 	"github.com/roscopecoltran/sniperkit-limo/config"
 	"github.com/roscopecoltran/sniperkit-limo/model"
 	"github.com/spf13/cobra"
@@ -71,10 +70,8 @@ func addStar(values []string) {
 
 func addTag(values []string) {
 	output := getOutput()
-
 	db, err := getDatabase()
 	fatalOnError(err)
-
 	for _, value := range values {
 		tag, created, err := model.FindOrCreateTagByName(db, value)
 		if err != nil {

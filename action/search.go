@@ -11,6 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// https://github.com/google/zoekt/blob/master/cmd/zoekt-git-index/main.go
+// code
+// repository
+
 // SearchCmd does a full-text search
 var SearchCmd = &cobra.Command{
 	Use:     "search <search string>",

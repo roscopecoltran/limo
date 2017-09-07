@@ -34,6 +34,10 @@ vendor
 vendor/
 vendor/**
 
+cache
+cache/
+cache/**
+
 limo*
 bin/limo*
 dist/linux/limo*
@@ -44,3 +48,5 @@ dist/windows/limo*
 
 conf.d/limo.json
 conf.d/limo.yaml
+
+sift-alpine.env

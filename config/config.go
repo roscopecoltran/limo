@@ -9,6 +9,7 @@ import (
 	"github.com/cep21/xdgbasedir"
 	//"github.com/jinzhu/configor"
 	log "github.com/sirupsen/logrus"
+	// prefixed "github.com/x-cray/logrus-prefixed-formatter"
 	"gopkg.in/yaml.v2"
 )
 
@@ -35,20 +36,11 @@ type OutputConfig struct {
 	SpinnerColor    string 	`yaml:"spinnerColor"`
 }
 
-// Config contains configuration information
-type Config struct {
-	DatabasePath string                    `yaml:"databasePath"`
-	IndexPath    string                    `yaml:"indexPath"`
-	Services     map[string]*ServiceConfig `yaml:"services"`
-	Outputs      map[string]*OutputConfig  `yaml:"outputs"`
-}
-
 // GetService returns the configuration information for a service
 func (config *Config) GetService(name string) *ServiceConfig {
 	if config.Services == nil {
 		config.Services = make(map[string]*ServiceConfig)
 	}
-
 	service := config.Services[name]
 	if service == nil {
 		service = &ServiceConfig{}
@@ -62,7 +54,6 @@ func (config *Config) GetOutput(name string) *OutputConfig {
 	if config.Outputs == nil {
 		config.Outputs = make(map[string]*OutputConfig)
 	}
-
 	output := config.Outputs[name]
 	if output == nil {
 		output = &OutputConfig{}
@@ -91,13 +82,17 @@ func ReadConfig() (*Config, error) {
 		config.DatabasePath = path.Join(configDirectoryPath, fmt.Sprintf("%s.db", ProgramName))
 	}
 	log.WithFields(log.Fields{"config": "ReadConfig"}).Infof("config.DatabasePath: %#v", config.DatabasePath)
+	// Set default datastore path
+	if config.DatastorePath == "" {
+		config.DatastorePath = path.Join(configDirectoryPath, fmt.Sprintf("%s.boltdb", ProgramName))
+	}
+	log.WithFields(log.Fields{"config": "ReadConfig"}).Infof("config.DatastorePath: %#v", config.DatastorePath)
 
 	// Set default search index path
 	if config.IndexPath == "" {
 		config.IndexPath = path.Join(configDirectoryPath, fmt.Sprintf("%s.idx", ProgramName))
 	}
 	log.WithFields(log.Fields{"config": "ReadConfig"}).Infof("config.IndexPath: %#v", config.IndexPath)
-
 	return &config, nil
 }
 
@@ -123,17 +118,13 @@ func configFilePath() string {
 }
 
 func init() {
-
 	// Log as JSON instead of the default ASCII formatter.
 	// log.SetFormatter(&log.JSONFormatter{})
-
 	// Output to stdout instead of the default stderr
 	// Can be any io.Writer, see below for File example
 	log.SetOutput(os.Stdout)
-
 	// Only log the warning severity or above.
 	log.SetLevel(log.InfoLevel)
-
 	baseDir, err := xdgbasedir.ConfigHomeDirectory()
 	if err != nil {
 		log.WithFields(log.Fields{"config": "init"}).Fatal("Can't find XDG BaseDirectory")

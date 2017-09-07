@@ -18,6 +18,8 @@ import (
 
 )
 
+// https://github.com/mongodb/curator/blob/master/repobuilder/config.go
+// 
 // https://github.com/Termina1/repolight/blob/master/handlers/repo_info_extractor.go
 // https://github.com/Termina1/repolight/blob/master/repo_extractor.go
 
@@ -42,6 +44,7 @@ type Repo struct {
 	Forks  				int
 	CreatedAt   		time.Time
 	ServiceID   		uint
+	// Files 			[]string `gorm:"many2many:repo_trees;"`
 	//UserName        		*string
 	Tags        		[]Tag `gorm:"many2many:repo_tags;"`
 	Topics      		[]Topic `gorm:"many2many:repo_topics;"`
@@ -378,3 +381,5 @@ func (repo *Repo) RepoOpenInBrowser(preferHomepage bool) error {
 	}
 	return open.Start(URL)
 }
+
+

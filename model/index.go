@@ -1,11 +1,35 @@
 package model
 
 import (
+	"fmt"
+	"github.com/google/go-github/github"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/analysis/analyzers/keyword_analyzer"
 	"github.com/blevesearch/bleve/analysis/analyzers/simple_analyzer"
 	"github.com/blevesearch/bleve/analysis/language/en"
 )
+
+const mapping = `
+{
+	"mappings": {
+		"_default_": {
+			"dynamic_templates": [
+				{
+					"strings": {
+						"match_mapping_type": "string",
+						"mapping": {
+							"index": "not_analyzed"
+						}
+					}
+				}
+			],
+			"properties": {
+				"body": {"type": "string", "index": "analyzed"}
+			}
+		}
+	}
+}`
 
 // InitIndex initializes the search index at the specified path
 func InitIndex(filepath string) (bleve.Index, error) {
@@ -48,4 +72,23 @@ func buildIndexMapping() *bleve.IndexMapping {
 
 
 	return indexMapping
+}
+
+// https://github.com/dastergon/strgz/blob/master/lib/bleve.go
+func ShowResults(results *bleve.SearchResult, index bleve.Index) {
+	if len(results.Hits) < 1 {
+		fmt.Println(results)
+	}
+	for _, val := range results.Hits {
+		id := val.ID
+		doc, err := index.Document(id)
+		if err != nil {
+			fmt.Println(err)
+		}
+		for _, field := range doc.Fields {
+			repo := github.Repository{}
+			jsoniter.Unmarshal(field.Value(), &repo)
+			fmt.Printf("%s - %s (%s)\n\t%s\n", *repo.Name, *repo.Description, *repo.Language, *repo.HTMLURL)
+		}
+	}
 }

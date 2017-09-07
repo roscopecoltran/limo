@@ -17,7 +17,7 @@ type Service struct {
 	Description *string
 	Homepage    *string
 	URL         *string
-	Stars []Star
+	Stars 		[]Star
 }
 
 // FindOrCreateServiceByName returns a service with the specified name, creating if necessary
