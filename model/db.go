@@ -1,31 +1,41 @@
 package model
 
+// curl -s https://api.github.com/repos/chimeracoder/gojson | gojson -name=Repository
+
 import (
 
 	// golang
-    // "errors"
+    "errors"
 	"time"
-
+	"path"
 	// limo
 	// "github.com/roscopecoltran/sniperkit-limo/config"
-
+	"os"
 	// gorm
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
+	// etcd
+	etcd "github.com/coreos/etcd/client"
+
 	// mongdb
 	// "gopkg.in/mgo.v2"
+	// "gopkg.in/mgo.v2/bson"
 
 	// boltdb
 	"github.com/boltdb/bolt"
-
+	// store "github.com/roscopecoltran/sniperkit-limo/model/boltdb"
 	// claey + Boltbd
 	//"github.com/cayleygraph/cayley"
 	//"github.com/cayleygraph/cayley/graph"
 	//_ "github.com/cayleygraph/cayley/graph/bolt"
 	//"github.com/cayleygraph/cayley/quad"
+
+	tablib "github.com/agrison/go-tablib"
+	// "github.com/davecgh/go-spew/spew"
+	// jsoniter "github.com/json-iterator/go"
 
 	// beego
 	// "github.com/astaxie/beego"
@@ -34,19 +44,33 @@ import (
     // "github.com/qor/qor"
     // "github.com/qor/admin"
 
-	// logs
-	log "github.com/sirupsen/logrus"
+	// graphs
+	"github.com/ckaznocha/taggraph"
 
+	// logs
+	"github.com/sirupsen/logrus"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
+
+
+// datasets - formats
+var validDataOutput 				= []string{"md","csv","yaml","json","xlsx","xml","tsv","mysql","postgres","html","ascii"}
+var availableLocales 				= []string{"en-US", "fr-FR", "pl-PL"}
+
+type DatabaseDriver struct {
+	bucket  	*bolt.DB
+	sql 		*gorm.DB
+	etcdClient  etcd.KeysAPI
+}
+
+// var Tables       = []interface{}{&auth_identity.AuthIdentity{}}
+//	globalSeoSetting := adminseo.MySEOSetting{}
+//	globalSetting := make(map[string]string)
 
 // https://github.com/thesyncim/365a/blob/master/server/app.go
 // https://github.com/emotionaldots/arbitrage/blob/master/cmd/arbitrage-db/main.go
 
-// ErrNotGorm is used in case when the database type in the config file isn't a Gorm type of database
-// var ErrNotGorm 		= errors.New("Not a Gorm database")
-// var ErrNotMongoDB 	= errors.New("Not a MongoDB database")
-// var ErrNotBoltDB 	= errors.New("Not a BoltDB key/value store")
-// var ErrNotEtcd 		= errors.New("Not an Etcd key/value store")
+
 
 // var db *dynamodb.DynamoDB
 
@@ -58,6 +82,35 @@ import (
 //	Indexes   map[string]*gorm.DB
 //}
 
+var	log 		= logrus.New()
+var tagg 		= taggraph.NewTagGaph()
+
+func init() {
+
+	// logs
+	log.Out = os.Stdout
+	// log.Formatter = new(prefixed.TextFormatter)
+
+	formatter := new(prefixed.TextFormatter)
+	formatter.FullTimestamp = true
+
+	// Set specific colors for prefix and timestamp
+	formatter.SetColorScheme(&prefixed.ColorScheme{
+		PrefixStyle:    "blue+b",
+		TimestampStyle: "white+h",
+	})
+
+	log.Formatter = formatter
+
+}
+
+// https://github.com/skyrunner2012/xormplus/blob/master/xorm/dataset.go
+// NewDataset creates a new Dataset.
+func NewDataset(headers []string) *tablib.Dataset {
+	return tablib.NewDataset(headers)
+}
+
+
 // https://github.com/qor/qor-example/blob/master/db/db.go
 
 // InitDB initializes the database at the specified path
@@ -65,12 +118,12 @@ func InitDB(filepath string, verbose bool) (*gorm.DB, error) {
 	// Get more config options to setup the SQL database
 	db, err := gorm.Open("sqlite3", filepath)
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitDB", "engine": "sqlite3", "filepath": filepath}).Warnf("error while init the database with gorm.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitDB", "engine": "sqlite3", "filepath": filepath}).Warnf("error while init the database with gorm.")
 		return nil, err
 	}
 	db.LogMode(verbose)
-	// , &Dependency{}, &Snippet{}
-	db.AutoMigrate(&Service{}, &Star{}, &Tag{}, &Topic{}, &LanguageDetected{}, &Tree{}, &Readme{}, &Academic{}, &Pkg{}, &Software{}, &Repo{}, &Keyword{}, &Pattern{})
+	// db.AutoMigrate(&Service{}, &Star{}, &Tag{}, &Topic{}, &LanguageDetected{}, &Tree{}, &Readme{}, &Academic{}, &Pkg{}, &Software{}, &Repo{}, &Keyword{}, &Pattern{})
+	db.AutoMigrate(&Service{}, &Star{}, &Tag{}, &Topic{}, &Tree{}, &Readme{}, &Language{}, &User{})
 	// Initalize
 	// Admin := admin.New(&qor.Config{DB: db})
 	return db, nil
@@ -84,13 +137,13 @@ func InitAdmin(db *gorm.DB) (error) {
 	// Initalize
 	adm, err := admin.New(&qor.Config{DB: &db.DB})
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitAdmin", "action": "admin.New").Warnf("error while init the admin webui powered by qor-admin.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitAdmin", "action": "admin.New").Warnf("error while init the admin webui powered by qor-admin.")
 		return err
 	}
 	adm.AddResource(&db.User{}, &admin.Config{Menu: []string{"Limo"}})
 	mux, err := http.NewServeMux()
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitAdmin", "action": "NewServeMux").Warnf("error while init the mux web-server.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitAdmin", "action": "NewServeMux").Warnf("error while init the mux web-server.")
 		return err
 	}
 	adm.MountTo("/admin", mux)
@@ -104,18 +157,146 @@ func InitBoltDB(filepath string) (*bolt.DB, error) {
 	// Get more config options to setup the bucket or the queue of tasks
 	db, err := bolt.Open(filepath, 0600, &bolt.Options{Timeout: time.Second})
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitDB", "engine": "boltdb", "filepath": filepath, "bolt.Options":  &bolt.Options{Timeout: time.Second}}).Warnf("error while init the database with boltDB.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitDB", "engine": "boltdb", "filepath": filepath, "bolt.Options":  &bolt.Options{Timeout: time.Second}}).Warnf("error while init the database with boltDB.")
 		return nil, err
 	}
 	return db, err
 }
+
+// NewStarDump(ds)
+func NewDump(content []byte, dumpPrefixPath string, dumpType string, dataFormat []string) (error) {
+	ds, err := tablib.LoadJSON(content)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"method": "NewStarDump", "call": "LoadJSON"}).Debug("failed to load LoadJSON() with content")
+		// panic(err)
+		return err
+	}
+	if err := os.MkdirAll(dumpPrefixPath, 0777); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"method": "NewStarDump", "call": "MkdirAll"}).Debugf("MkdirAll error on %#s", dumpPrefixPath)
+		// panic(err)
+		return err
+	}
+	for _, t := range dataFormat {
+		filePath  := path.Join(dumpPrefixPath, dumpType+"."+t) // fmt.Sprintf("%s/%s", dumpPrefixPath, "repository.yaml") // will create a function
+		file, err := os.Create(filePath)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{"method": "NewStarDump", "call": "WriteTo"}).Errorf("%#v Write to %#v", t, filePath)
+			// panic(err)
+			return err
+		}
+		defer file.Close()
+		switch df := t; df {
+		case "json":
+			json, err := ds.JSON()
+			if err != nil {
+				// panic(err)
+				return errors.New("Error while converting data to "+df+" format")
+			}
+			json.WriteTo(file)
+			// log.WithFields(logrus.Fields{"method": "NewStarDump", "call": "WriteTo"}).Debugf("%#v Write to %#v",  df, filePath)
+		case "yaml":
+			yaml, err := ds.YAML()
+			if err != nil {
+				// panic(err)
+				return errors.New("Error while converting data to "+df+" format")
+			}
+			yaml.WriteTo(file)
+			// log.WithFields(logrus.Fields{"method": "NewStarDump", "call": "WriteTo"}).Debugf("%#v Write to %#v",  df, filePath)
+		case "csv":
+			csv, err := ds.CSV()
+			if err != nil {
+				// panic(err)
+				return errors.New("Error while converting data to "+df+" format")
+			}
+			csv.WriteTo(file)
+			// log.WithFields(logrus.Fields{"method": "NewStarDump", "call": "WriteTo"}).Debugf("%#v Write to %#v",  df, filePath)
+		case "xml":
+			xml, err := ds.XML()
+			if err != nil {
+				// panic(err)
+				return errors.New("Error while converting data to "+df+" format")
+			}
+			xml.WriteTo(file)
+			// log.WithFields(logrus.Fields{"method": "NewStarDump", "call": "WriteTo"}).Debugf("%#v Write to %#v",  df, filePath)
+		case "markdown":
+			ascii := ds.Tabular("markdown")
+			if ascii == nil {
+				// panic(err)
+				return errors.New("Error while converting data to "+df+" format")
+			}
+			ascii.WriteTo(file)
+			// log.WithFields(logrus.Fields{"method": "NewStarDump", "call": "WriteTo"}).Debugf("%#v Write to %#v",  df, filePath)
+		default:
+			return errors.New("Unsupported data format: "+df)
+		}
+		file.Close()
+	}
+	return nil
+}
+
+/*
+
+// https://github.com/Termina1/starlight/blob/93bd58b4c4795ca12b9fc849db9e4e3b0c668ca4/star_repo.go
+
+func ReindexReposMongoDB(coll *mgo.Collection, batch int) *mgo.Iter {
+  return coll.Find(bson.M{}).Batch(batch).Iter()
+}
+
+func RepoUpdateMongoDB(coll *mgo.Collection, name string, repo *StarRepo) {
+  coll.Upsert(bson.M{"name": name}, repo)
+}
+*/
+
+/*
+// Open opens the connection to the bolt database defined by path.
+func (d *DatabaseDriver) OpenBoltDriver(path string) error {
+	if d.bucket != nil {
+		return errors.New("store alread open")
+	}
+
+	store, err := bolt.Open(path, 0600, &bolt.Options{Timeout: 1 * time.Second})
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"db": "OpenBoltDriver", "engine": "boltdb", "path": path}).Warnf("error while opening the boltDB bucket.")
+		return err
+	}
+
+	err = store.Update(func(tx *bolt.Tx) error {
+		buckets := [][]byte{
+			store.importsBucket,
+		}
+		for _, bucket := range buckets {
+			_, err := tx.CreateBucketIfNotExists(bucket)
+			if err != nil {
+				log.WithError(err).WithFields(logrus.Fields{"db": "OpenBoltDriver", "method": "CreateBucketIfNotExists", "engine": "boltdb", "path": path}).Warnf("error while creating the boltDB bucket if missing.")
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	d.bucket = store
+	return nil
+}
+
+// Close closes the underlying database.
+func (d *DatabaseDriver) CloseBoltDriver() error {
+	if d.bucket != nil {
+		err := d.bucket.Close()
+		d.bucket = nil
+		log.WithError(err).WithFields(logrus.Fields{"db": "CloseBoltDriver", "method": "d.bucket.Close()", "engine": "boltdb"}).Warnf("error while closing the boltDB bucket.")
+		return err
+	}
+	return nil
+}
+*/
 
 /*
 // init caley
 func InitCaleyGraph(filepath string) (*bolt.DB, error) {
 	// init command(s)
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitCaleyGraph", "engine": "").Warnf("error while init the full text search engine service.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitCaleyGraph", "engine": "").Warnf("error while init the full text search engine service.")
 		return nil, err
 	}
 	return db, err
@@ -127,7 +308,7 @@ func InitCaleyGraph(filepath string) (*bolt.DB, error) {
 func InitNeo4J(filepath string) (*bolt.DB, error) {
 	// init command(s)
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitNeo4J", "engine": "neo4j", "drivers": "").Warnf("error while init the full text search engine service.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitNeo4J", "engine": "neo4j", "drivers": "").Warnf("error while init the full text search engine service.")
 		return nil, err
 	}
 	return db, err
@@ -139,7 +320,7 @@ func InitNeo4J(filepath string) (*bolt.DB, error) {
 func InitDGraph(filepath string) (*bolt.DB, error) {
 	// init command(s)
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitDGraph", "engine": "dgraph", "drivers": "").Warnf("error while init the full text search engine service.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitDGraph", "engine": "dgraph", "drivers": "").Warnf("error while init the full text search engine service.")
 		return nil, err
 	}
 	return db, err
@@ -151,7 +332,7 @@ func InitDGraph(filepath string) (*bolt.DB, error) {
 func InitElasticsearch(filepath string) (*bolt.DB, error) {
 	// init command(s)
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitElasticsearch", "engine": "elasticsearch", "drivers": "").Warnf("error while init the full text search engine service.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitElasticsearch", "engine": "elasticsearch", "drivers": "").Warnf("error while init the full text search engine service.")
 		return nil, err
 	}
 	return db, err
@@ -163,7 +344,7 @@ func InitElasticsearch(filepath string) (*bolt.DB, error) {
 func InitSphinxSearch(filepath string) (*bolt.DB, error) {
 	// init command(s)
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitSphinxSearch", "engine": "sphinxsearch", "drivers": "").Warnf("error while init the full text search engine service.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitSphinxSearch", "engine": "sphinxsearch", "drivers": "").Warnf("error while init the full text search engine service.")
 		return nil, err
 	}
 	return db, err
@@ -175,7 +356,7 @@ func InitSphinxSearch(filepath string) (*bolt.DB, error) {
 func InitMongoDB(filepath string) (*bolt.DB, error) {
 	// init command(s)
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitMongoDB", "engine": "mongodb", "drivers": "").Warnf("error while connecting to the NoSQL data-store service.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitMongoDB", "engine": "mongodb", "drivers": "").Warnf("error while connecting to the NoSQL data-store service.")
 		return nil, err
 	}
 	return db, err
@@ -187,7 +368,7 @@ func InitMongoDB(filepath string) (*bolt.DB, error) {
 func InitCassandraDB(filepath string) (*bolt.DB, error) {
 	// init command(s)
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitCassandraDB", "engine": "cassandra", "drivers": "").Warnf("error while init the key/value store service.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitCassandraDB", "engine": "cassandra", "drivers": "").Warnf("error while init the key/value store service.")
 		return nil, err
 	}
 	return db, err
@@ -199,7 +380,7 @@ func InitCassandraDB(filepath string) (*bolt.DB, error) {
 func InitRedis(filepath string) (*bolt.DB, error) {
 	// init command(s)
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitRedis", "engine": "redis", "drivers": "").Warnf("error while init the key/value store service.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitRedis", "engine": "redis", "drivers": "").Warnf("error while init the key/value store service.")
 		return nil, err
 	}
 	return db, err
@@ -211,7 +392,7 @@ func InitRedis(filepath string) (*bolt.DB, error) {
 func InitWebdis(filepath string) (*bolt.DB, error) {
 	// init command(s)
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitWebdis", "engine": "webdis", "drivers": "").Warnf("error while init the key/value store service.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitWebdis", "engine": "webdis", "drivers": "").Warnf("error while init the key/value store service.")
 		return nil, err
 	}
 	return db, err
@@ -223,7 +404,7 @@ func InitWebdis(filepath string) (*bolt.DB, error) {
 func InitMemcached(filepath string) (*bolt.DB, error) {
 	// init command(s)
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitMemcached", "engine": "memcached", "drivers": "").Warnf("error while init the key/value store service.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitMemcached", "engine": "memcached", "drivers": "").Warnf("error while init the key/value store service.")
 		return nil, err
 	}
 	return db, err

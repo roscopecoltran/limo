@@ -4,7 +4,7 @@ package model
 import (
 	//"errors"
 	//"fmt"
-	//"log"
+	////"log"
 	//"strings"
     // "github.com/qor/qor"
     // "github.com/qor/admin"
@@ -18,6 +18,7 @@ import (
 	// "github.com/davecgh/go-spew/spew"
 	// fuzz "github.com/google/gofuzz"
 	"github.com/roscopecoltran/sniperkit-limo/utils"
+	// "github.com/sirupsen/logrus"
 )
 
 // https://github.com/hekar/gitmark/blob/master/gitmark/bookmark.go

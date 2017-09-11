@@ -9,6 +9,7 @@ import (
 	"github.com/qor/l10n"
 	"github.com/qor/sorting"
 	"github.com/qor/validations"
+	// "github.com/sirupsen/logrus"
 )
 
 type Category struct {

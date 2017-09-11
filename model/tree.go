@@ -3,11 +3,15 @@ package model
 import (
 	"errors"
 	"fmt"
-	"log"
+	//"log"
 	"strings"
-    // "github.com/qor/qor"
-    // "github.com/qor/admin"
 	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
+
+	// el "github.com/src-d/enry"
+	// rl "github.com/rai-project/linguist"
+	// gl "github.com/generaltso/linguist"
+
 )
 
 // https://github.com/Termina1/starlight/blob/master/handlers/filenames_extractor.go
@@ -21,6 +25,37 @@ type Tree struct {
 	StarCount 		int    `gorm:"-"`
 	Stars     		[]Star `gorm:"many2many:star_trees;"`
 }
+
+/*
+
+	// Examples
+
+	lang, safe := enry.GetLanguageByExtension("foo.go")
+	fmt.Println(lang)
+	// result: Go
+
+	lang, safe := enry.GetLanguageByContent("foo.m", "<matlab-code>")
+	fmt.Println(lang)
+	// result: Matlab
+
+	lang, safe := enry.GetLanguageByContent("bar.m", "<objective-c-code>")
+	fmt.Println(lang)
+	// result: Objective-C
+
+	// all strategies together
+	lang := enry.GetLanguage("foo.cpp", "<cpp-code>")
+
+	// get a list of possible languages for a given file
+	langs := enry.GetLanguages("foo.h",  "<cpp-code>")
+	// result: []string{"C++", "C"}
+
+	langs := enry.GetLanguagesByExtension("foo.asc", "<content>", nil)
+	// result: []string{"AGS Script", "AsciiDoc", "Public Key"}
+
+	langs := enry.GetLanguagesByFilename("Gemfile", "<content>", []string{})
+	// result: []string{"Ruby"}
+
+*/
 
 /*
 

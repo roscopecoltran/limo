@@ -4,6 +4,7 @@ package model
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/qor/publish2"
+	// "github.com/sirupsen/logrus"
 )
 
 type Article struct {

@@ -3,11 +3,19 @@ package model
 import (
 	"errors"
 	"fmt"
-	"log"
+	// //"log"
+	"path"
+	// "os"
 	"strings"
+	"strconv"
+	"github.com/sirupsen/logrus"
     // "github.com/qor/qor"
     // "github.com/qor/admin"
+	// "github.com/xanzy/go-gitlab"
+	"github.com/google/go-github/github"
 	"github.com/jinzhu/gorm"
+	// "github.com/davecgh/go-spew/spew"
+	jsoniter "github.com/json-iterator/go"
 )
 
 // https://github.com/grimmer0125/search-github-starred/blob/develop/githubAPI.go
@@ -16,55 +24,84 @@ import (
 // https://github.com/google/go-github/blob/master/github/activity_star_test.go
 // https://github.com/google/go-github/blob/master/github/search.go
 
+// http://jinzhu.me/gorm/models.html#model-definition
 // Readme  represents a readme in the database
 type Readme  struct {
 	gorm.Model
-	Name      	string
-	ReadmeCount int    `gorm:"-"`
-	StarCount 	int    `gorm:"-"`
-	Stars     	[]Star `gorm:"many2many:star_readmes;"`
+	RemoteID    string
+	UserID    	string
+	RemoteURI   string
+	Name    	*string
+	Path 		*string 
+	Content     *string
+	Decoded     string 
+	SHA     	*string 	// boltholdIndex:"SHA"
+	URL 		*string 
+	DownloadURL *string
+	Language    string
+	Type 		*string
+	Encoding 	*string
+	Size 		*int
+}
+
+//type Token struct {
+//	name string
+//}
+
+type ReadmeResult struct {
+	Readme  *Readme
+	Error 	error
+}
+
+// iAreaId, ok := val.(int) // Alt. non panicking version 
+// i, errInt := strconv.ParseInt(v.(string), 10, 64)
+
+// TokenizeContent("I'm from Iceland and I make goat cheese. How about you? Do you work?")
+// => ["iceland", "goat", "cheese"]
+
+// ref: https://github.com/rawlingsj/gostats/blob/f8a768818f4689071d181543c92cd1beb6f734b4/vendor/github.com/google/go-github/github/examples_test.go#L29-L45
+func NewReadmeFromGithub(readme github.RepositoryContent, remoteId int, userId int, remoteUri string) (*Readme, error) {
+	// TestTopicsGraph()
+	decoded, err := readme.GetContent()
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"action": "NewReadmeFromGithub", "step": "GetContent", "userId": userId, "remoteId": remoteId, "remoteUri": remoteUri}).Warn("extracting error on readme informations with readme.GetContent")
+		return nil, err
+	}
+	readmeMetaInfo :=	&Readme{
+		RemoteID:    strconv.Itoa(remoteId),
+		UserID:      strconv.Itoa(userId),
+		RemoteURI:   remoteUri,
+		Name:    	 readme.Name,
+		Path:     	 readme.Path,
+		Content:     readme.Content,
+		Decoded:     decoded,
+		SHA:         readme.SHA,
+		URL: 	 	 readme.URL,
+		DownloadURL: readme.DownloadURL,
+		Type: 	 	 readme.Type,
+		Encoding: 	 readme.Encoding,
+		Size: 	 	 readme.Size,
+	}
+	if decoded != "" {
+		dumpReadme, err := jsoniter.Marshal(readmeMetaInfo)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{"action": "NewReadmeFromGithub", "step": "JsoniterMarshalReadme", "userId": userId, "remoteId": remoteId, "remoteUri": remoteUri}).Warn("dump error on readme informations received with jsoniter")
+		} else {
+			// add a common prefix cache
+			dumpPrefixPath  := path.Join("cache", "vcs", remoteUri)
+			if err := NewDump([]byte(fmt.Sprintf("[%s]\n", dumpReadme)), dumpPrefixPath, "readme", []string{"json","yaml"}); err != nil {
+				log.WithError(err).WithFields(logrus.Fields{"action": "NewReadmeFromGithub", "step": "NewDumpReadme", "readme": readmeMetaInfo}).Warn("could not dump Readme to specified format")
+				return nil, err // errors.New("Could not get the readme file content.")
+			}
+		}
+	}
+	return readmeMetaInfo, nil
 }
 
 // FindReadmes finds all readmes
 func FindReadmes(db *gorm.DB) ([]Readme , error) {
 	var readmes []Readme 
 	db.Order("name").Find(&readmes)
-	return readmes, db.Error
-}
-
-// FindReadmesWithStarCount finds all readmes and gets their count of stars
-func FindReadmesWithStarCount(db *gorm.DB) ([]Readme , error) {
-	var readmes []Readme 
-
-	// Create resources from GORM-backend model
-	// Admin.AddResource(&Readme {})
-
-	rows, err := db.Raw(`
-		SELECT T.NAME, COUNT(ST.README_ID) AS STARCOUNT
-		FROM READMES T
-		LEFT JOIN STAR_READMES ST ON T.ID = ST.README_ID
-		WHERE T.DELETED_AT IS NULL
-		GROUP BY T.ID
-		ORDER BY T.NAME`).Rows()
-
-	if err != nil {
-		return readmes, err
-	}
-
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	for rows.Next() {
-		var readme Readme 
-		if err = rows.Scan(&readme.Name, &readme.StarCount); err != nil {
-			return readmes, err
-		}
-		readmes = append(readmes, readme)
-	}
 	return readmes, db.Error
 }
 
@@ -81,48 +118,23 @@ func FindReadmeByName(db *gorm.DB, name string) (*Readme , error) {
 func FindOrCreateReadmeByName(db *gorm.DB, name string) (*Readme , bool, error) {
 	var readme Readme 
 	if db.Where("lower(name) = ?", strings.ToLower(name)).First(&readme).RecordNotFound() {
-		readme.Name = name
+		*readme.Name = name
 		err := db.Create(&readme).Error
 		return &readme, true, err
 	}
 	return &readme, false, nil
 }
 
-// LoadStars loads the stars for a readme
-func (readme *Readme ) LoadStars(db *gorm.DB, match string) error {
-	// Make sure readme exists in database, or we will panic
-	var existing Readme 
-	if db.Where("id = ?", readme.ID).First(&existing).RecordNotFound() {
-		return fmt.Errorf("Readme  '%d' not found", readme.ID)
-	}
-
-	if match != "" {
-		var stars []Star
-		db.Raw(`
-			SELECT *
-			FROM STARS S
-			INNER JOIN STAR_READMES ST ON S.ID = ST.STAR_ID
-			WHERE S.DELETED_AT IS NULL
-			AND ST.README_ID = ?
-			AND LOWER(S.FULL_NAME) LIKE ?
-			ORDER BY S.FULL_NAME`,
-			readme.ID,
-			fmt.Sprintf("%%%s%%", strings.ToLower(match))).Scan(&stars)
-		readme.Stars = stars
-		return db.Error
-	}
-	return db.Model(readme).Association("Stars").Find(&readme.Stars).Error
-}
-
 // Rename renames a readme -- new name must not already exist
 func (readme *Readme ) Rename(db *gorm.DB, name string) error {
 	// Can't rename to the same name
-	if name == readme.Name {
+	if name == *readme.Name {
+		// err := errors.New("You can't rename to the same name")
+		// log.WithError(err).WithFields(logrus.Fields{"action": "Rename", "model": "Readme"}).Warn("You can't rename to the same name")
 		return errors.New("You can't rename to the same name")
 	}
-
 	// If they're just changing case, allow. Otherwise, block the change
-	if strings.ToLower(name) != strings.ToLower(readme.Name) {
+	if strings.ToLower(name) != strings.ToLower(*readme.Name) {
 		existing, err := FindReadmeByName(db, name)
 		if err != nil {
 			return err
@@ -131,14 +143,13 @@ func (readme *Readme ) Rename(db *gorm.DB, name string) error {
 			return fmt.Errorf("Readme  '%s' already exists", existing.Name)
 		}
 	}
-
-	readme.Name = name
+	*readme.Name = name
 	return db.Save(readme).Error
 }
 
 // Delete deletes a readme and disassociates it from any stars
 func (readme *Readme ) Delete(db *gorm.DB) error {
-	if err := db.Model(readme).Association("Stars").Clear().Error; err != nil {
+	if err := db.Model(readme).Association("Readmes").Clear().Error; err != nil {
 		return err
 	}
 	return db.Delete(readme).Error

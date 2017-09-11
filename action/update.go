@@ -7,8 +7,20 @@ import (
 	"github.com/roscopecoltran/sniperkit-limo/model"
 	"github.com/roscopecoltran/sniperkit-limo/service"
 	"github.com/spf13/cobra"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
+	// tablib "github.com/agrison/go-tablib"
+	// "github.com/davecgh/go-spew/spew"
+	// jsoniter "github.com/json-iterator/go"
+	//"github.com/k0kubun/pp"
 )
+
+// top priority
+// https://github.com/Termina1/starlight
+
+// https://github.com/indraniel/srasearch/blob/master/makeindex/main.go
+// https://github.com/ulrf/ulrf/blob/master/models/svuldb.go
+// https://github.com/Jonexlee/project/blob/1d794ed0db1f47cac807381a468f1baea5e910a6/model/batch/batchInfo.go
+// https://github.com/urandom/readeef
 
 // UpdateCmd lets you log in
 var UpdateCmd = &cobra.Command{
@@ -23,14 +35,17 @@ var UpdateCmd = &cobra.Command{
 		// Get configuration
 		cfg, err := getConfiguration()
 		fatalOnError(err)
+		// spew.Printf(&cfg)
 
 		// Get the database
 		db, err := getDatabase()
 		fatalOnError(err)
+		// spew.Printf(&db)
 
 		// Get the database
 		bucket, err := getBucket()
 		fatalOnError(err)
+		// spew.Printf(&bucket)
 
 		// Just to use it once, at least, for the moment
 		// we can put the config struct in the bucket
@@ -39,21 +54,26 @@ var UpdateCmd = &cobra.Command{
 		// Get the search index
 		index, err := getIndex()
 		fatalOnError(err)
+		// spew.Printf(&index)
 
 		// Get the specified service
 		svc, err := getService()
 		fatalOnError(err)
+		// spew.Printf(&svc)
 
 		// Get the database record for the specified service
 		serviceName := service.Name(svc)
 		dbSvc, _, err := model.FindOrCreateServiceByName(db, serviceName)
 		fatalOnError(err)
+		// spew.Printf(&dbSvc)
 
 		// Create a channel to receive stars, since service can page
 		starChan := make(chan *model.StarResult, 20)
 
 		// Get the stars for the authenticated user
-		go svc.GetStars(ctx, starChan, cfg.GetService(serviceName).Token, "")
+		go svc.GetStars(ctx, starChan, cfg.GetService(serviceName).Token, "", true, 20)
+		//go svc.GetReadmes(ctx, readmeChan, cfg.GetService(serviceName).Token, "")
+		//go svc.GetUserInfos(ctx, userInfoChan, cfg.GetService(serviceName).Token, "")
 
 		output := getOutput()
 
@@ -67,7 +87,7 @@ var UpdateCmd = &cobra.Command{
 				created, err := model.CreateOrUpdateStar(db, starResult.Star, dbSvc)
 				if err != nil {
 					totalErrors++
-					log.WithError(err).WithFields(log.Fields{"config": "UpdateCmd", "starResult.Star.FullName": *starResult.Star.FullName}).Warnf("error while getting creating/updating a vcs starred project. \n Error %s: %s", *starResult.Star.FullName, err.Error())
+					log.WithError(err).WithFields(logrus.Fields{"config": "UpdateCmd", "starResult.Star.FullName": *starResult.Star.FullName}).Warnf("error while getting creating/updating a vcs starred project. \n Error %s: %s", *starResult.Star.FullName, err.Error())
 					output.Error(fmt.Sprintf("Error %s: %s", *starResult.Star.FullName, err.Error()))
 				} else {
 					if created {
@@ -78,17 +98,19 @@ var UpdateCmd = &cobra.Command{
 					err = starResult.Star.Index(index, db)
 					if err != nil {
 						totalErrors++
-						log.WithError(err).WithFields(log.Fields{"config": "UpdateCmd", "starResult.Star.Index.FullName": *starResult.Star.FullName}).Warnf("error while getting creating/updating a vcs starred project. \n Error %s: %s", *starResult.Star.FullName, err.Error())
+						log.WithError(err).WithFields(logrus.Fields{"config": "UpdateCmd", "starResult.Star.Index.FullName": *starResult.Star.FullName}).Warnf("error while getting creating/updating a vcs starred project. \n Error %s: %s", *starResult.Star.FullName, err.Error())
 						output.Error(fmt.Sprintf("Error %s: %s", *starResult.Star.FullName, err.Error()))
 					}
-					output.Tick()
+					// output.Tick()
 				}
 			}
 		}
-		log.WithFields(log.Fields{"config": "UpdateCmd", "action": "SyncedStar"}).Infof("\nCreated: %d; Synced: %d; Errors: %d", totalCreated, totalUpdated, totalErrors)
+		log.WithFields(logrus.Fields{"config": "UpdateCmd", "action": "SyncedStar"}).Infof("\nCreated: %d; Synced: %d; Errors: %d", totalCreated, totalUpdated, totalErrors)
 		output.Info(fmt.Sprintf("\nCreated: %d; Updated: %d; Errors: %d", totalCreated, totalUpdated, totalErrors))
 	},
 }
+
+// functions to update languages, topics
 
 func init() {
 	RootCmd.AddCommand(UpdateCmd)

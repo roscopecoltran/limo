@@ -209,11 +209,6 @@ func (c *Color) Tag(tag *model.Tag) {
 		c.Error(err.Error())
 	}
 
-	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf(" ★ :%d", tag.StarCount)))
-	if err != nil {
-		c.Error(err.Error())
-	}
-
 	fmt.Println(buffer.String())
 }
 
@@ -222,11 +217,6 @@ func (c *Color) Topic(topic *model.Topic) {
 	var buffer bytes.Buffer
 
 	_, err := buffer.WriteString(color.BlueString(topic.Name))
-	if err != nil {
-		c.Error(err.Error())
-	}
-
-	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf(" ★ :%d", topic.StarCount)))
 	if err != nil {
 		c.Error(err.Error())
 	}
@@ -323,12 +313,17 @@ func (c *Color) Pkg(pkg *model.Pkg) {
 func (c *Color) Readme(readme *model.Readme) {
 	var buffer bytes.Buffer
 
-	_, err := buffer.WriteString(color.BlueString(readme.Name))
+	_, err := buffer.WriteString(color.BlueString(fmt.Sprintf("%s", readme.Name)))
 	if err != nil {
 		c.Error(err.Error())
 	}
 
-	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf(" ★ :%d", readme.StarCount)))
+	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf("%d", readme.Size)))
+	if err != nil {
+		c.Error(err.Error())
+	}
+
+	_, err = buffer.WriteString(color.WhiteString(fmt.Sprintf("%s", readme.Decoded)))
 	if err != nil {
 		c.Error(err.Error())
 	}

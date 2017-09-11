@@ -45,7 +45,7 @@ var DumpCmd = &cobra.Command{
 		starChan := make(chan *model.StarResult, 20)
 
 		// Get the stars for the authenticated user
-		go svc.GetStars(ctx, starChan, cfg.GetService(serviceName).Token, "")
+		go svc.GetStars(ctx, starChan, cfg.GetService(serviceName).Token, "", true, 5)
 
 		output := getOutput()
 

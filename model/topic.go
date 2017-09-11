@@ -3,23 +3,50 @@ package model
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
-    // "github.com/qor/qor"
-    // "github.com/qor/admin"
 	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
+	"github.com/ckaznocha/taggraph"
 )
 
 // https://github.com/cloudfoundry-incubator/cf-extensions/blob/master/bot/repos.go
-// 
 
 // Topic represents a topic in the database
 type Topic struct {
 	gorm.Model
-	Name      		string
-	TopicCount 		int    `gorm:"-"`
-	StarCount 		int    `gorm:"-"`
+	Name      		string `gorm:"type:varchar(64);not null;unique"`
+	Count 			int    `gorm:"-"`
 	Stars     		[]Star `gorm:"many2many:star_topics;"`
+}
+
+type TopicResult struct {
+	Topic  	*Topic
+	Error 	error
+}
+
+// type Topics []Topic
+
+// should provide a map[string]map[string]
+func TestTopicsGraph(query string) (taggraph.Tagger, error) {
+	tagg.AddChildToTag("shirts", "clothes")
+	tagg.AddChildToTag("pants", "clothes")
+	tagg.AddChildToTag("dress clothes", "clothes")
+	tagg.AddChildToTag("shirts", "dress clothes")
+	tagg.AddChildToTag("shirts", "tops")
+	tagg.AddChildToTag("tops", "casual")
+	tagg.AddChildToTag("casual", "clothes")
+	entities, ok := tagg.GetTag(query)
+	if !ok {
+		log.WithFields(logrus.Fields{"action": "PrintTopicsGraph", "step": "GetTag", "model": "Topic", "query": query}).Warnf("Tag topic not found", query)
+		return nil, fmt.Errorf("Tag topic not found", query)
+	}
+	// iterate
+	paths := entities.PathsToAllAncestorsAsString("->")
+	for _, path := range paths {
+		log.WithFields(logrus.Fields{"action": "PrintTopicsGraph", "step": "PathsToAllAncestorsAsString", "model": "Topic", "query": query, "path": path}).Info("New path discovered.")
+	}
+	return entities, nil
+
 }
 
 // FindTopics finds all topics
@@ -57,7 +84,7 @@ func FindTopicsWithStarCount(db *gorm.DB) ([]Topic, error) {
 
 	for rows.Next() {
 		var topic Topic
-		if err = rows.Scan(&topic.Name, &topic.StarCount); err != nil {
+		if err = rows.Scan(&topic.Name); err != nil {
 			return topics, err
 		}
 		topics = append(topics, topic)

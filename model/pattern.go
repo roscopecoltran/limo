@@ -3,7 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
-	"log"
+	//"log"
 	"strings"
     // "github.com/qor/qor"
     // "github.com/qor/admin"

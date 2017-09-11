@@ -6,22 +6,34 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"os"
+	//"os"
 	"path"
-	log "github.com/sirupsen/logrus"
+	// "filepath"
+	"github.com/sirupsen/logrus"
 	"github.com/blevesearch/bleve"
 	"github.com/google/go-github/github"
 	"github.com/jinzhu/gorm"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/xanzy/go-gitlab"
-	tablib "github.com/agrison/go-tablib"
-	// "github.com/davecgh/go-spew/spew"
 	jsoniter "github.com/json-iterator/go"
+
+	// el "github.com/src-d/enry"
+	// rl "github.com/rai-project/linguist"
+	// gl "github.com/generaltso/linguist"
+	// jl "github.com/jhaynie/linguist"
+
+	// tablib "github.com/agrison/go-tablib"
+	// "github.com/davecgh/go-spew/spew"
+
 	// fuzz "github.com/google/gofuzz"
     // "github.com/qor/qor"
     // "github.com/qor/admin"
     // es "gopkg.in/olivere/elastic.v5"
+
 )
+
+// 
+// result, err := jl.GetLanguageDetails(context.Background(), "test.js", []byte("var a = 1"))
 
 // https://github.com/redite/kleng/blob/master/core/gh.go
 // 
@@ -36,18 +48,24 @@ import (
 // https://github.com/Termina1/starlight/blob/master/handlers/repo_info_extractor.go
 // https://github.com/Termina1/starlight/blob/master/star_extractor.go
 
+// http://jinzhu.me/gorm/models.html#model-definition
 // Star represents a starred repository
 type Star struct {
 	gorm.Model
 	RemoteID    		string
-	Name        		*string
-	FullName    		*string
+	OwnerID        		string 		
+	RemoteURI        	string 			`gorm:"type:varchar(128);not null;"`
+	OwnerLogin        	*string 		`gorm:"type:varchar(128);not null;"`
+	Name        		*string 		`gorm:"type:varchar(128);not null;"`
+	FullName    		*string 		`gorm:"type:varchar(128);not null;"`
 	Description 		*string
 	Homepage    		*string
+	//RemoteURI         	string
 	URL         		*string
 	Language    		*string
 	Avatar				*string
 	HasWiki 			*bool
+	// Readme       		string 		`json:"readme"`
 	// SHA  			*string
 	// ForkedFromProject *string
 	// Snippets 		*bool
@@ -55,26 +73,39 @@ type Star struct {
 	Stargazers  		int
 	Watchers  			int
 	Forks 				int
+
 	StarredAt   		time.Time
-	ServiceID   		uint
+	LastUpdate   		time.Time
+	CreationData   		time.Time
+	PushedAt 			time.Time
+
+	ServiceID   		uint 				// `gorm:"index:idx_name_code"`
+	ReadMe        		string
+	TopicsList 			string
 	//UserName        		*string
-	Tags        		[]Tag `gorm:"many2many:star_tags;"`
-	Topics      		[]Topic `gorm:"many2many:star_topics;"`
-	LanguagesDetected   []LanguageDetected `gorm:"many2many:star_languages;"`
+	Tags        		[]Tag 				`gorm:"many2many:star_tags;"`
+	Topics      		[]Topic 			`gorm:"many2many:star_topics;"`
+	Languages      		[]Language 			`gorm:"many2many:star_languages;"`
+	Readme      		[]Readme 			`gorm:"many2many:star_readmes;"`
+	LanguagesDetected   []LanguageDetected 	`gorm:"many2many:star_languages;"`
 }
+
+// "apiURL":        repo["url"],
+// "repoURL":       repo["html_url"],
+// "repoName":      repo["name"],
+// "repofull_name": repo["full_name"], //no use now
+// // "ownerName":     repo["owner"].(map[string]interface{})["login"],    //no use now
+// // "ownerURL":      repo["owner"].(map[string]interface{})["html_url"], // no use now
+// "starredBy":   tokenOwner,
+// "description": repo["description"],
+// "homepage":    repo["homepage"],
 
 // https://github.com/GrantSeltzer/go-baseball-savant/blob/master/bbsavant/read_file.go
 // StarResult wraps a star and an error
 type StarResult struct {
 	Star  	*Star
 	Error 	error
-	dataset *tablib.Dataset
-}
-
-// https://github.com/skyrunner2012/xormplus/blob/master/xorm/dataset.go
-// NewDataset creates a new Dataset.
-func NewStarDataset(headers []string) *tablib.Dataset {
-	return tablib.NewDataset(headers)
+	// dataset *tablib.Dataset
 }
 
 /*
@@ -84,83 +115,12 @@ if data == nil {
 n := len(headers)
 */
 
-// NewStarDump(ds)
-func NewStarDump(content []byte, dumpPrefixPath string, dumpType string, dataFormat []string) (error) {
-	ds, err := tablib.LoadJSON(content)
-	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"method": "NewStarDump", "call": "LoadJSON"}).Info("failed to load LoadJSON() with content")
-		panic(err)
-		return err
-	}
-	if err := os.MkdirAll(dumpPrefixPath, 0777); err != nil {
-		log.WithError(err).WithFields(log.Fields{"method": "NewStarDump", "call": "MkdirAll"}).Infof("MkdirAll error on %#s", dumpPrefixPath)
-		panic(err)
-		return err
-	}
-	for _, t := range dataFormat {
-		filePath  := path.Join(dumpPrefixPath, dumpType+"."+t) // fmt.Sprintf("%s/%s", dumpPrefixPath, "repository.yaml") // will create a function
-		file, err := os.Create(filePath)
-		if err != nil {
-			log.WithError(err).WithFields(log.Fields{"method": "NewStarDump", "call": "WriteTo"}).Infof("%#v Write to %#v", t, filePath)
-			panic(err)
-			return err
-		}
-		defer file.Close()
-		switch df := t; df {
-		case "json":
-			json, err := ds.JSON()
-			if err != nil {
-				panic(err)
-				return errors.New("Error while converting data to json format")
-			}
-			json.WriteTo(file)
-			log.WithFields(log.Fields{"method": "NewStarDump", "call": "WriteTo"}).Infof("%#v Write to %#v",  df, filePath)
-		case "yaml":
-			yaml, err := ds.YAML()
-			if err != nil {
-				panic(err)
-				return errors.New("Error while converting data to yaml format")
-			}
-			yaml.WriteTo(file)
-			log.WithFields(log.Fields{"method": "NewStarDump", "call": "WriteTo"}).Infof("%#v Write to %#v",  df, filePath)
-		case "csv":
-			csv, err := ds.CSV()
-			if err != nil {
-				panic(err)
-				return errors.New("Error while converting data to csv format")
-			}
-			csv.WriteTo(file)
-			log.WithFields(log.Fields{"method": "NewStarDump", "call": "WriteTo"}).Infof("%#v Write to %#v",  df, filePath)
-		case "xml":
-			xml, err := ds.XML()
-			if err != nil {
-				panic(err)
-				return errors.New("Error while converting data to csv format")
-			}
-			xml.WriteTo(file)
-			log.WithFields(log.Fields{"method": "NewStarDump", "call": "WriteTo"}).Infof("%#v Write to %#v",  df, filePath)
-		case "markdown":
-			ascii := ds.Tabular("markdown")
-			if ascii == nil {
-				panic(err)
-				return errors.New("Error while converting data to ascii format")
-			}
-			ascii.WriteTo(file)
-			log.WithFields(log.Fields{"method": "NewStarDump", "call": "WriteTo"}).Infof("%#v Write to %#v",  df, filePath)
-		default:
-			return errors.New("Unsupported data format")
-		}
-		file.Close()
-	}
-	return nil
-}
-
 // https://github.com/google/go-github/blob/master/github/repos.go#L21-L117
 // NewStarFromGithub creates a Star from a Github star
-func NewStarFromGithub(timestamp *github.Timestamp, star github.Repository) (*Star, error) {
+func NewStarFromGithub(timestamp *github.Timestamp, star github.Repository, readme github.RepositoryContent) (*Star, error) {
 	// Require the GitHub ID
 	if star.ID == nil {
-		log.WithFields(log.Fields{"model": "NewStarFromGithub"}).Warn("ID from GitHub is required")
+		log.WithFields(logrus.Fields{"model": "NewStarFromGithub"}).Warn("ID from GitHub is required")
 		return nil, errors.New("ID from GitHub is required")
 	}
 
@@ -187,34 +147,88 @@ func NewStarFromGithub(timestamp *github.Timestamp, star github.Repository) (*St
 		starredAt = timestamp.Time
 	}
 
+	var shortForm 	= "2006-01-02 15:04:05 -0700 UTC"
+	createdAt, _ 	:= time.Parse(shortForm, fmt.Sprintf("%s", *star.CreatedAt))
+	updatedAt, _ 	:= time.Parse(shortForm, fmt.Sprintf("%s", *star.UpdatedAt))
+	pushedAt, _ 	:= time.Parse(shortForm, fmt.Sprintf("%s", *star.PushedAt))
+	//starUri 		:= fmt.Sprintf("github.com/%s", *star.FullName)
+	starUri 		:= path.Join("github.com", fmt.Sprintf("%s", *star.Owner.Login), fmt.Sprintf("%s", *star.Name))
+
+	log.WithFields(logrus.Fields{"starUri": starUri, "createdAt": createdAt, "updatedAt": updatedAt}).Info("")	
+
+	readmeContent, err := readme.GetContent()
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"action": "NewReadmeFromGithub", "step": "readmeGetContent", "userId": *star.Owner.ID, "remoteId": *star.ID, "remoteUri": starUri}).Warn("extracting error on readme informations with readme.GetContent")
+		return nil, err
+	}
+
+	var topics []Topic
+	if len(star.Topics) > 0 {
+		for _, t := range star.Topics {
+			topics = append(topics, Topic{Name: t})
+		}
+		log.WithFields(logrus.Fields{"starUri": starUri, "topics": strings.Join(star.Topics, ",")}).Warn("")	
+	}
+
+	var languages []Language
+	languageMain := fmt.Sprintf("%s", star.Language)
+	if languageMain != "" {
+		languages = append(languages, Language{Name: languageMain})
+		log.WithFields(logrus.Fields{"starUri": starUri, "languages": languages}).Warn("")	
+	}
+
+	var readmes []Readme
+	if len(readmeContent) > 0 {
+		readmes = append(readmes, Readme{Decoded: readmeContent})
+		log.WithFields(logrus.Fields{"starUri": starUri, "readmes": readmes}).Warn("")	
+	}
+
 	starMetaInfo :=	&Star{
 			RemoteID:    strconv.Itoa(*star.ID),
+			OwnerID:	 strconv.Itoa(*star.Owner.ID),
+			RemoteURI:	 starUri,
+			OwnerLogin:  star.Owner.Login,
 			Name:        star.Name,
 			FullName:    star.FullName,
 			Description: star.Description,
 			Homepage:    star.Homepage,
 			URL:         star.CloneURL,
 			Language:    star.Language,
-			Avatar: 	 nil,
+			Avatar: 	 star.Owner.AvatarURL,
 			HasWiki: 	 star.HasWiki,
 			// Topics:      star.Topics,
 			Stargazers:  stargazersCount,
 			Watchers:  	 watchersCount,
 			Forks:  	 forksCount,
-			StarredAt:   starredAt,
-			//Topics:    star.Topics,
+
+			StarredAt:    starredAt,
+			LastUpdate:   updatedAt,
+			CreationData: createdAt,
+			PushedAt: 	  pushedAt,
+
+			ReadMe: 	 readmeContent,
+			Topics:    	 topics,
+			TopicsList:  strings.Join(star.Topics, ","),
 		}
+
+	dumpPrefixPath  := path.Join("cache", "vcs", "github.com", *star.FullName)
+
+	dumpRepoInfo, err := jsoniter.Marshal(star)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"action": "NewReadmeFromGithub", "step": "JsoniterMarshalRepoInfo", "dumpPrefixPath": dumpPrefixPath}).Warn("dump error on readme informations received with jsoniter")
+	} else {
+		if err := NewDump([]byte(fmt.Sprintf("[%s]\n", dumpRepoInfo)), dumpPrefixPath, "repository", []string{"json", "yaml"}); err != nil {
+			return nil, errors.New("Could not dump the data to file for all export format.")
+		}
+	}
 
 	dumpStar, err := jsoniter.Marshal(starMetaInfo)
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"service": "GetStars"}).Warn("dump error on repo starred with jsoniter")
+		log.WithError(err).WithFields(logrus.Fields{"service": "GetStars", "dumpPrefixPath": dumpPrefixPath}).Warn("dump error on repo starred with jsoniter")
 	} else {
-		// https://github.com/ds0nt/hax/blob/4c9c7eca5197cf7c1b0c2d165418caab4a26d34a/gh-list/main.go
-		// fmt.Println(string(dumpStar))
-		// https://github.com/monteirocicero/golang-learning/blob/master/src/cap6-variadic-functions/files.go
 		dumpPrefixPath  := path.Join("cache", "vcs", "github.com", *star.FullName)
-		if err := NewStarDump([]byte(fmt.Sprintf("[%s]\n", dumpStar)), dumpPrefixPath, "repository", []string{"yaml", "csv", "xml", "json", "markdown"}); err != nil {
-			return nil, errors.New("Could not dump the data to file.")
+		if err := NewDump([]byte(fmt.Sprintf("[%s]\n", dumpStar)), dumpPrefixPath, "meta", []string{"json", "yaml"}); err != nil {
+			return nil, errors.New("Could not dump the data to file for all export format.")
 		}
 	}
 

@@ -3,21 +3,46 @@ package model
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
-    // "github.com/qor/qor"
-    // "github.com/qor/admin"
 	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
 )
 
 // LanguageDetected represents a languageDetected in the database
 type LanguageDetected struct {
 	gorm.Model
-	Name      				string
-	LanguageDetectedCount 	int    `gorm:"-"`
-	StarCount 				int    `gorm:"-"`
-	Stars     				[]Star `gorm:"many2many:star_languagesDetected;"`
+	Name        			string 				`gorm:"-" json:"name,omitempty"`
+	Type        			string 				`json:"type,omitempty"`
+	Group       			string 				`json:"group,omitempty"`
+	AceMode     			string 				`json:"ace_mode,omitempty"`
+	IsPopular   			bool   				`json:"is_popular,omitempty"`
+	IsUnpopular 			bool   				`json:"is_unpopular,omitempty"`
+	LanguageDetectedCount 	int    				`gorm:"-"`
+	Stars     				[]Star 				`gorm:"many2many:star_languagesDetected;"`
 }
+
+// Detection represents a language detection result
+type Detection struct {
+	gorm.Model
+	Path                   string    			`json:"path,omitempty"`
+	Type                   string    			`json:"type,omitempty"`
+	ExtName                string    			`json:"extname,omitempty"`
+	MimeType               string    			`json:"mime_type,omitempty"`
+	ContentType            string    			`json:"content_type,omitempty"`
+	Disposition            string    			`json:"disposition,omitempty"`
+	IsDocumentation        bool      			`json:"is_documentation,omitempty"`
+	IsLarge                bool      			`json:"is_large,omitempty"`
+	IsGenerated            bool      			`json:"is_generated,omitempty"`
+	IsText                 bool      			`json:"is_text,omitempty"`
+	IsImage                bool      			`json:"is_image,omitempty"`
+	IsBinary               bool      			`json:"is_binary,omitempty"`
+	IsVendored             bool      			`json:"is_vendored,omitempty"`
+	IsHighRatioOfLongLines bool      			`json:"is_high_ratio_of_long_lines,omitempty"`
+	IsViewable             bool      			`json:"is_viewable,omitempty"`
+	IsSafeToColorize       bool      			`json:"is_safe_to_colorize,omitempty"`
+	Language               *LanguageDetected 	`json:"language,omitempty"`
+}
+
 
 // FindLanguageDetecteds finds all languagesDetected
 func FindLanguageDetecteds(db *gorm.DB) ([]LanguageDetected, error) {
@@ -48,7 +73,7 @@ func FindLanguageDetectedsWithStarCount(db *gorm.DB) ([]LanguageDetected, error)
 	defer func() {
 		err := rows.Close()
 		if err != nil {
-			log.Fatal(err)
+			log.WithError(err).WithFields(logrus.Fields{"service": "FindLanguageDetectedsWithStarCount", "action": "languagesDetected"}).Fatalf("error: %#s", err)
 		}
 	}()
 
@@ -119,6 +144,7 @@ func (languageDetected *LanguageDetected) Rename(db *gorm.DB, name string) error
 	if strings.ToLower(name) != strings.ToLower(languageDetected.Name) {
 		existing, err := FindLanguageDetectedByName(db, name)
 		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{"service": "FindLanguageDetectedsWithStarCount", "action": "FindLanguageDetectedByName"}).Fatalf("error: %#s", err)
 			return err
 		}
 		if existing != nil {

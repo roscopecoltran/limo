@@ -3,7 +3,7 @@ package actions
 import (
 	"fmt"
 	"os"
-	// "github.com/jinzhu/configor"
+	"github.com/jinzhu/configor"
 	"github.com/blevesearch/bleve"
 	"github.com/roscopecoltran/sniperkit-limo/config"
 	"github.com/roscopecoltran/sniperkit-limo/model"
@@ -12,14 +12,18 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/boltdb/bolt"
 	"github.com/spf13/cobra"
-	log "github.com/sirupsen/logrus"
-	// prefixed "github.com/x-cray/logrus-prefixed-formatter"
+	"github.com/sirupsen/logrus"
+	// "github.com/davecgh/go-spew/spew"
+	// "github.com/k0kubun/pp"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
+var defaultConfigFilePath string = "~/.config/limo/limo.yaml"
 var configuration *config.Config
 var db *gorm.DB
 var bucket *bolt.DB
 var index bleve.Index
+var	log 	= logrus.New()
 
 var options struct {
 	config 		string
@@ -42,16 +46,34 @@ You can tag, display, and search your starred repositories.`,
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		//fmt.Println(err)
-		log.WithError(err).WithFields(log.Fields{"config": "Execute"}).Info("error while getting starting the program.")
+		log.WithError(err).WithFields(logrus.Fields{"config": "Execute"}).Info("error while getting starting the program.")
 		os.Exit(-1)
 	}
 }
 
 func init() {
 
+	// logs
+	log.Out = os.Stdout
+	// log.Formatter = new(prefixed.TextFormatter)
+
+	formatter := new(prefixed.TextFormatter)
+	formatter.FullTimestamp = true
+
+	// Set specific colors for prefix and timestamp
+	formatter.SetColorScheme(&prefixed.ColorScheme{
+		PrefixStyle:    "blue+b",
+		TimestampStyle: "white+h",
+	})
+
 	// https://github.com/x-cray/logrus-prefixed-formatter
 	// log.Formatter = new(prefixed.TextFormatter)
 	// log.Level = logrus.DebugLevel
+
+	log.Formatter = formatter
+
+	tmpDir := config.GetTmpDir()
+	log.WithFields(logrus.Fields{"action": "init", "step": "getTmpDir"}).Infof("tmp dir located at: %#s", tmpDir)
 
 	flags := RootCmd.PersistentFlags()
 	flags.StringVarP(&options.language, "language", "l", "", 								"language")
@@ -60,33 +82,31 @@ func init() {
 	flags.StringVarP(&options.tag, 		"tag", 		"t", "", 								"tag")
 	flags.BoolVarP(&options.verbose, 	"verbose", 	"v", false, 							"verbose output")
 	flags.StringVarP(&options.config, 	"config", 	"c", "./config/settings_default.yml", 	"Path to the configuration filename")
+
+	if options.verbose {
+		log.Level = logrus.InfoLevel
+	}
+
 }
 
-func getConfiguration() (*config.Config, error) {
-	if configuration == nil {
-		var err error
-		if configuration, err = config.ReadConfig(); err != nil {
-			log.WithError(err).WithFields(log.Fields{"config": "getConfiguration"}).Info("error while getting global configuration data.")
-			return nil, err
-		}
-	}
-	return configuration, nil
-}
+func getConfiguration() (configuration config.Config, err error) {
 
-/*
-func getConfiguration2() (*config.Config, error) {
-	if configuration == nil {
-		var err error
-		if configuration, err = config.ReadConfig(); err != nil {
-			return nil, err
+	//if configuration == nil {
+
+		configFilePath := config.FindLocalConfig()
+		if configFilePath != "" {
+			log.WithFields(logrus.Fields{"config": "getConfiguration"}).Info("FOUND configuration data to load.")
+			// return nil, Error(fmt.Print("could not find the config file "))
 		}
-	}
-	//if err := configor.Load(&config.Config, options.config); err != nil {
-	//	return nil, err
+
+		if err := configor.Load(&configuration, configFilePath, defaultConfigFilePath); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{"config": "getConfiguration"}).Fatal("error while loading the config files with configor package.")
+		}		
+
 	//}
+
 	return configuration, nil
 }
-*/
 
 func getDatabase() (*gorm.DB, error) {
 	if db == nil {
@@ -94,6 +114,7 @@ func getDatabase() (*gorm.DB, error) {
 		if err != nil {
 			return nil, err
 		}
+		//db, err = model.InitDB(cfg.DatabasePath, true)
 		db, err = model.InitDB(cfg.DatabasePath, options.verbose)
 		if err != nil {
 			return nil, err
@@ -106,12 +127,12 @@ func getBucket() (*bolt.DB, error) {
 	if bucket == nil {
 		cfg, err := getConfiguration()
 		if err != nil {
-			log.WithError(err).WithFields(log.Fields{"config": "getBucket"}).Info("error while getting configuration.")
+			log.WithError(err).WithFields(logrus.Fields{"config": "getBucket"}).Info("error while getting configuration.")
 			return nil, err
 		}
 		bucket, err = model.InitBoltDB(cfg.DatastorePath)
 		if err != nil {
-			log.WithError(err).WithFields(log.Fields{"config": "getBucket", "cfg.DatastorePath": cfg.DatastorePath}).Infof("error while init the BoltDB bucket at %#s", cfg.DatastorePath)
+			log.WithError(err).WithFields(logrus.Fields{"config": "getBucket", "cfg.DatastorePath": cfg.DatastorePath}).Warnf("error while init the BoltDB bucket at %#s", cfg.DatastorePath)
 			return nil, err
 		}
 	}
@@ -122,12 +143,12 @@ func getIndex() (bleve.Index, error) {
 	if index == nil {
 		cfg, err := getConfiguration()
 		if err != nil {
-			log.WithError(err).WithFields(log.Fields{"config": "getIndex"}).Info("error while getting configuration.")
+			log.WithError(err).WithFields(logrus.Fields{"config": "getIndex"}).Info("error while getting configuration.")
 			return nil, err
 		}
 		index, err = model.InitIndex(cfg.IndexPath)
 		if err != nil {
-			log.WithError(err).WithFields(log.Fields{"config": "getIndex", "cfg.IndexPath": cfg.IndexPath}).Infof("error while init the search engine index: %#s", cfg.IndexPath)
+			log.WithError(err).WithFields(logrus.Fields{"config": "getIndex", "cfg.IndexPath": cfg.IndexPath}).Warnf("error while init the search engine index: %#s", cfg.IndexPath)
 			return nil, err
 		}
 	}
@@ -137,8 +158,9 @@ func getIndex() (bleve.Index, error) {
 func getOutput() output.Output {
 	output := output.ForName(options.output)
 	oc, err := getConfiguration()
-	if err == nil {
-		log.WithError(err).WithFields(log.Fields{"config": "getOutput", "options.output": options.output}).Info("error while getting output options.")
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"config": "getOutput", "options.output": options.output}).Warnf("error while getting output options.")
+	} else {
 		output.Configure(oc.GetOutput(options.output))
 	}
 	return output

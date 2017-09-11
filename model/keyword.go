@@ -3,11 +3,13 @@ package model
 import (
 	"errors"
 	"fmt"
-	"log"
+	//"log"
 	"strings"
     // "github.com/qor/qor"
     // "github.com/qor/admin"
+	// "github.com/sirupsen/logrus"
 	"github.com/jinzhu/gorm"
+	// "github.com/sirupsen/logrus"
 )
 
 // Keyword represents a keyword in the database

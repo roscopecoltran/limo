@@ -35,7 +35,7 @@ import (
     // "github.com/qor/admin"
 
 	// logs
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 
 )
 
@@ -69,7 +69,7 @@ func SyncDB(db *gorm.DB, star *Star, service *Service) (bool, error) {
 		star.ServiceID = service.ID
 		err := db.Create(star).Error
 		if err != nil {
-			log.WithError(err).WithFields(log.Fields{"config": "SyncDB", "star.RemoteID": star.RemoteID, "service.ID": service.ID}).Warnf("error while syncing the sql database service.")
+			log.WithError(err).WithFields(logrus.Fields{"config": "SyncDB", "star.RemoteID": star.RemoteID, "service.ID": service.ID}).Warnf("error while syncing the sql database service.")
 		}
 		return err == nil, err
 	}
@@ -87,13 +87,13 @@ func InitAdmin(db *gorm.DB) (error) {
 	// Initalize
 	adm, err := admin.New(&qor.Config{DB: &db.DB})
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitAdmin", "action": "admin.New").Warnf("error while init the admin webui powered by qor-admin.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitAdmin", "action": "admin.New").Warnf("error while init the admin webui powered by qor-admin.")
 		return err
 	}
 	adm.AddResource(&db.User{}, &admin.Config{Menu: []string{"Limo"}})
 	mux, err := http.NewServeMux()
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{"db": "InitAdmin", "action": "NewServeMux").Warnf("error while init the mux web-server.")
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitAdmin", "action": "NewServeMux").Warnf("error while init the mux web-server.")
 		return err
 	}
 	adm.MountTo("/admin", mux)

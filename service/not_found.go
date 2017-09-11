@@ -17,7 +17,7 @@ func (nf *NotFound) Login(ctx context.Context) (string, error) {
 }
 
 // GetStars is not implemented
-func (nf *NotFound) GetStars(ctx context.Context, starChan chan<- *model.StarResult, token string, user string) {
+func (nf *NotFound) GetStars(ctx context.Context, starChan chan<- *model.StarResult, token string, user string, subChannels bool, subChannelsJobs uint) {
 }
 
 // GetTrending is not implemented

@@ -24,13 +24,18 @@ APP_DIST_DIR 		:= "$(CURDIR)/dist"
 APP_PKG 			:= $(APP_NAME)
 APP_PKGS 			:= $(shell go list ./... | grep -v /vendor/)
 APP_VER				:= $(APP_VER)
-APP_VER_FILE 		:= $(shell if [ -f ./VERSION ]; then cat ./VERSION ; fi)
+APP_VER_FILE 		:= $(shell git describe --always --long --dirty --tags)
 
 # golang
 GO_BUILD_LDFLAGS 	:= -a -ldflags="-X github.com/roscopecoltran/sniperkit-$(APP_NAME)/$(APP_PKG).$(APP_NAME_UCFIRST)Version=${APP_VER}"
 GO_BUILD_PREFIX		:= $(APP_DIST_DIR)/all/$(APP_NAME)
 GO_BUILD_URI		:= github.com/roscopecoltran/sniperkit-$(APP_NAME)/cmd/$(APP_NAME)
 GO_BUILD_VARS 		:= GOARCH=amd64 CGO_ENABLED=0
+
+# https://github.com/derekparker/delve/blob/master/Makefile
+GO_VERSION			:= $(shell go version)
+GO_BUILD_SHA		:= $(shell git rev-parse HEAD)
+LLDB_SERVER			:= $(shell which lldb-server)
 
 # golang - app
 GO_BINDATA			:= $(shell which go-bindata)
@@ -74,8 +79,11 @@ build: check
 dist: macos linux windows
 
 darwin:
+	clear
+	echo ""
 	rm -f ./limo
 	gox -verbose -os="darwin" -arch="amd64" -output="{{.Dir}}" ./cmd/...
+	echo ""
 
 # darwin:
 # 	gox -verbose -os="darwin" -arch="amd64" -output="{{.Dir}}" ./cmd/$*/...

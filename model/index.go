@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/go-github/github"
 	jsoniter "github.com/json-iterator/go"
+	// "github.com/sirupsen/logrus"
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/analysis/analyzers/keyword_analyzer"
 	"github.com/blevesearch/bleve/analysis/analyzers/simple_analyzer"

@@ -3,11 +3,12 @@ package model
 import (
 	"errors"
 	"fmt"
-	"log"
+	//"log"
 	"strings"
     // "github.com/qor/qor"
     // "github.com/qor/admin"
 	"github.com/jinzhu/gorm"
+	// "github.com/sirupsen/logrus"
 )
 
 // Pkg represents a pkg in the database

@@ -9,9 +9,21 @@ import (
 	"github.com/roscopecoltran/sniperkit-limo/config"
 	"github.com/roscopecoltran/sniperkit-limo/model"
 	"github.com/spf13/cobra"
+
+	"github.com/sirupsen/logrus"
+
 )
 
+// https://github.com/cioc/decentralizedSearch/blob/master/providers/stackoverflow/stackoverflow.go
+// https://github.com/yieldbot/ferret/blob/master/providers/github/github.go
+// https://github.com/piger/corpus/blob/master/file_walk.go
+// https://github.com/smnalex/stealth
+// https://github.com/keimoon/cerebro/blob/master/search/reddit.go
+// https://github.com/zjucx/SearchEngine/blob/master/main.go
 // https://github.com/google/zoekt/blob/master/cmd/zoekt-git-index/main.go
+// github.com/BenjaminCh/app-store
+// 
+
 // code
 // repository
 
@@ -26,6 +38,7 @@ var SearchCmd = &cobra.Command{
 		output := getOutput()
 
 		if len(args) == 0 {
+			log.WithFields(logrus.Fields{"actions": "SearchCmd", "len(args)": len(args)}).Warnf("You must specify a search string")
 			output.Fatal("You must specify a search string")
 		}
 

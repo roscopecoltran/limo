@@ -163,12 +163,12 @@ func (t *Text) Repo(repo *model.Repo) {
 
 // Tag displays a tag
 func (t *Text) Tag(tag *model.Tag) {
-	fmt.Printf("%s *:%d\n", tag.Name, tag.StarCount)
+	fmt.Printf("%s *:%d\n", tag.Name)
 }
 
 // Topic displays a topic
 func (t *Text) Topic(topic *model.Topic) {
-	fmt.Printf("%s *:%d\n", topic.Name, topic.StarCount)
+	fmt.Printf("%s *:%d\n", topic.Name)
 }
 
 // Academic displays a academic
@@ -197,8 +197,9 @@ func (t *Text) Pkg(pkg *model.Pkg) {
 }
 
 // Readme displays a readme
-func (t *Text) Readme(file *model.Readme) {
-	fmt.Printf("%s *:%d\n", file.Name, file.StarCount)
+func (t *Text) Readme(readme *model.Readme) {
+	fmt.Printf("filename: %s (size: %d)\n %s \n", readme.Name, readme.Size, readme.Decoded)
+	//fmt.Printf("%s *:%d\n", readme.Name, readme.StarCount)
 }
 
 // Keyword displays a keyword

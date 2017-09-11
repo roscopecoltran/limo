@@ -1,0 +1,7 @@
+package: github.com/roscopecoltran/sniperkit-limo/plugins/docker/alpine
+import:
+- package: github.com/PuerkitoBio/goquery
+- package: github.com/agrison/go-tablib
+- package: github.com/jinzhu/configor
+- package: github.com/sirupsen/logrus
+- package: github.com/BurntSushi/toml

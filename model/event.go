@@ -4,9 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"time"
-
+	// "github.com/sirupsen/logrus"
 	"github.com/google/go-github/github"
 	"github.com/skratchdot/open-golang/open"
+	// "github.com/sirupsen/logrus"
 )
 
 const defaultWho = "somebody"

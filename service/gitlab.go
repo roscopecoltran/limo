@@ -38,7 +38,7 @@ func (g *Gitlab) Login(ctx context.Context) (string, error) {
 }
 
 // GetStars returns the stars for the specified user (empty string for authenticated user)
-func (g *Gitlab) GetStars(ctx context.Context, starChan chan<- *model.StarResult, token string, user string) {
+func (g *Gitlab) GetStars(ctx context.Context, starChan chan<- *model.StarResult, token string, user string, subChannels bool, subChannelsJobs uint) {
 	client := g.getClient(token)
 
 	currentPage := 1

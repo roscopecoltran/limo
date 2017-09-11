@@ -1,0 +1,218 @@
+package: github.com/roscopecoltran/sniperkit-limo
+homepage: https://github.com/roscopecoltran/sniperkit-limo
+license: MIT
+owners:
+- name: Rob Warner
+  email: rwarner@grailbox.com
+  homepage: http://grailbox.com
+- name: Luc Michalski
+  email: michalski.luc@gmail.com
+  homepage: https://github.com/lucmichalski
+# ignore:
+# - github.com/go-kit/kit
+import:
+- package: github.com/motemen/go-colorine
+- package: github.com/onsi/gomega
+# graphs
+- package: github.com/hydrogen18/memlistener
+  version: master
+- package: github.com/segmentio/ksuid
+  version: master
+#- package: github.com/segmentio/ksuid
+#  version: master
+- package: github.com/kayteh/waifudb
+  subpackages:
+  - db 
+  - datastore
+  - client 
+  - util
+- package: github.com/ziahamza/blend
+  subpackages:
+  - server
+  - db
+  - api
+  - events
+- package: github.com/jsccast/tinygraph
+- package: github.com/swirsz/facebookcrawler
+- package: github.com/ericfode/SpiderDB
+- package: github.com/go-gremlin/gremlin
+- package: github.com/aaasen/kapok
+  subpackages:
+  - generate
+  - parse
+  - stats
+- package: github.com/nickswift/bacongraph
+  subpackages:
+  - graph
+  - wiki
+- package: github.com/ckaznocha/taggraph
+# plugins
+- package: github.com/zephyyrr/plugins
+  subpackages:
+  - structhandler
+- package: github.com/jsimnz/goplugin
+- package: github.com/rcrowley/go-metrics
+# - package: github.com/dustin/go-humanize
+- package: github.com/gtank/cryptopasta
+- package: github.com/hashicorp/go-plugin
+- package: github.com/schorsch/go-callbacks
+- package: github.com/fatih/structs
+  version: master
+- package: github.com/imdario/mergo
+  version: master
+- package: github.com/golibri/list
+  version: master
+# kvs
+- package: github.com/coreos/etcd
+  version: v3.2.7
+  subpackages:
+  - client
+# config
+- package: github.com/spf13/viper  
+  version: v1.0.0
+# grpc
+- package: google.golang.org/grpc
+  version: ^1.6.0
+- package: github.com/go-kit/kit
+  version: ~0.5.0
+  subpackages:
+  - log
+  - log/level
+  - log/term
+  - endpoint
+  - transport/http
+# - package: "github.com/turtlemonvh/blanket-api
+- package: github.com/UltimateSoftware/udocs
+  subpackages:
+  - cli/cmd
+  - cli/config
+  - cli/server
+  - cli/storage
+  - cli/udocs
+# - package: google.golang.org/grpc
+#   subpackages:
+#   - reflection
+- package: github.com/k0kubun/pp
+- package: github.com/alaska/boltqueue
+- package: github.com/oliveagle/boltq
+- package: github.com/x-cray/logrus-prefixed-formatter
+- package: github.com/mgutz/ansi
+- package: github.com/BurntSushi/toml
+- package: github.com/mitchellh/go-homedir  
+- package: github.com/blevesearch/bleve
+  version: v0.5.0
+  subpackages:
+  - analysis/analyzers/keyword_analyzer
+  - analysis/analyzers/simple_analyzer
+  - analysis/language/en
+- package: github.com/briandowns/spinner
+  version: v1.0.0
+- package: github.com/davecgh/go-spew
+  subpackages:
+  - spew
+- package: github.com/facebookgo/httpdown
+- package: github.com/dns-gh/tojson
+- package: gopkg.in/olivere/elastic.v5
+- package: github.com/adlio/trello
+- package: github.com/qor/l10n
+- package: github.com/qor/sorting
+- package: github.com/qor/publish
+- package: github.com/qor/responder
+- package: github.com/qor/roles
+- package: github.com/qor/serializable_meta
+- package: github.com/theplant/jsonhandlerfunc
+- package: github.com/theplant/gormutils
+- package: github.com/qor/session
+- package: github.com/qor/validations
+- package: github.com/qor/widget
+- package: github.com/qor/worker
+- package: github.com/qor/publish2
+- package: github.com/qor/seo
+- package: github.com/google/zoekt
+- package: github.com/github/hub
+- package: github.com/qor/media
+  subpackages:
+  - media_library
+  - oss
+- package: github.com/asaskevich/govalidator
+- package: go4.org
+  subpackages:
+  - sort
+- package: github.com/disintegration/imaging
+  version: v1.2.1
+- package: github.com/gosimple/slug
+  version: master
+- package: github.com/jinzhu/now
+- package: github.com/qor/assetfs
+  version: master
+  subpackages:
+  - filesystem
+- package: github.com/qor/slug
+  version: master
+- package: github.com/bndr/gojenkins
+  version: master
+- package: github.com/cep21/xdgbasedir
+  version: master
+- package: github.com/bassam/stargazers
+  version: pr-fix-logging
+  repo: https://github.com/bassam/stargazers.git
+  vcs: git
+- package: github.com/sirupsen/logrus
+  version: master
+- package: github.com/json-iterator/go
+  version: master
+- package: github.com/golang/glog
+  version: master
+- package: github.com/michaelsauter/crane
+  version: master
+  subpackages:
+  - crane
+- package: github.com/dlemmond1/ArxBot
+- package: github.com/roscopecoltran/sniperkit-sift
+  version: pkg
+  subpackages:
+  - sift
+  - plugins/gitignore
+- package: github.com/dustin/go-humanize
+- package: github.com/fatih/color
+  version: v1.5.0
+- package: github.com/google/go-github
+  version: master
+  subpackages:
+  - github
+- package: github.com/jinzhu/configor
+  version: master
+- package: github.com/boltdb/bolt
+  version: 144418e1475d8bf7abbdc48583500f1a20c62ea7
+- package: github.com/hoop33/entrevista
+  version: master
+- package: github.com/jinzhu/gorm
+  version: v1.0.0
+  subpackages:
+  - dialects/sqlite
+  - dialects/msyql
+  - dialects/postgres
+- package: github.com/qor/admin
+  version: master
+- package: github.com/qor/qor
+  version: master
+- package: github.com/skratchdot/open-golang
+  version: master
+  subpackages:
+  - open
+- package: github.com/spf13/cobra
+  version: master
+- package: github.com/xanzy/go-gitlab
+  version: v0.5.1
+- package: golang.org/x/oauth2
+  version: master
+- package: gopkg.in/yaml.v2
+- package: github.com/theplant/cldr
+- package: github.com/devopsfaith/krakend
+testImport:
+- package: github.com/arschles/assert
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert
+  - mock
+  - suite

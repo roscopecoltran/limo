@@ -3,11 +3,12 @@ package model
 import (
 	"errors"
 	"fmt"
-	"log"
+	//"log"
 	"strings"
     // "github.com/qor/qor"
     // "github.com/qor/admin"
 	"github.com/jinzhu/gorm"
+	// "github.com/sirupsen/logrus"
 )
 
 // https://github.com/lighttiger2505/ghs/blob/master/code.go

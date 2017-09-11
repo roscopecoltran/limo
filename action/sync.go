@@ -7,7 +7,7 @@ import (
 	"github.com/roscopecoltran/sniperkit-limo/model"
 	"github.com/roscopecoltran/sniperkit-limo/service"
 	"github.com/spf13/cobra"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // SyncCmd lets you log in
@@ -54,7 +54,7 @@ var SyncCmd = &cobra.Command{
 		starChan := make(chan *model.StarResult, 20)
 
 		// Get the stars for the authenticated user
-		go svc.GetStars(ctx, starChan, cfg.GetService(serviceName).Token, "")
+		go svc.GetStars(ctx, starChan, cfg.GetService(serviceName).Token, "", true, 5)
 
 		output := getOutput()
 
@@ -68,7 +68,7 @@ var SyncCmd = &cobra.Command{
 				created, err := model.SyncDB(db, starResult.Star, dbSvc)
 				if err != nil {
 					totalErrors++
-					log.WithError(err).WithFields(log.Fields{"config": "SyncCmd", "starResult.Star.FullName": *starResult.Star.FullName}).Warnf("error while getting creating/updating a vcs starred project. \n Error %s: %s", *starResult.Star.FullName, err.Error())
+					log.WithError(err).WithFields(logrus.Fields{"config": "SyncCmd", "starResult.Star.FullName": *starResult.Star.FullName}).Warnf("error while getting creating/updating a vcs starred project. \n Error %s: %s", *starResult.Star.FullName, err.Error())
 					output.Error(fmt.Sprintf("Error %s: %s", *starResult.Star.FullName, err.Error()))
 				} else {
 					if created {
@@ -79,14 +79,14 @@ var SyncCmd = &cobra.Command{
 					err = starResult.Star.Index(index, db)
 					if err != nil {
 						totalErrors++
-						log.WithError(err).WithFields(log.Fields{"config": "SyncCmd", "starResult.Star.Index.FullName": *starResult.Star.FullName}).Warnf("error while getting creating/updating a vcs starred project. \n Error %s: %s", *starResult.Star.FullName, err.Error())
+						log.WithError(err).WithFields(logrus.Fields{"config": "SyncCmd", "starResult.Star.Index.FullName": *starResult.Star.FullName}).Warnf("error while getting creating/updating a vcs starred project. \n Error %s: %s", *starResult.Star.FullName, err.Error())
 						output.Error(fmt.Sprintf("Error %s: %s", *starResult.Star.FullName, err.Error()))
 					}
 					output.Tick()
 				}
 			}
 		}
-		log.WithFields(log.Fields{"config": "SyncCmd", "action": "SyncedStar"}).Infof("\nCreated: %d; Synced: %d; Errors: %d", totalCreated, totalSyncd, totalErrors)
+		log.WithFields(logrus.Fields{"config": "SyncCmd", "action": "SyncedStar"}).Infof("\nCreated: %d; Synced: %d; Errors: %d", totalCreated, totalSyncd, totalErrors)
 		output.Info(fmt.Sprintf("\nCreated: %d; Synced: %d; Errors: %d", totalCreated, totalSyncd, totalErrors))
 	},
 }

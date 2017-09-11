@@ -1,0 +1,67 @@
+---
+plugins:
+  docker:
+    alpine:
+      components:
+        name: "apk-file"
+        active: true
+        build:
+          auto_build: true
+          source_path: ./cmd/...
+          prefix_bin: snk_alpine          
+          architectures: 
+            default: "{{.LocalMachineArch}}"              # commas separated
+            list:
+            - "386"
+            - "amd64"
+            - "amd64p32"
+            - "arm"
+            - "arm64"
+            - "ppc64"
+            - "ppc64le"
+          operating_systems: 
+            default: "{{.LocalMachineOS}}"               # commas separated
+            list:
+            - "darwin"
+            - "linux"
+            - "windows"
+        search:
+          uri: https://pkgs.alpinelinux.org/contents
+          query_args:
+            default: "file"
+            list:
+            - "file"
+            - "package"
+            - "branch"
+            - "repository"
+            - "architecture"
+          repositories:
+            default: main
+            list:
+            - "main"
+            - "community"
+            - "testing"
+          architectures:
+            default: "x86_64"
+            list:
+            - "x86"
+            - "x86_64"
+            - "armhf"
+          output: 
+            limit: "25"
+            formats:
+              default: "json"
+              list:
+              - "md"
+              - "csv"
+              - "yaml"
+              - "json"
+              - "xlsx"
+              - "xml"
+              - "tsv"
+              - "html"
+              - "ascii"
+          results:
+            auto_save: false
+            prefix_path: "./output"
+            basename: "results"

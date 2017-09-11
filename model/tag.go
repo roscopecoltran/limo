@@ -3,18 +3,18 @@ package model
 import (
 	"errors"
 	"fmt"
-	"log"
+	//"log"
 	"strings"
     // "github.com/qor/qor"
     // "github.com/qor/admin"
 	"github.com/jinzhu/gorm"
+	// "github.com/sirupsen/logrus"
 )
 
 // Tag represents a tag in the database
 type Tag struct {
 	gorm.Model
-	Name      	string
-	TagCount 	int    `gorm:"-"`
+	Name      	string `gorm:"type:varchar(64);not null;unique"`
 	StarCount 	int    `gorm:"-"`
 	Stars     	[]Star `gorm:"many2many:star_tags;"`
 }
@@ -54,7 +54,7 @@ func FindTagsWithStarCount(db *gorm.DB) ([]Tag, error) {
 
 	for rows.Next() {
 		var tag Tag
-		if err = rows.Scan(&tag.Name, &tag.StarCount); err != nil {
+		if err = rows.Scan(&tag.Name); err != nil {
 			return tags, err
 		}
 		tags = append(tags, tag)
