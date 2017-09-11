@@ -1,22 +1,26 @@
 package model
 
 import (
+	// golang
 	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
-	//"os"
 	"path"
-	// "filepath"
-	"github.com/sirupsen/logrus"
+	// search engine
 	"github.com/blevesearch/bleve"
+	// vcs api wrappers
 	"github.com/google/go-github/github"
-	"github.com/jinzhu/gorm"
-	"github.com/skratchdot/open-golang/open"
 	"github.com/xanzy/go-gitlab"
+	// database
+	"github.com/jinzhu/gorm"
+	// data processing
 	jsoniter "github.com/json-iterator/go"
-
+	// logs
+	"github.com/sirupsen/logrus"
+	// widgets
+	"github.com/skratchdot/open-golang/open"
 	// el "github.com/src-d/enry"
 	// rl "github.com/rai-project/linguist"
 	// gl "github.com/generaltso/linguist"
@@ -32,8 +36,21 @@ import (
 
 )
 
-// 
+// PP_LINGUIST_URL=https://linguist:25032
+// PP_LINGUIST_AUTH=1234
 // result, err := jl.GetLanguageDetails(context.Background(), "test.js", []byte("var a = 1"))
+// jl.AddExcludedFilename("foo.extension")
+// jl.AddExcludedExtension(".extension")
+// jl.linguist.NewMatcher("\\.somepath$")
+// jl.AddExcludedRule(rule)
+/*
+files := []*linguist.File{
+	linguist.NewFile("foo.properties", []byte("foo=1")),
+	linguist.NewFile("foo.js", []byte("var foo=1")),
+	linguist.NewFile("foo.jsx", []byte("var foo=1")),
+}
+results, err := linguist.GetLanguageDetailsMultiple(context.Background(), files)
+*/
 
 // https://github.com/redite/kleng/blob/master/core/gh.go
 // 
@@ -90,30 +107,12 @@ type Star struct {
 	LanguagesDetected   []LanguageDetected 	`gorm:"many2many:star_languages;"`
 }
 
-// "apiURL":        repo["url"],
-// "repoURL":       repo["html_url"],
-// "repoName":      repo["name"],
-// "repofull_name": repo["full_name"], //no use now
-// // "ownerName":     repo["owner"].(map[string]interface{})["login"],    //no use now
-// // "ownerURL":      repo["owner"].(map[string]interface{})["html_url"], // no use now
-// "starredBy":   tokenOwner,
-// "description": repo["description"],
-// "homepage":    repo["homepage"],
-
 // https://github.com/GrantSeltzer/go-baseball-savant/blob/master/bbsavant/read_file.go
 // StarResult wraps a star and an error
 type StarResult struct {
 	Star  	*Star
 	Error 	error
-	// dataset *tablib.Dataset
 }
-
-/*
-if data == nil {
-	return tablib.NewDatasetWithData(headers, nil), nil
-}
-n := len(headers)
-*/
 
 // https://github.com/google/go-github/blob/master/github/repos.go#L21-L117
 // NewStarFromGithub creates a Star from a Github star

@@ -3,12 +3,9 @@ package model
 import (
 	"errors"
 	"fmt"
-	//"log"
 	"strings"
-    // "github.com/qor/qor"
-    // "github.com/qor/admin"
 	"github.com/jinzhu/gorm"
-	// "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // Tag represents a tag in the database
@@ -29,10 +26,6 @@ func FindTags(db *gorm.DB) ([]Tag, error) {
 // FindTagsWithStarCount finds all tags and gets their count of stars
 func FindTagsWithStarCount(db *gorm.DB) ([]Tag, error) {
 	var tags []Tag
-
-	// Create resources from GORM-backend model
-	// Admin.AddResource(&Tag{})
-
 	rows, err := db.Raw(`
 		SELECT T.NAME, COUNT(ST.TAG_ID) AS STARCOUNT
 		FROM TAGS T
@@ -40,21 +33,22 @@ func FindTagsWithStarCount(db *gorm.DB) ([]Tag, error) {
 		WHERE T.DELETED_AT IS NULL
 		GROUP BY T.ID
 		ORDER BY T.NAME`).Rows()
-
 	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "tag", "step": "FindTagsWithStarCount"}).Warnf("%#s", err)
 		return tags, err
 	}
-
 	defer func() {
 		err := rows.Close()
 		if err != nil {
-			log.Fatal(err)
+			log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "tag", "step": "FindTagsWithStarCount"}).Fatalf("%#s", err)
+			//log.Fatal(err)
 		}
 	}()
 
 	for rows.Next() {
 		var tag Tag
 		if err = rows.Scan(&tag.Name); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "tag", "step": "FindTagsWithStarCount"}).Warnf("%#s", err)
 			return tags, err
 		}
 		tags = append(tags, tag)
@@ -77,6 +71,7 @@ func FindOrCreateTagByName(db *gorm.DB, name string) (*Tag, bool, error) {
 	if db.Where("lower(name) = ?", strings.ToLower(name)).First(&tag).RecordNotFound() {
 		tag.Name = name
 		err := db.Create(&tag).Error
+		log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "tag", "step": "FindOrCreateTagByName"}).Warnf("%#s", err)
 		return &tag, true, err
 	}
 	return &tag, false, nil
@@ -119,10 +114,13 @@ func (tag *Tag) Rename(db *gorm.DB, name string) error {
 	if strings.ToLower(name) != strings.ToLower(tag.Name) {
 		existing, err := FindTagByName(db, name)
 		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "tag", "step": "Rename"}).Warnf("%#s", err)
 			return err
 		}
 		if existing != nil {
-			return fmt.Errorf("Tag '%s' already exists", existing.Name)
+			err := fmt.Errorf("Tag '%s' already exists", existing.Name)
+			log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "tag", "step": "Rename"}).Errorf("Tag '%s' already exists", existing.Name)
+			return err
 		}
 	}
 

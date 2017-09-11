@@ -4,10 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	// "github.com/sirupsen/logrus"
 	"github.com/google/go-github/github"
 	"github.com/skratchdot/open-golang/open"
-	// "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 const defaultWho = "somebody"
@@ -83,7 +82,9 @@ func NewEventFromGithub(event *github.Event) *Event {
 // OpenInBrowser opens the event in the browser
 func (event *Event) OpenInBrowser() error {
 	if event.URL == "" {
-		return errors.New("No URL for event")
+		err := errors.New("No URL for event")
+		log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "event", "step": "OpenInBrowser"}).Warnf("%#s", err)
+		return err
 	}
 	return open.Start(event.URL)
 }

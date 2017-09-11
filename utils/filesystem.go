@@ -28,6 +28,13 @@ func defaultPath() string {
 	return filepath.Join(home, "src")
 }
 
+func relativePath(path string) string {
+	if strings.HasPrefix(path, *dir) {
+		path = path[len(*dir)+1:]
+	}
+	return path
+}
+
 // NoPathError thrown when home path could not automatically be determined
 var NoPathError error
 

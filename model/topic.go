@@ -24,8 +24,6 @@ type TopicResult struct {
 	Error 	error
 }
 
-// type Topics []Topic
-
 // should provide a map[string]map[string]
 func TestTopicsGraph(query string) (taggraph.Tagger, error) {
 	tagg.AddChildToTag("shirts", "clothes")
@@ -59,10 +57,6 @@ func FindTopics(db *gorm.DB) ([]Topic, error) {
 // FindTopicsWithStarCount finds all topics and gets their count of stars
 func FindTopicsWithStarCount(db *gorm.DB) ([]Topic, error) {
 	var topics []Topic
-
-	// Create resources from GORM-backend model
-	// Admin.AddResource(&Topic{})
-
 	rows, err := db.Raw(`
 		SELECT T.NAME, COUNT(ST.TOPIC_ID) AS STARCOUNT
 		FROM TOPICS T
@@ -117,9 +111,10 @@ func (topic *Topic) LoadStars(db *gorm.DB, match string) error {
 	// Make sure topic exists in database, or we will panic
 	var existing Topic
 	if db.Where("id = ?", topic.ID).First(&existing).RecordNotFound() {
-		return fmt.Errorf("Topic '%d' not found", topic.ID)
+		err := fmt.Errorf("Topic '%d' not found", topic.ID)
+		log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "tag", "step": "LoadStars"}).Errorf("Topic '%d' not found", topic.ID)
+		return err
 	}
-
 	if match != "" {
 		var stars []Star
 		db.Raw(`
@@ -149,10 +144,13 @@ func (topic *Topic) Rename(db *gorm.DB, name string) error {
 	if strings.ToLower(name) != strings.ToLower(topic.Name) {
 		existing, err := FindTopicByName(db, name)
 		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "tag", "step": "Rename"}).Warnf("%#s", err)
 			return err
 		}
 		if existing != nil {
-			return fmt.Errorf("Topic '%s' already exists", existing.Name)
+			err := fmt.Errorf("Topic '%s' already exists", existing.Name)
+			log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "tag", "step": "Rename"}).Errorf("Topic '%s' already exists", existing.Name)
+			return err
 		}
 	}
 

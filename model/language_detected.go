@@ -11,38 +11,47 @@ import (
 // LanguageDetected represents a languageDetected in the database
 type LanguageDetected struct {
 	gorm.Model
-	Name        			string 				`gorm:"-" json:"name,omitempty"`
-	Type        			string 				`json:"type,omitempty"`
-	Group       			string 				`json:"group,omitempty"`
-	AceMode     			string 				`json:"ace_mode,omitempty"`
-	IsPopular   			bool   				`json:"is_popular,omitempty"`
-	IsUnpopular 			bool   				`json:"is_unpopular,omitempty"`
+	Name        			string 				`gorm:"-" yaml:"name,omitempty" json:"name,omitempty"`
+	Type        			string 				`yaml:"type,omitempty" json:"type,omitempty"`
+	Group       			string 				`yaml:"group,omitempty" json:"group,omitempty"`
+	AceMode     			string 				`yaml:"ace_mode,omitempty" json:"ace_mode,omitempty"`
+	IsPopular   			bool   				`yaml:"is_popular,omitempty" json:"is_popular,omitempty"`
+	IsUnpopular 			bool   				`yaml:"is_unpopular,omitempty" json:"is_unpopular,omitempty"`
 	LanguageDetectedCount 	int    				`gorm:"-"`
 	Stars     				[]Star 				`gorm:"many2many:star_languagesDetected;"`
 }
 
 // Detection represents a language detection result
-type Detection struct {
+type LanguageDetection struct {
 	gorm.Model
-	Path                   string    			`json:"path,omitempty"`
-	Type                   string    			`json:"type,omitempty"`
-	ExtName                string    			`json:"extname,omitempty"`
-	MimeType               string    			`json:"mime_type,omitempty"`
-	ContentType            string    			`json:"content_type,omitempty"`
-	Disposition            string    			`json:"disposition,omitempty"`
-	IsDocumentation        bool      			`json:"is_documentation,omitempty"`
-	IsLarge                bool      			`json:"is_large,omitempty"`
-	IsGenerated            bool      			`json:"is_generated,omitempty"`
-	IsText                 bool      			`json:"is_text,omitempty"`
-	IsImage                bool      			`json:"is_image,omitempty"`
-	IsBinary               bool      			`json:"is_binary,omitempty"`
-	IsVendored             bool      			`json:"is_vendored,omitempty"`
-	IsHighRatioOfLongLines bool      			`json:"is_high_ratio_of_long_lines,omitempty"`
-	IsViewable             bool      			`json:"is_viewable,omitempty"`
-	IsSafeToColorize       bool      			`json:"is_safe_to_colorize,omitempty"`
-	Language               *LanguageDetected 	`json:"language,omitempty"`
+	Path                   string    			`yaml:"path,omitempty" json:"path,omitempty"`
+	Type                   string    			`yaml:"type,omitempty" json:"type,omitempty"`
+	ExtName                string    			`yaml:"extname,omitempty" json:"extname,omitempty"`
+	MimeType               string    			`yaml:"mime_type,omitempty" json:"mime_type,omitempty"`
+	ContentType            string    			`yaml:"content_type,omitempty" json:"content_type,omitempty"`
+	Disposition            string    			`yaml:"disposition,omitempty" json:"disposition,omitempty"`
+	IsDocumentation        bool      			`yaml:"is_documentation,omitempty" json:"is_documentation,omitempty"`
+	IsLarge                bool      			`yaml:"is_large,omitempty" json:"is_large,omitempty"`
+	IsGenerated            bool      			`yaml:"is_generated,omitempty" json:"is_generated,omitempty"`
+	IsText                 bool      			`yaml:"is_text,omitempty" json:"is_text,omitempty"`
+	IsImage                bool      			`yaml:"is_image,omitempty" json:"is_image,omitempty"`
+	IsBinary               bool      			`yaml:"is_binary,omitempty" json:"is_binary,omitempty"`
+	IsVendored             bool      			`yaml:"is_vendored,omitempty" json:"is_vendored,omitempty"`
+	IsHighRatioOfLongLines bool      			`yaml:"is_high_ratio_of_long_lines,omitempty" json:"is_high_ratio_of_long_lines,omitempty"`
+	IsViewable             bool      			`yaml:"is_viewable,omitempty" json:"is_viewable,omitempty"`
+	IsSafeToColorize       bool      			`yaml:"is_safe_to_colorize,omitempty" json:"is_safe_to_colorize,omitempty"`
+	Language               *LanguageDetected 	`yaml:"language,omitempty" json:"language,omitempty"`
 }
 
+// Result is the result details of a detection
+type LanguageDetectionResult struct {
+	Success    				bool       			`yaml:"success" json:"success"`
+	Message    				string     			`yaml:"message,omitempty" json:"message,omitempty"`
+	Result     				*LanguageDetection 	`yaml:"result" json:"result"`
+	IsBinary   				bool       			`yaml:"binary" json:"binary"`
+	IsLarge    				bool       			`yaml:"large" json:"large"`
+	IsExcluded 				bool       			`yaml:"excluded" json:"excluded"`
+}
 
 // FindLanguageDetecteds finds all languagesDetected
 func FindLanguageDetecteds(db *gorm.DB) ([]LanguageDetected, error) {
@@ -54,9 +63,6 @@ func FindLanguageDetecteds(db *gorm.DB) ([]LanguageDetected, error) {
 // FindLanguageDetectedsWithStarCount finds all languagesDetected and gets their count of stars
 func FindLanguageDetectedsWithStarCount(db *gorm.DB) ([]LanguageDetected, error) {
 	var languagesDetected []LanguageDetected
-
-	// Create resources from GORM-backend model
-	// Admin.AddResource(&LanguageDetected{})
 
 	rows, err := db.Raw(`
 		SELECT T.NAME, COUNT(ST.LANGUAGE_ID) AS STARCOUNT

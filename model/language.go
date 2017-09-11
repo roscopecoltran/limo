@@ -2,23 +2,20 @@ package model
 
 import (
 	"github.com/jinzhu/gorm"
-	//"fmt"
 	"errors"
-    // "github.com/qor/qor"
-    // "github.com/qor/admin"
 	"github.com/sirupsen/logrus"
 )
 
 // https://github.com/yoru9zine/starlink/blob/master/main.go
 // https://github.com/importre/mecca/blob/master/polymer.go
-// 
 
 // Service represents a hosting service like Github
 type Language struct {
 	gorm.Model
-	Name  			string `gorm:"type:varchar(128);not null;unique"`
+	Name  			string 			`gorm:"type:varchar(128);not null;unique"`
 	ServiceID   	uint   
-	Count 			int    `gorm:"-"` 
+	Count 			int    			`gorm:"-"` 
+	LanguageType    []LanguageType 	`gorm:"many2many:language_type;"` 			// is a dev language, human language or sign language ?!
 }
 
 type LanguageResult struct {

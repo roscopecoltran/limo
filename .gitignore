@@ -50,3 +50,9 @@ conf.d/limo.json
 conf.d/limo.yaml
 
 sift-alpine.env
+
+.staging
+.staging/
+.staging/**
+
+

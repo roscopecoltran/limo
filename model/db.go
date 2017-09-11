@@ -3,50 +3,39 @@ package model
 // curl -s https://api.github.com/repos/chimeracoder/gojson | gojson -name=Repository
 
 import (
-
-	// golang
     "errors"
 	"time"
 	"path"
-	// limo
-	// "github.com/roscopecoltran/sniperkit-limo/config"
 	"os"
 	// gorm
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-
 	// etcd
 	etcd "github.com/coreos/etcd/client"
-
 	// mongdb
 	// "gopkg.in/mgo.v2"
 	// "gopkg.in/mgo.v2/bson"
-
 	// boltdb
 	"github.com/boltdb/bolt"
 	// store "github.com/roscopecoltran/sniperkit-limo/model/boltdb"
-	// claey + Boltbd
-	//"github.com/cayleygraph/cayley"
-	//"github.com/cayleygraph/cayley/graph"
-	//_ "github.com/cayleygraph/cayley/graph/bolt"
-	//"github.com/cayleygraph/cayley/quad"
-
+	// cayley + Boltbd
+	// "github.com/cayleygraph/cayley"
+	// "github.com/cayleygraph/cayley/graph"
+	// _ "github.com/cayleygraph/cayley/graph/bolt"
+	// "github.com/cayleygraph/cayley/quad"
+	// data transform
 	tablib "github.com/agrison/go-tablib"
-	// "github.com/davecgh/go-spew/spew"
 	// jsoniter "github.com/json-iterator/go"
-
+	// "github.com/davecgh/go-spew/spew"
 	// beego
 	// "github.com/astaxie/beego"
-
 	// qor
     // "github.com/qor/qor"
     // "github.com/qor/admin"
-
 	// graphs
 	"github.com/ckaznocha/taggraph"
-
 	// logs
 	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
@@ -63,14 +52,37 @@ type DatabaseDriver struct {
 	etcdClient  etcd.KeysAPI
 }
 
+
+var (
+	Tables       = []interface{}{
+		&auth_identity.AuthIdentity{},
+		&models.User{}, &models.Address{},
+		&models.Category{}, &models.Color{}, &models.Size{}, &models.Material{}, &models.Collection{},
+		&models.Product{}, &models.ProductImage{}, &models.ColorVariation{}, &models.SizeVariation{},
+		&models.Store{},
+		&models.Order{}, &models.OrderItem{},
+		&models.Setting{},
+		&adminseo.MySEOSetting{},
+		&models.Article{},
+		&models.MediaLibrary{},
+		&banner_editor.QorBannerEditorSetting{},
+
+		&asset_manager.AssetManager{},
+		&i18n_database.Translation{},
+		&notification.QorNotification{},
+		&admin.QorWidgetSetting{},
+		&help.QorHelpEntry{},
+	}
+	log 		= logrus.New()
+	tagg 		= taggraph.NewTagGaph()
+)
+
 // var Tables       = []interface{}{&auth_identity.AuthIdentity{}}
 //	globalSeoSetting := adminseo.MySEOSetting{}
 //	globalSetting := make(map[string]string)
 
 // https://github.com/thesyncim/365a/blob/master/server/app.go
 // https://github.com/emotionaldots/arbitrage/blob/master/cmd/arbitrage-db/main.go
-
-
 
 // var db *dynamodb.DynamoDB
 
@@ -82,37 +94,21 @@ type DatabaseDriver struct {
 //	Indexes   map[string]*gorm.DB
 //}
 
-var	log 		= logrus.New()
-var tagg 		= taggraph.NewTagGaph()
-
 func init() {
-
 	// logs
 	log.Out = os.Stdout
 	// log.Formatter = new(prefixed.TextFormatter)
-
 	formatter := new(prefixed.TextFormatter)
 	formatter.FullTimestamp = true
-
 	// Set specific colors for prefix and timestamp
 	formatter.SetColorScheme(&prefixed.ColorScheme{
 		PrefixStyle:    "blue+b",
 		TimestampStyle: "white+h",
 	})
-
 	log.Formatter = formatter
-
 }
-
-// https://github.com/skyrunner2012/xormplus/blob/master/xorm/dataset.go
-// NewDataset creates a new Dataset.
-func NewDataset(headers []string) *tablib.Dataset {
-	return tablib.NewDataset(headers)
-}
-
 
 // https://github.com/qor/qor-example/blob/master/db/db.go
-
 // InitDB initializes the database at the specified path
 func InitDB(filepath string, verbose bool) (*gorm.DB, error) {
 	// Get more config options to setup the SQL database
@@ -123,10 +119,20 @@ func InitDB(filepath string, verbose bool) (*gorm.DB, error) {
 	}
 	db.LogMode(verbose)
 	// db.AutoMigrate(&Service{}, &Star{}, &Tag{}, &Topic{}, &LanguageDetected{}, &Tree{}, &Readme{}, &Academic{}, &Pkg{}, &Software{}, &Repo{}, &Keyword{}, &Pattern{})
-	db.AutoMigrate(&Service{}, &Star{}, &Tag{}, &Topic{}, &Tree{}, &Readme{}, &Language{}, &User{})
+	db.AutoMigrate(&Service{}, &Star{}, &Tag{}, &Topic{}, &Tree{}, &Readme{}, &Language{}, &Category{}, &LanguageType, &Wiki, &User{})
 	// Initalize
 	// Admin := admin.New(&qor.Config{DB: db})
 	return db, nil
+}
+
+func InitBoltDB(filepath string) (*bolt.DB, error) {
+	// Get more config options to setup the bucket or the queue of tasks
+	db, err := bolt.Open(filepath, 0600, &bolt.Options{Timeout: time.Second})
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitDB", "engine": "boltdb", "filepath": filepath, "bolt.Options":  &bolt.Options{Timeout: time.Second}}).Warnf("error while init the database with boltDB.")
+		return nil, err
+	}
+	return db, err
 }
 
 /*
@@ -153,14 +159,10 @@ func InitAdmin(db *gorm.DB) (error) {
 }
 */
 
-func InitBoltDB(filepath string) (*bolt.DB, error) {
-	// Get more config options to setup the bucket or the queue of tasks
-	db, err := bolt.Open(filepath, 0600, &bolt.Options{Timeout: time.Second})
-	if err != nil {
-		log.WithError(err).WithFields(logrus.Fields{"db": "InitDB", "engine": "boltdb", "filepath": filepath, "bolt.Options":  &bolt.Options{Timeout: time.Second}}).Warnf("error while init the database with boltDB.")
-		return nil, err
-	}
-	return db, err
+// https://github.com/skyrunner2012/xormplus/blob/master/xorm/dataset.go
+// NewDataset creates a new Dataset.
+func NewDataset(headers []string) *tablib.Dataset {
+	return tablib.NewDataset(headers)
 }
 
 // NewStarDump(ds)

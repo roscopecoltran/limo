@@ -11,7 +11,26 @@ owners:
 # ignore:
 # - github.com/go-kit/kit
 import:
+- package: github.com/roscopecoltran/go-github
+  version: sniperkit
+  vcs: git
+## file system notification
+- package: github.com/fsnotify/fsnotify
+# wiki(s) - markdowns
+- package: github.com/russross/blackfriday
+- package: github.com/mschoch/blackfriday-text
 # linguist packages
+- package: gopkg.in/src-d/enry.v1
+  subpackages:
+  - data
+#  - internal/tokenizer
+#  - internal/code-generator/generator
+#  - internal/code-generator/assets
+#  - internal/code-generator/assets
+- package: github.com/GeertJohan/go.rice
+- package: github.com/rai-project/linguist
+  subpackages:
+  - pkg
 - package: github.com/generaltso/linguist
   subpackages:
   - tokenizer
@@ -111,13 +130,10 @@ import:
 # - package: github.com/dustin/go-humanize
 - package: github.com/gtank/cryptopasta
 - package: github.com/hashicorp/go-plugin
-- package: github.com/schorsch/go-callbacks
+# - package: github.com/schorsch/go-callbacks
 - package: github.com/fatih/structs
-  version: master
 - package: github.com/imdario/mergo
-  version: master
 - package: github.com/golibri/list
-  version: master
 # kvs
 - package: github.com/coreos/etcd
   version: v3.2.7

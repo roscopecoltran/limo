@@ -182,14 +182,11 @@ var DictCommonWords = map[string]bool{
 
 func FilterWords(list []string, dictionaries ...map[string]bool) []string {
 	result := []string{}
-
 	for _, el := range list {
 		el = strings.ToLower(el)
-
 		if len(el) < 2 || DictCommonWords[el] {
 			continue
 		}
-
 		skip := false
 		for _, dict := range dictionaries {
 			if dict[el] {
@@ -197,14 +194,11 @@ func FilterWords(list []string, dictionaries ...map[string]bool) []string {
 				break
 			}
 		}
-
 		if skip {
 			continue
 		}
-
 		result = append(result, el)
 	}
-
 	return result
 }
 

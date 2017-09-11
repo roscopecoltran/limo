@@ -1,16 +1,25 @@
 package model
 
 import (
+	// golang
 	"fmt"
+	"strings"
+	// vcs api wrappers 
 	"github.com/google/go-github/github"
+	// data processing
+	"github.com/roscopecoltran/sniperkit-limo/utils"
 	jsoniter "github.com/json-iterator/go"
-	// "github.com/sirupsen/logrus"
+	// bleve search
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/analysis/analyzers/keyword_analyzer"
 	"github.com/blevesearch/bleve/analysis/analyzers/simple_analyzer"
 	"github.com/blevesearch/bleve/analysis/language/en"
+	// logs
+	"github.com/sirupsen/logrus"
 )
 
+/*
+// elasticsearch mapping
 const mapping = `
 {
 	"mappings": {
@@ -31,6 +40,13 @@ const mapping = `
 		}
 	}
 }`
+*/
+
+var textFieldAnalyzer = "standard"
+
+func init() {
+	textFieldAnalyzer = "en"
+}
 
 // InitIndex initializes the search index at the specified path
 func InitIndex(filepath string) (bleve.Index, error) {
@@ -40,13 +56,60 @@ func InitIndex(filepath string) (bleve.Index, error) {
 	if err != nil {
 		index, err = bleve.New(filepath, buildIndexMapping())
 		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "index", "step": "InitIndex"}).Warnf("%#s", err)
 			return nil, err
 		}
 	}
 	return index, nil
 }
 
+func OpenIndex(path string) bleve.Index {
+	index, err := bleve.Open(path)
+	if err == bleve.ErrorIndexPathDoesNotExist {
+		//log.Printf("Creating new index...")
+		log.WithFields(logrus.Fields{"section:": "model", "typology": "index", "step": "OpenIndex"}).Info("Creating new index...")
+		// create a mapping
+		indexMapping := buildIndexMapping()
+		index, err = bleve.New(path, indexMapping)
+		if err != nil {
+			// log.Fatal(err)
+			log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "index", "step": "OpenIndex"}).Fatal(err)
+		}
+	} else if err == nil {
+		//log.Printf("Opening existing index...")
+		log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "index", "step": "OpenIndex"}).Warn("Opening existing index...")
+	} else {
+		log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "index", "step": "OpenIndex"}).Fatal(err)
+		//log.Fatal(err)
+	}
+	return index
+}
+
+func ProcessUpdate(index bleve.Index, repo *github.Repository, path string) {
+	log.Printf("updated: %s", path)
+	rp := relativePath(path)
+	wiki, err := NewWikiFromFile(path)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "index", "step": "ProcessUpdate"}).Warn(err)
+		//log.Print(err)
+	} else {
+		doGitStuff(repo, rp, wiki)
+		index.Index(rp, wiki)
+	}
+}
+
+func ProcessDelete(index bleve.Index, repo *github.Repository, path string) {
+	log.Printf("delete: %s", path)
+	rp := utils.relativePath(path)
+	err := index.Delete(rp)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "index", "step": "ProcessUpdate"}).Warn(err)
+		//log.Print(err)
+	}
+}
+
 func buildIndexMapping() *bleve.IndexMapping {
+
 	simpleTextFieldMapping := bleve.NewTextFieldMapping()
 	simpleTextFieldMapping.Analyzer = simple_analyzer.Name
 
@@ -65,12 +128,39 @@ func buildIndexMapping() *bleve.IndexMapping {
 	starMapping.AddFieldMappingsAt("Topics.Name", keywordFieldMapping)
 	starMapping.AddFieldMappingsAt("Languages.Name", keywordFieldMapping)
 	// starMapping.AddFieldMappingsAt("Readmes.Content", keywordFieldMapping)
-
 	indexMapping := bleve.NewIndexMapping()
 	indexMapping.AddDocumentMapping("Star", starMapping)
 
 	// indexMapping.AddDocumentMapping("Repo", starMapping)
+	return indexMapping
 
+}
+
+func buildIndexMappingFromWiki() *bleve.IndexMapping {
+
+	enTextFieldMapping := bleve.NewTextFieldMapping()
+	enTextFieldMapping.Analyzer = textFieldAnalyzer
+
+	storeFieldOnlyMapping := bleve.NewTextFieldMapping()
+	storeFieldOnlyMapping.Index = false
+	storeFieldOnlyMapping.IncludeTermVectors = false
+	storeFieldOnlyMapping.IncludeInAll = false
+
+	dateTimeMapping := bleve.NewDateTimeFieldMapping()
+
+	wikiMapping := bleve.NewDocumentMapping()
+	wikiMapping.AddFieldMappingsAt("name", enTextFieldMapping)
+	wikiMapping.AddFieldMappingsAt("body", enTextFieldMapping)
+	wikiMapping.AddFieldMappingsAt("modified_by", enTextFieldMapping)
+	wikiMapping.AddFieldMappingsAt("modified_by_name", enTextFieldMapping)
+	wikiMapping.AddFieldMappingsAt("modified_by_email", enTextFieldMapping)
+	wikiMapping.AddFieldMappingsAt("modified_by_avatar", storeFieldOnlyMapping)
+	wikiMapping.AddFieldMappingsAt("modified", dateTimeMapping)
+
+	indexMapping := bleve.NewIndexMapping()
+	indexMapping.AddDocumentMapping("wiki", wikiMapping)
+
+	indexMapping.DefaultAnalyzer = textFieldAnalyzer
 
 	return indexMapping
 }
@@ -84,11 +174,13 @@ func ShowResults(results *bleve.SearchResult, index bleve.Index) {
 		id := val.ID
 		doc, err := index.Document(id)
 		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "index", "step": "ShowResults"}).Warnf("%#s", err)
 			fmt.Println(err)
 		}
 		for _, field := range doc.Fields {
 			repo := github.Repository{}
 			jsoniter.Unmarshal(field.Value(), &repo)
+			log.WithFields(logrus.Fields{"section:": "model", "typology": "index", "step": "ShowResults"}).Infof("%s - %s (%s)\n\t%s\n", *repo.Name, *repo.Description, *repo.Language, *repo.HTMLURL)
 			fmt.Printf("%s - %s (%s)\n\t%s\n", *repo.Name, *repo.Description, *repo.Language, *repo.HTMLURL)
 		}
 	}

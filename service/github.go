@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"crypto/md5"
 	//"regexp"
 	"path"
 	"github.com/sirupsen/logrus"
@@ -86,6 +87,18 @@ func (g *Github) Login(ctx context.Context) (string, error) {
 	return answers["token"].(string), nil
 }
 
+/*
+// https://raw.githubusercontent.com/blevesearch/bleve-wiki-indexer/master/git.go
+func (g *Github) OpenGitRepo(path string) *github.Repository {
+	repo, err := github.OpenRepository(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return repo
+}
+*/
+
 // about linting code: https://github.com/seiffert/ghrepos/blob/master/scripts/lint
 
 // ctype, _, err := mime.ParseMediaType(res.Header.Get("Content-Type"))
@@ -99,6 +112,11 @@ func (g *Github) Login(ctx context.Context) (string, error) {
 // 	json.Unmarshal(b, &data)
 // 	return data, nil
 // }
+
+func gravatarHashFromEmail(email string) string {
+	input := strings.ToLower(strings.TrimSpace(email))
+	return fmt.Sprintf("%x", md5.Sum([]byte(input)))
+}
 
 func searchForFile(files []string, file string) bool {
   for _, b := range files {
