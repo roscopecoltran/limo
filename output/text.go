@@ -171,45 +171,20 @@ func (t *Text) Topic(topic *model.Topic) {
 	fmt.Printf("%s *:%d\n", topic.Name)
 }
 
-// Academic displays a academic
-func (t *Text) Academic(academic *model.Academic) {
-	fmt.Printf("%s *:%d\n", academic.Name, academic.StarCount)
-}
-
-// Software displays a software
-func (t *Text) Software(software *model.Software) {
-	fmt.Printf("%s *:%d\n", software.Name, software.StarCount)
-}
-
 // Tree displays a tree
 func (t *Text) Tree(file *model.Tree) {
-	fmt.Printf("%s *:%d\n", file.Name, file.StarCount)
+	fmt.Printf("%s \n", file.Name)
 }
 
 // Software displays a software
 func (t *Text) LanguageDetected(LanguageDetected *model.LanguageDetected) {
-	fmt.Printf("%s *:%d\n", LanguageDetected.Name, LanguageDetected.StarCount)
-}
-
-// Pkg displays a pkg
-func (t *Text) Pkg(pkg *model.Pkg) {
-	fmt.Printf("%s *:%d\n", pkg.Name, pkg.StarCount)
+	fmt.Printf("%s \n", LanguageDetected.Name)
 }
 
 // Readme displays a readme
 func (t *Text) Readme(readme *model.Readme) {
 	fmt.Printf("filename: %s (size: %d)\n %s \n", readme.Name, readme.Size, readme.Decoded)
 	//fmt.Printf("%s *:%d\n", readme.Name, readme.StarCount)
-}
-
-// Keyword displays a keyword
-func (t *Text) Keyword(keyword *model.Keyword) {
-	fmt.Printf("%s *:%d\n", keyword.Name, keyword.StarCount)
-}
-
-// Pattern displays a pattern
-func (t *Text) Pattern(pattern *model.Pattern) {
-	fmt.Printf("%s *:%d\n", pattern.Name, pattern.StarCount)
 }
 
 // Tick displays evidence that the program is working

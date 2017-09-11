@@ -21,14 +21,9 @@ type Output interface {
 	Repo(*model.Repo)
 	Tag(*model.Tag)
 	Topic(*model.Topic)
-	Academic(*model.Academic)
-	Software(*model.Software)
 	Tree(*model.Tree)
 	LanguageDetected(*model.LanguageDetected)
-	Pkg(*model.Pkg)
 	Readme(*model.Readme)
-	Keyword(*model.Keyword)
-	Pattern(*model.Pattern)
 	Tick()
 }
 

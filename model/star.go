@@ -36,6 +36,8 @@ import (
 
 )
 
+// https://github.com/rai-project/inle/blob/master/pkg/linguist/init.go
+// 
 // PP_LINGUIST_URL=https://linguist:25032
 // PP_LINGUIST_AUTH=1234
 // result, err := jl.GetLanguageDetails(context.Background(), "test.js", []byte("var a = 1"))

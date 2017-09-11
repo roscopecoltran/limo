@@ -1,0 +1,17 @@
+package: github.com/devopsfaith/krakend/examples/searx
+import:
+- package: github.com/aviddiviner/gin-limit
+- package: github.com/devopsfaith/krakend
+  subpackages:
+  - config
+  - config/viper
+  - logging
+  - logging/gologging
+  - proxy
+  - router/gin
+  - sd/etcd
+- package: github.com/gin-gonic/contrib
+  subpackages:
+  - cache
+  - secure
+- package: github.com/gin-gonic/gin

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 	"crypto/md5"
+	"strings"
 	//"regexp"
 	"path"
 	"github.com/sirupsen/logrus"

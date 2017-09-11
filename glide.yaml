@@ -8,9 +8,96 @@ owners:
 - name: Luc Michalski
   email: michalski.luc@gmail.com
   homepage: https://github.com/lucmichalski
-# ignore:
+ignore:
+- enterprise.getqor.com
+- enterprise.getqor.com/microsite
+- github.com/qor/qor-example
+- github.com/docker/distribution
+- golang.org/x/crypto/ssh/knownhosts
+- github.com/docker/docker
+- github.com/golang/protobuf/ptypes
+- github.com/Sirupsen/logrus
+# - github.com/golang/protobuf
 # - github.com/go-kit/kit
 import:
+- package: github.com/urandom/text-summary
+  subpackages:
+  - summarize
+- package: github.com/urandom/handler
+  subpackages:
+  - lang
+- package: github.com/inconshreveable/log15
+  version: ^2.11.0
+- package: github.com/jessevdk/go-flags
+  version: ^1.2.0
+- package: github.com/satori/go.uuid
+  version: ^1.1.0
+- package: gopkg.in/src-d/go-billy.v3
+  version: d0dc16de10d86398cc9aba4513a2453b401eceb3
+  repo: https://github.com/src-d/go-billy.git
+- package: gopkg.in/src-d/go-billy-siva.v3
+  version: 763351934333e34370292b308c74bcb71035e22a
+  repo: https://github.com/src-d/go-billy-siva.git
+- package: gopkg.in/src-d/go-git.v4
+  version: 2dc59a6925f47e9d1bc99dd64d86e37b79b65d11
+  repo: https://github.com/src-d/go-git.git
+  subpackages:
+  - config
+  - plumbing
+  - plumbing/object
+  - plumbing/storer
+  - plumbing/transport
+  - plumbing/transport/client
+  - plumbing/transport/server
+  - storage/filesystem
+  - utils/ioutil
+- package: gopkg.in/src-d/go-kallax.v1
+  version: ^1.3.1
+- package: gopkg.in/src-d/core-retrieval.v0
+  version: 7426f069e342b557b38853af1e372aa664a1678f
+  subpackages:
+  - model
+  - repository
+- package: gopkg.in/src-d/framework.v0
+  version: f1a98e57ed5f295ca8272ebd21280f87b753786f
+  subpackages:
+  - lock
+  - queue
+- package: gopkg.in/src-d/go-errors.v0
+- package: golang.org/x/crypto
+  version: dd96d35c1b251a7ef77f057fc5c4f92ea2b285b4
+  subpackages:
+  - ssh
+  - ssh/knownhosts
+  - md4
+- package: github.com/golang/protobuf
+  subpackages:
+  - ptypes
+  - descriptor
+  - jsonpb
+  - proto
+- package: github.com/src-d/go-billy
+  subpackages:
+  - helper
+  - memfs
+  - osfs
+  - utill
+- package: gopkg.in/src-d/go-siva.v1  
+- package: github.com/markbates/goth
+- package: github.com/volatiletech/authboss
+- package: github.com/kaneshin/pigeon  
+- package: github.com/qor/qor-example
+  subpackages:
+  - config
+  - config/admin
+  - config/seo
+  - config/auth
+  - config/utils
+  - db
+  - db/migrations
+  - app/models
+  - app/controllers
+  - app/views
 - package: github.com/roscopecoltran/go-github
   version: sniperkit
   vcs: git
@@ -289,3 +376,5 @@ testImport:
   - assert
   - mock
   - suite
+- package: github.com/src-d/go-git-fixtures
+  version: 03ddd4bf3d4a1baf61e72fd8ee4746db9005f5e7

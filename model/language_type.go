@@ -55,38 +55,6 @@ func FindLanguageTypes(db *gorm.DB) ([]LanguageType, error) {
 	return language_types, db.Error
 }
 
-// FindLanguageTypesWithStarCount finds all language_types and gets their count of stars
-func FindLanguageTypesWithStarCount(db *gorm.DB) ([]LanguageType, error) {
-	var language_types []LanguageType
-	rows, err := db.Raw(`
-		SELECT LT.LABEL, COUNT(ST.LANGUAGE_TYPE_ID) AS STARCOUNT
-		FROM LANGUAGE_TYPES LT
-		LEFT JOIN STAR_LANGUAGE_TYPES ST ON LT.ID = ST.LANGUAGE_TYPE_ID
-		WHERE LT.DELETED_AT IS NULL
-		GROUP BY LT.ID
-		ORDER BY LT.LABEL`).Rows()
-
-	if err != nil {
-		return language_types, err
-	}
-
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	for rows.Next() {
-		var language_type LanguageType
-		if err = rows.Scan(&language_type.Label); err != nil {
-			return language_types, err
-		}
-		language_types = append(language_types, language_type)
-	}
-	return language_types, db.Error
-}
-
 // FindLanguageTypeByLabel finds a language_type by label
 func FindLanguageTypeByLabel(db *gorm.DB, label string) (*LanguageType, error) {
 	var language_type LanguageType
@@ -105,33 +73,6 @@ func FindOrCreateLanguageTypeByLabel(db *gorm.DB, label string) (*LanguageType, 
 		return &language_type, true, err
 	}
 	return &language_type, false, nil
-}
-
-// LoadStars loads the stars for a language_type
-func (language_type *LanguageType) LoadStars(db *gorm.DB, match string) error {
-	// Make sure language_type exists in database, or we will panic
-	var existing LanguageType
-	if db.Where("id = ?", language_type.ID).First(&existing).RecordNotFound() {
-		err := fmt.Errorf("LanguageType '%d' not found", language_type.ID)
-		log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "tag", "step": "LoadStars"}).Errorf("LanguageType '%d' not found", language_type.ID)
-		return err
-	}
-	if match != "" {
-		var stars []Star
-		db.Raw(`
-			SELECT *
-			FROM STARS S
-			INNER JOIN STAR_LANGUAGE_TYPES SLT ON S.ID = SLT.STAR_ID
-			WHERE S.DELETED_AT IS NULL
-			AND SLT.LANGUAGE_TYPE_ID = ?
-			AND LOWER(S.FULL_NAME) LIKE ?
-			ORDER BY S.FULL_NAME`,
-			language_type.ID,
-			fmt.Sprintf("%%%s%%", strings.ToLower(match))).Scan(&stars)
-		language_type.Stars = stars
-		return db.Error
-	}
-	return db.Model(language_type).Association("Stars").Find(&language_type.Stars).Error
 }
 
 // Rename renames a language_type -- new label must not already exist

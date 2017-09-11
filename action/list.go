@@ -25,8 +25,8 @@ var listers = map[string]func(ctx context.Context, args []string){
 	"stars":     listStars,
 	"tags":      listTags,
 	"topics":    listTopics,
-	"academics": listAcademics,
-	"packages":  listPackages,
+	//"academics": listAcademics,
+	//"packages":  listPackages,
 	"trending":  listTrending,
 }
 
@@ -175,24 +175,6 @@ func listTags(ctx context.Context, args []string) {
 	}
 }
 
-func listPackages(ctx context.Context, args []string) {
-	output := getOutput()
-
-	db, err := getDatabase()
-	if err != nil {
-		output.Fatal(err.Error())
-	}
-
-	pkgs, err := model.FindPkgsWithStarCount(db)
-	if err != nil {
-		output.Error(err.Error())
-	} else {
-		for _, pkg := range pkgs {
-			output.Pkg(&pkg)
-		}
-	}
-}
-
 func listTrending(ctx context.Context, args []string) {
 	// Get configuration
 	cfg, err := getConfiguration()
@@ -263,24 +245,6 @@ func listTopics(ctx context.Context, args []string) {
 	} else {
 		for _, topic := range topics {
 			output.Topic(&topic)
-		}
-	}
-}
-
-func listAcademics(ctx context.Context, args []string) {
-	output := getOutput()
-
-	db, err := getDatabase()
-	if err != nil {
-		output.Fatal(err.Error())
-	}
-
-	academics, err := model.FindAcademicsWithStarCount(db)
-	if err != nil {
-		output.Error(err.Error())
-	} else {
-		for _, academic := range academics {
-			output.Academic(&academic)
 		}
 	}
 }

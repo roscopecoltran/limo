@@ -55,6 +55,11 @@ type DatabaseDriver struct {
 
 var (
 	Tables       = []interface{}{
+		&Service{},  &Category{}, 									// service + registry organization
+		&Star{}, &Readme{}, &WikiPage{}, &User{},						// vcs content indexation
+		&Tag{}, &Topic{}, &Tree{}, &Language{}, &LanguageType{}, 	// vcs repository classification
+
+		/*
 		&auth_identity.AuthIdentity{},
 		&models.User{}, &models.Address{},
 		&models.Category{}, &models.Color{}, &models.Size{}, &models.Material{}, &models.Collection{},
@@ -72,6 +77,8 @@ var (
 		&notification.QorNotification{},
 		&admin.QorWidgetSetting{},
 		&help.QorHelpEntry{},
+		*/
+
 	}
 	log 		= logrus.New()
 	tagg 		= taggraph.NewTagGaph()
@@ -119,7 +126,7 @@ func InitDB(filepath string, verbose bool) (*gorm.DB, error) {
 	}
 	db.LogMode(verbose)
 	// db.AutoMigrate(&Service{}, &Star{}, &Tag{}, &Topic{}, &LanguageDetected{}, &Tree{}, &Readme{}, &Academic{}, &Pkg{}, &Software{}, &Repo{}, &Keyword{}, &Pattern{})
-	db.AutoMigrate(&Service{}, &Star{}, &Tag{}, &Topic{}, &Tree{}, &Readme{}, &Language{}, &Category{}, &LanguageType, &Wiki, &User{})
+	db.AutoMigrate(&Service{}, &Star{}, &Tag{}, &Topic{}, &Tree{}, &Readme{}, &Language{}, &Category{}, &LanguageType{}, &WikiPage{}, &User{})
 	// Initalize
 	// Admin := admin.New(&qor.Config{DB: db})
 	return db, nil

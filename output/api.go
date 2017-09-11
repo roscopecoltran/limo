@@ -51,7 +51,6 @@ type Language struct {
 	IsPopular   			bool   				`yaml:"is_popular,omitempty" json:"is_popular,omitempty"`
 	IsUnpopular 			bool   				`yaml:"is_unpopular,omitempty" json:"is_unpopular,omitempty"`
 	LanguageDetectedCount 	int    				`gorm:"-"`
-	Stars     				[]Star 				`gorm:"many2many:star_languagesDetected;"`
 }
 
 // Detection represents a language detection result

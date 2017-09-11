@@ -39,6 +39,8 @@ cache/
 cache/**
 
 limo*
+limo-*
+
 bin/limo*
 dist/linux/limo*
 dist/macos/limo*
@@ -55,4 +57,7 @@ sift-alpine.env
 .staging/
 .staging/**
 
+.notes
+.notes/
+.notes/**
 

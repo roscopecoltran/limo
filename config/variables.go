@@ -6,6 +6,9 @@ import (
 	"fmt"
 )
 
+// locales
+var	clientLocale 					= "undefined"
+
 // user-agents
 var HeaderName 						= fmt.Sprintf("X-%X", ProgramName) 						// LimoHeaderName is the name of the custom KrakenD header
 var HeaderValue 					= fmt.Sprintf("Version %s", Version) 					// HeaderValue is the value of the custom Limo header

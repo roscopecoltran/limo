@@ -3,11 +3,11 @@ package model
 import (
 	// golang
 	"fmt"
-	"strings"
+	// "strings"
 	// vcs api wrappers 
 	"github.com/google/go-github/github"
 	// data processing
-	"github.com/roscopecoltran/sniperkit-limo/utils"
+	// "github.com/roscopecoltran/sniperkit-limo/utils"
 	jsoniter "github.com/json-iterator/go"
 	// bleve search
 	"github.com/blevesearch/bleve"
@@ -85,9 +85,10 @@ func OpenIndex(path string) bleve.Index {
 	return index
 }
 
+/*
 func ProcessUpdate(index bleve.Index, repo *github.Repository, path string) {
 	log.Printf("updated: %s", path)
-	rp := relativePath(path)
+	rp := utils.relativePath(path)
 	wiki, err := NewWikiFromFile(path)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{"section:": "model", "typology": "index", "step": "ProcessUpdate"}).Warn(err)
@@ -107,6 +108,7 @@ func ProcessDelete(index bleve.Index, repo *github.Repository, path string) {
 		//log.Print(err)
 	}
 }
+*/
 
 func buildIndexMapping() *bleve.IndexMapping {
 
@@ -185,3 +187,69 @@ func ShowResults(results *bleve.SearchResult, index bleve.Index) {
 		}
 	}
 }
+
+/*
+func startWatching(path string, index bleve.Index, repo *github.Repository) *fsnotify.Watcher {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// start a go routine to process events
+	go func() {
+		idleTimer := time.NewTimer(10 * time.Second)
+		queuedEvents := make([]fsnotify.Event, 0)
+		for {
+			select {
+			case ev := <-watcher.Events:
+				queuedEvents = append(queuedEvents, ev)
+				idleTimer.Reset(10 * time.Second)
+			case err := <-watcher.Errors:
+				log.Fatal(err)
+			case <-idleTimer.C:
+				for _, ev := range queuedEvents {
+					if pathMatch(ev.Name) {
+						switch ev.Op {
+						case fsnotify.Remove, fsnotify.Rename:
+							// delete the path
+							processDelete(index, repo, ev.Name)
+						case fsnotify.Create, fsnotify.Write:
+							// update the path
+							processUpdate(index, repo, ev.Name)
+						default:
+							// ignore
+						}
+					}
+				}
+				queuedEvents = make([]fsnotify.Event, 0)
+				idleTimer.Reset(10 * time.Second)
+			}
+		}
+	}()
+
+	// now actually watch the path requested
+	err = watcher.Add(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("watching '%s' for changes...", path)
+
+	return watcher
+}
+
+func walkForIndexing(path string, index bleve.Index, repo *github.Repository) {
+	dirEntries, err := ioutil.ReadDir(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, dirEntry := range dirEntries {
+		dirEntryPath := path + string(os.PathSeparator) + dirEntry.Name()
+		if dirEntry.IsDir() {
+			walkForIndexing(dirEntryPath, index, repo)
+		} else if pathMatch(dirEntry.Name()) {
+			processUpdate(index, repo, dirEntryPath)
+		}
+	}
+}
+*/
+

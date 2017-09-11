@@ -12,6 +12,10 @@ import (
 	"crypto/md5"
 	"fmt"
 	"strings"
+	"io"
+	"net/http"
+	"os"
+	"io/ioutil"
 	"github.com/google/go-github/github"
 	// "github.com/xanzy/go-gitlab"
 	// "github.com/libgit2/git2go"
@@ -112,6 +116,33 @@ func recursiveDiffLookingForFile(repo *git.Repository, commit *git.Commit, path 
 		}
 		return nil, nil
 	}
+}
+
+// Private
+func extractFileBytes(fileContent *github.RepositoryContent) ([]byte, error) {
+	response, err := http.Get(*fileContent.DownloadURL)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	tmpFile, err := ioutil.TempFile(os.TempDir(), "ExtRepos")
+	defer os.Remove(tmpFile.Name())
+	if err != nil {
+		return []byte{}, err
+	}
+
+	defer response.Body.Close()
+	_, err = io.Copy(tmpFile, response.Body)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	fileBytes, err := ioutil.ReadFile(tmpFile.Name())
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return fileBytes, nil
 }
 
 func gravatarHashFromEmail(email string) string {

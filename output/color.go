@@ -203,109 +203,40 @@ func (c *Color) Repo(repo *model.Repo) {
 // Tag displays a tag
 func (c *Color) Tag(tag *model.Tag) {
 	var buffer bytes.Buffer
-
 	_, err := buffer.WriteString(color.BlueString(tag.Name))
 	if err != nil {
 		c.Error(err.Error())
 	}
-
 	fmt.Println(buffer.String())
 }
 
 // Topic displays a topic
 func (c *Color) Topic(topic *model.Topic) {
 	var buffer bytes.Buffer
-
 	_, err := buffer.WriteString(color.BlueString(topic.Name))
 	if err != nil {
 		c.Error(err.Error())
 	}
-
-	fmt.Println(buffer.String())
-}
-
-// Academic displays a academic
-func (c *Color) Academic(academic *model.Academic) {
-	var buffer bytes.Buffer
-
-	_, err := buffer.WriteString(color.BlueString(academic.Name))
-	if err != nil {
-		c.Error(err.Error())
-	}
-
-	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf(" ★ :%d", academic.StarCount)))
-	if err != nil {
-		c.Error(err.Error())
-	}
-
-	fmt.Println(buffer.String())
-}
-
-// Software displays a software
-func (c *Color) Software(software *model.Software) {
-	var buffer bytes.Buffer
-
-	_, err := buffer.WriteString(color.BlueString(software.Name))
-	if err != nil {
-		c.Error(err.Error())
-	}
-
-	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf(" ★ :%d", software.StarCount)))
-	if err != nil {
-		c.Error(err.Error())
-	}
-
 	fmt.Println(buffer.String())
 }
 
 // Tree displays a tree
 func (c *Color) Tree(file *model.Tree) {
 	var buffer bytes.Buffer
-
 	_, err := buffer.WriteString(color.BlueString(file.Name))
 	if err != nil {
 		c.Error(err.Error())
 	}
-
-	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf(" ★ :%d", file.StarCount)))
-	if err != nil {
-		c.Error(err.Error())
-	}
-
 	fmt.Println(buffer.String())
 }
 
 // LanguageDetected displays a languageDetected
 func (c *Color) LanguageDetected(languageDetected *model.LanguageDetected) {
 	var buffer bytes.Buffer
-
 	_, err := buffer.WriteString(color.BlueString(languageDetected.Name))
 	if err != nil {
 		c.Error(err.Error())
 	}
-
-	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf(" ★ :%d", languageDetected.StarCount)))
-	if err != nil {
-		c.Error(err.Error())
-	}
-
-	fmt.Println(buffer.String())
-}
-
-// LanguageDetected displays a languageDetected
-func (c *Color) Pkg(pkg *model.Pkg) {
-	var buffer bytes.Buffer
-
-	_, err := buffer.WriteString(color.BlueString(pkg.Name))
-	if err != nil {
-		c.Error(err.Error())
-	}
-
-	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf(" ★ :%d", pkg.StarCount)))
-	if err != nil {
-		c.Error(err.Error())
-	}
-
 	fmt.Println(buffer.String())
 }
 
@@ -324,40 +255,6 @@ func (c *Color) Readme(readme *model.Readme) {
 	}
 
 	_, err = buffer.WriteString(color.WhiteString(fmt.Sprintf("%s", readme.Decoded)))
-	if err != nil {
-		c.Error(err.Error())
-	}
-
-	fmt.Println(buffer.String())
-}
-
-// Keyword displays a keyword
-func (c *Color) Keyword(keyword *model.Keyword) {
-	var buffer bytes.Buffer
-
-	_, err := buffer.WriteString(color.BlueString(keyword.Name))
-	if err != nil {
-		c.Error(err.Error())
-	}
-
-	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf(" ★ :%d", keyword.StarCount)))
-	if err != nil {
-		c.Error(err.Error())
-	}
-
-	fmt.Println(buffer.String())
-}
-
-// Pattern displays a pattern
-func (c *Color) Pattern(pattern *model.Pattern) {
-	var buffer bytes.Buffer
-
-	_, err := buffer.WriteString(color.BlueString(pattern.Name))
-	if err != nil {
-		c.Error(err.Error())
-	}
-
-	_, err = buffer.WriteString(color.YellowString(fmt.Sprintf(" ★ :%d", pattern.StarCount)))
 	if err != nil {
 		c.Error(err.Error())
 	}

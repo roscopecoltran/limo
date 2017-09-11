@@ -4,7 +4,7 @@ import (
 	"github.com/jinzhu/gorm"
     // "github.com/qor/qor"
     // "github.com/qor/admin"
-	// "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // https://github.com/yoru9zine/starlink/blob/master/main.go
@@ -27,6 +27,9 @@ func FindOrCreateServiceByName(db *gorm.DB, name string) (*Service, bool, error)
 	if db.Where("name = ?", name).First(&service).RecordNotFound() {
 		service.Name = name
 		err := db.Create(&service).Error
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{"action": "FindOrCreateServiceByName", "step": "db.Create", "service": "service"}).Info("")
+		}
 		return &service, true, err
 	}
 	return &service, false, nil

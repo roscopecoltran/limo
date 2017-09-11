@@ -8,9 +8,39 @@ owners:
 - name: Luc Michalski
   email: michalski.luc@gmail.com
   homepage: https://github.com/lucmichalski
-# ignore:
+ignore:
+- enterprise.getqor.com
+- enterprise.getqor.com/microsite
+- github.com/qor/qor-example
 # - github.com/go-kit/kit
 import:
+- package: github.com/src-d/go-billy
+  subpackages:
+  - helper
+  - memfs
+  - osfs
+  - utill
+- package: gopkg.in/src-d/go-siva.v1  
+- package: github.com/markbates/goth
+- package: github.com/volatiletech/authboss
+- package: github.com/kaneshin/pigeon  
+- package: github.com/qor/qor-example
+  subpackages:
+  - config
+  - config/admin
+  - config/seo
+  - config/auth
+  - config/utils
+  - db
+  - db/migrations
+  - app/models
+  - app/controllers
+  - app/views
+- package: github.com/roscopecoltran/go-github
+  version: sniperkit
+  vcs: git
+## file system notification
+- package: github.com/fsnotify/fsnotify
 # wiki(s) - markdowns
 - package: github.com/russross/blackfriday
 - package: github.com/mschoch/blackfriday-text
@@ -125,13 +155,10 @@ import:
 # - package: github.com/dustin/go-humanize
 - package: github.com/gtank/cryptopasta
 - package: github.com/hashicorp/go-plugin
-- package: github.com/schorsch/go-callbacks
+# - package: github.com/schorsch/go-callbacks
 - package: github.com/fatih/structs
-  version: master
 - package: github.com/imdario/mergo
-  version: master
 - package: github.com/golibri/list
-  version: master
 # kvs
 - package: github.com/coreos/etcd
   version: v3.2.7

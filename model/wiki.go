@@ -2,20 +2,24 @@ package model
 
 import (
 	// golang
-	"errors"
+	// "errors"
 	"io/ioutil"
 	"os"
 	"strings"
 	"time"
-	"crypto/md5"
-	"fmt"
+	// "crypto/md5"
+	// "fmt"
 	// database
 	"github.com/jinzhu/gorm"
 	// wiki - markdowns
 	"github.com/mschoch/blackfriday-text"
 	"github.com/russross/blackfriday"
+	// vcs
+	// "github.com/google/go-github/github"	
 	// notification fs
-	"github.com/fsnotify/fsnotify"
+	// "github.com/fsnotify/fsnotify"
+	// search
+	// "github.com/blevesearch/bleve"
 	// logs
 	"github.com/sirupsen/logrus"
 )
@@ -32,8 +36,8 @@ type WikiPage struct {
 }
 
 type WikiResult struct {
-	Wiki  	*Wiki
-	Error 	error
+	WikiPage  	*WikiPage
+	Error 		error
 }
 
 func (w *WikiPage) Type() string {
@@ -69,13 +73,15 @@ func cleanupMarkdown(input []byte) []byte {
 	return output
 }
 
+/*
 func OpenGitRepo(path string) *github.Repository {
-	repo, err := git.OpenRepository(path)
+	repo, err := github.OpenRepository(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return repo
 }
+*/
 
 /*
 func DoGitStuff(repo *github.Repository, path string, wiki *WikiPage) {
@@ -112,68 +118,6 @@ func DoGitStuff(repo *github.Repository, path string, wiki *WikiPage) {
 }
 */
 
-func startWatching(path string, index bleve.Index, repo *github.Repository) *fsnotify.Watcher {
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// start a go routine to process events
-	go func() {
-		idleTimer := time.NewTimer(10 * time.Second)
-		queuedEvents := make([]fsnotify.Event, 0)
-		for {
-			select {
-			case ev := <-watcher.Events:
-				queuedEvents = append(queuedEvents, ev)
-				idleTimer.Reset(10 * time.Second)
-			case err := <-watcher.Errors:
-				log.Fatal(err)
-			case <-idleTimer.C:
-				for _, ev := range queuedEvents {
-					if pathMatch(ev.Name) {
-						switch ev.Op {
-						case fsnotify.Remove, fsnotify.Rename:
-							// delete the path
-							processDelete(index, repo, ev.Name)
-						case fsnotify.Create, fsnotify.Write:
-							// update the path
-							processUpdate(index, repo, ev.Name)
-						default:
-							// ignore
-						}
-					}
-				}
-				queuedEvents = make([]fsnotify.Event, 0)
-				idleTimer.Reset(10 * time.Second)
-			}
-		}
-	}()
-
-	// now actually watch the path requested
-	err = watcher.Add(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("watching '%s' for changes...", path)
-
-	return watcher
-}
-
-func walkForIndexing(path string, index bleve.Index, repo *github.Repository) {
-	dirEntries, err := ioutil.ReadDir(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, dirEntry := range dirEntries {
-		dirEntryPath := path + string(os.PathSeparator) + dirEntry.Name()
-		if dirEntry.IsDir() {
-			walkForIndexing(dirEntryPath, index, repo)
-		} else if pathMatch(dirEntry.Name()) {
-			processUpdate(index, repo, dirEntryPath)
-		}
-	}
-}
 
 /*
 func recursiveDiffLookingForFile(repo *github.Repository, commit *github.Commit, path string) (*github.Commit, error) {

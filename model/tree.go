@@ -6,7 +6,7 @@ import (
 	//"log"
 	"strings"
 	"github.com/jinzhu/gorm"
-	"github.com/sirupsen/logrus"
+	// "github.com/sirupsen/logrus"
 
 	// el "github.com/src-d/enry"
 	// rl "github.com/rai-project/linguist"
@@ -22,7 +22,6 @@ type Tree struct {
 	gorm.Model
 	Name      		string
 	TreeCount 		int    `gorm:"-"`
-	StarCount 		int    `gorm:"-"`
 	Stars     		[]Star `gorm:"many2many:star_trees;"`
 }
 
@@ -108,42 +107,6 @@ func FindTrees(db *gorm.DB) ([]Tree, error) {
 	return trees, db.Error
 }
 
-// FindTreesWithStarCount finds all trees and gets their count of stars
-func FindTreesWithStarCount(db *gorm.DB) ([]Tree, error) {
-	var trees []Tree
-
-	// Create resources from GORM-backend model
-	// Admin.AddResource(&Tree{})
-
-	rows, err := db.Raw(`
-		SELECT T.NAME, COUNT(ST.TREE_ID) AS STARCOUNT
-		FROM TREES T
-		LEFT JOIN STAR_TREES ST ON T.ID = ST.TREE_ID
-		WHERE T.DELETED_AT IS NULL
-		GROUP BY T.ID
-		ORDER BY T.NAME`).Rows()
-
-	if err != nil {
-		return trees, err
-	}
-
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	for rows.Next() {
-		var tree Tree
-		if err = rows.Scan(&tree.Name, &tree.StarCount); err != nil {
-			return trees, err
-		}
-		trees = append(trees, tree)
-	}
-	return trees, db.Error
-}
-
 // FindTreeByName finds a tree by name
 func FindTreeByName(db *gorm.DB, name string) (*Tree, error) {
 	var tree Tree
@@ -162,32 +125,6 @@ func FindOrCreateTreeByName(db *gorm.DB, name string) (*Tree, bool, error) {
 		return &tree, true, err
 	}
 	return &tree, false, nil
-}
-
-// LoadStars loads the stars for a tree
-func (tree *Tree) LoadStars(db *gorm.DB, match string) error {
-	// Make sure tree exists in database, or we will panic
-	var existing Tree
-	if db.Where("id = ?", tree.ID).First(&existing).RecordNotFound() {
-		return fmt.Errorf("Tree '%d' not found", tree.ID)
-	}
-
-	if match != "" {
-		var stars []Star
-		db.Raw(`
-			SELECT *
-			FROM TREES S
-			INNER JOIN STAR_TREES ST ON S.ID = ST.STAR_ID
-			WHERE S.DELETED_AT IS NULL
-			AND ST.TREE_ID = ?
-			AND LOWER(S.FULL_NAME) LIKE ?
-			ORDER BY S.FULL_NAME`,
-			tree.ID,
-			fmt.Sprintf("%%%s%%", strings.ToLower(match))).Scan(&stars)
-		tree.Stars = stars
-		return db.Error
-	}
-	return db.Model(tree).Association("Stars").Find(&tree.Stars).Error
 }
 
 // Rename renames a tree -- new name must not already exist

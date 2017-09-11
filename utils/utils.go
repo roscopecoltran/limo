@@ -2,18 +2,35 @@ package utils
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"time"
-
-	"io/ioutil"
-	"net/http"
-
-	"github.com/google/go-github/github"
 	// "github.com/davecgh/go-spew/spew"
+	"github.com/sirupsen/logrus"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 var VERBOSE = false
+
+var	log 	= logrus.New()
+
+func init() {
+
+	// logs
+	log.Out = os.Stdout
+	// log.Formatter = new(prefixed.TextFormatter)
+
+	formatter := new(prefixed.TextFormatter)
+	formatter.FullTimestamp = true
+
+	// Set specific colors for prefix and timestamp
+	formatter.SetColorScheme(&prefixed.ColorScheme{
+		PrefixStyle:    "blue+b",
+		TimestampStyle: "white+h",
+	})
+
+	log.Formatter = formatter
+
+}
 
 // public
 func CurrentTime() time.Time {
@@ -76,30 +93,3 @@ func dumpSpew(obj interface{}) string {
 	return cfg.Sdump(obj)
 }
 */
-
-// Private
-func extractFileBytes(fileContent *github.RepositoryContent) ([]byte, error) {
-	response, err := http.Get(*fileContent.DownloadURL)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	tmpFile, err := ioutil.TempFile(os.TempDir(), "ExtRepos")
-	defer os.Remove(tmpFile.Name())
-	if err != nil {
-		return []byte{}, err
-	}
-
-	defer response.Body.Close()
-	_, err = io.Copy(tmpFile, response.Body)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	fileBytes, err := ioutil.ReadFile(tmpFile.Name())
-	if err != nil {
-		return []byte{}, err
-	}
-
-	return fileBytes, nil
-}

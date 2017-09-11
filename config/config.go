@@ -57,6 +57,7 @@ type ServiceConfig struct {			// ServiceConfig contains configuration informatio
 
 type Config struct {
 
+	// to move and to refine !
 	DatabasePath 	string                    	`default:"./shared/data/limo/gorm" json:"database_path,omitempty" yaml:"database_path,omitempty"`
 	DatastorePath 	string                    	`default:"./shared/data/limo/boltdb" json:"datastore_path,omitempty" yaml:"datastore_path,omitempty"`
 	IndexPath    	string                    	`default:"./shared/data/limo/bleve" json:"index_path,omitempty" yaml:"index_path,omitempty"`

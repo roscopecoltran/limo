@@ -3,18 +3,35 @@ package utils
 import (
 	"errors"
 	"io"
-	"log"
+	// "log"
 	"os"
+	"strings"
+	"flag"
+	// "log"
+	//"net/http"
 	"path/filepath"
+	"regexp"
+	// logs
+	"github.com/sirupsen/logrus"
 )
 // https://github.com/jakdept/dir/blob/master/dir_test.go
 // watch + create
+
+var (
+	dir 		= flag.String("dir", "", "directory to monitor and index")
+	indexPath 	= flag.String("index", "wiki.bleve", "path to store index")
+	pathFilter 	= flag.String("pathFilter", `\.md$`, "regular expression that file names must match")
+	staticEtag 	= flag.String("staticEtag", "", "A static etag value.")
+	staticPath 	= flag.String("static", "static/", "Path to the static content")
+	bindAddr 	= flag.String("addr", ":8099", "http listen address")
+	pathRegexp 	*regexp.Regexp
+	NoPathError error
+)
 
 type RootFolder struct {
 	Repo string
 	Path string
 }
-
 
 func init() {
 	NoPathError = errors.New("Could not get home path from env vars HOME or USERPROFILE")
@@ -23,7 +40,8 @@ func init() {
 func defaultPath() string {
 	home, err := homePath()
 	if err != nil {
-		log.Fatal(err)
+		log.WithError(err).WithFields(logrus.Fields{"action": "defaultPath", "step": "homePath", "service": "filesystem"}).Warn("Could not get home path from env vars HOME or USERPROFILE")
+		//log.Fatal(err)
 	}
 	return filepath.Join(home, "src")
 }
@@ -36,7 +54,6 @@ func relativePath(path string) string {
 }
 
 // NoPathError thrown when home path could not automatically be determined
-var NoPathError error
 
 func homePath() (string, error) {
 	value := ""
@@ -46,7 +63,9 @@ func homePath() (string, error) {
 			return value, nil
 		}
 	}
-
+	if NoPathError != nil {
+		log.WithError(NoPathError).WithFields(logrus.Fields{"action": "homePath", "step": "Getenv", "service": "filesystem"}).Warn("Could not get home path from env vars HOME or USERPROFILE")
+	}
 	return "", NoPathError
 }
 

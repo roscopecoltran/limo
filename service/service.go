@@ -1,17 +1,23 @@
 package service
 
 import (
+	// golang
 	"context"
 	"fmt"
 	"reflect"
 	"strings"
 	"os"
-	"github.com/sirupsen/logrus"
+	// output
 	"github.com/fatih/color"
+	// cli
 	"github.com/hoop33/entrevista"
+	// data
 	"github.com/roscopecoltran/sniperkit-limo/model"
+	// logs
+	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
-	"github.com/deckarep/gosx-notifier"
+	// notifications
+	// "github.com/deckarep/gosx-notifier"
 )
 
 // https://github.com/cloudflavor/shep/blob/master/pkg/services/system.go
@@ -37,6 +43,7 @@ func init() {
 
 }
 
+/*
 func gosxnotifierTest() {
     //At a minimum specifiy a message to display to end-user.
     note := gosxnotifier.NewNotification("Check your Apple Stock!")
@@ -74,6 +81,7 @@ func gosxnotifierTest() {
         log.Println("Uh oh!")
     }
 }
+*/
 
 // Service represents a service
 type Service interface {

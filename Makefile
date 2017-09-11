@@ -82,7 +82,14 @@ darwin:
 	clear
 	echo ""
 	rm -f ./limo
-	gox -verbose -os="darwin" -arch="amd64" -output="{{.Dir}}" ./cmd/...
+	gox -verbose -os="darwin" -arch="amd64" -output="{{.Dir}}" ./cmd/limo/...
+	echo ""
+
+darwin-tests:
+	clear
+	echo ""
+	rm -f ./limo
+	gox -verbose -os="darwin" -arch="amd64" -output="{{.Dir}}" ./cmd/tests/...
 	echo ""
 
 # darwin:
@@ -163,6 +170,11 @@ pkg-uri-fix: install-ag pkg-uri-clean clear-screen ## fix sniperkit-limo pkg uri
 pkg-uri-revert: install-ag pkg-uri-clean clear-screen ## fix limo, fork, pkg uri for golang package import
 	@echo "fix limo, fork, pkg uri for golang package import"
 	@$(AG_EXEC) -l 'github.com/roscopecoltran/sniperkit-limo' --ignore Makefile --ignore *.md . | xargs sed -i -e 's/roscopecoltran\/sniperkit-limo/hoop33\/limo/g'
+	@find . -name "*-e" -exec rm -f {} \; 
+
+golang-logrus-fix2: install-ag pkg-uri-clean clear-screen ## fix limo, fork, pkg uri for golang package import
+	@echo "fix limo, fork, pkg uri for golang package import"
+	@$(AG_EXEC) -l 'github.com/Sirupsen/logrus' --ignore Makefile --ignore *.md . | xargs sed -i -e 's/Sirupsen\/logrus/sirupsen\/logrus/g'
 	@find . -name "*-e" -exec rm -f {} \; 
 
 golang-logrus-fix: install-ag clear-screen ## fix logrus case for golang package import
