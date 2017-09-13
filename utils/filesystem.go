@@ -24,8 +24,7 @@ var (
 	staticEtag 	= flag.String("staticEtag", "", "A static etag value.")
 	staticPath 	= flag.String("static", "static/", "Path to the static content")
 	bindAddr 	= flag.String("addr", ":8099", "http listen address")
-	pathRegexp 	*regexp.Regexp
-	NoPathError error
+	pathRegexp 	*regexp.Regexp	
 )
 
 type RootFolder struct {
@@ -33,14 +32,13 @@ type RootFolder struct {
 	Path string
 }
 
-func init() {
-	NoPathError = errors.New("Could not get home path from env vars HOME or USERPROFILE")
-}
-
 func defaultPath() string {
 	home, err := homePath()
 	if err != nil {
-		log.WithError(err).WithFields(logrus.Fields{"action": "defaultPath", "step": "homePath", "service": "filesystem"}).Warn("Could not get home path from env vars HOME or USERPROFILE")
+		log.WithError(err).WithFields(
+			logrus.Fields{	"action": 	"defaultPath", 
+							"step": 	"homePath", 
+							"service": "filesystem"}).Warn("Could not get home path from env vars HOME or USERPROFILE")
 		//log.Fatal(err)
 	}
 	return filepath.Join(home, "src")
@@ -64,7 +62,10 @@ func homePath() (string, error) {
 		}
 	}
 	if NoPathError != nil {
-		log.WithError(NoPathError).WithFields(logrus.Fields{"action": "homePath", "step": "Getenv", "service": "filesystem"}).Warn("Could not get home path from env vars HOME or USERPROFILE")
+		log.WithError(NoPathError).WithFields(
+			logrus.Fields{	"action": 	"homePath", 
+							"step": 	"Getenv", 
+							"service": 	"filesystem"}).Warn("Could not get home path from env vars HOME or USERPROFILE")
 	}
 	return "", NoPathError
 }
@@ -127,12 +128,18 @@ func dirIsEmpty(name string) (bool, error) {
 
 func rmDir(path string) error {
 	if VERBOSE {
-		log.Printf("rmDir?: %s\n", path)
+		log.WithFields(
+			logrus.Fields{	"action": 	"VERBOSE", 
+							"step": 	"rmDir", 
+							"file": 	"utils/filesystem.go"}).Infof("rmDir?: %s\n", path)
 	}
 
 	if ok, _ := dirIsEmpty(path); ok {
 		if VERBOSE {
-			log.Printf("Removing %s\n", path)
+			log.WithFields(
+				logrus.Fields{	"action": 	"rmDir", 
+								"step": 	"dirIsEmpty", 
+								"file": 	"utils/filesystem.go"}).Infof("rmDir?: %s\n", path)
 		}
 		return os.Remove(path)
 	}

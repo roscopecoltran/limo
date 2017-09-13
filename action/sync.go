@@ -54,7 +54,7 @@ var SyncCmd = &cobra.Command{
 		starChan := make(chan *model.StarResult, 20)
 
 		// Get the stars for the authenticated user
-		go svc.GetStars(ctx, starChan, cfg.GetService(serviceName).Token, "", true, 5)
+		go svc.GetStars(ctx, starChan, cfg.GetService(serviceName).Token, "", true)
 
 		output := getOutput()
 

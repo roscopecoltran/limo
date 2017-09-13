@@ -43,58 +43,15 @@ func init() {
 
 }
 
-/*
-func gosxnotifierTest() {
-    //At a minimum specifiy a message to display to end-user.
-    note := gosxnotifier.NewNotification("Check your Apple Stock!")
-
-    //Optionally, set a title
-    note.Title = "It's money making time 💰"
-
-    //Optionally, set a subtitle
-    note.Subtitle = "My subtitle"
-
-    //Optionally, set a sound from a predefined set.
-    note.Sound = gosxnotifier.Basso
-
-    //Optionally, set a group which ensures only one notification is ever shown replacing previous notification of same group id.
-    note.Group = "com.unique.yourapp.identifier"
-
-    //Optionally, set a sender (Notification will now use the Safari icon)
-    note.Sender = "com.apple.Safari"
-
-    //Optionally, specifiy a url or bundleid to open should the notification be
-    //clicked.
-    note.Link = "http://www.yahoo.com" //or BundleID like: com.apple.Terminal
-
-    //Optionally, an app icon (10.9+ ONLY)
-    note.AppIcon = "gopher.png"
-
-    //Optionally, a content image (10.9+ ONLY)
-    note.ContentImage = "gopher.png"
-
-    //Then, push the notification
-    err := note.Push()
-
-    //If necessary, check error
-    if err != nil {
-        log.Println("Uh oh!")
-    }
-}
-*/
-
 // Service represents a service
 type Service interface {
 	Login(ctx context.Context) (string, error)
-	// GetStars(ctx context.Context, starChan chan<- *model.StarResult, token, user string)
-	GetStars(ctx context.Context, starChan chan<- *model.StarResult, token, user string, subChannels bool, subChannelsJobs uint)
-	// GetUserInfos(ctx context.Context, starChan chan<- *model.StarResult, token)
-	// GetReadmes(ctx context.Context, starChan chan<- *model.StarResult, token)
-	// GetReadmes(ctx context.Context, starChan chan<- *model.StarResult, token, user string, name string)
-	// GetRepos(ctx context.Context, starChan chan<- *model.StarResult, user string, name string)
-	GetTrending(ctx context.Context, trendingChan chan<- *model.StarResult, token, language string, verbose bool)
+	GetStars(ctx context.Context, starChan chan<- *model.StarResult, token, user string, isAugmented bool)
+	GetTrending(ctx context.Context, trendingChan chan<- *model.StarResult, token, language string, verbose bool) // , isAugmented bool
 	GetEvents(ctx context.Context, eventChan chan<- *model.EventResult, token, user string, page, count int)
 }
+
+// Add providers and engines here !
 
 var services = make(map[string]Service)
 
@@ -104,8 +61,8 @@ func registerService(service Service) {
 
 // Name returns the name of a service
 func Name(service Service) string {
-	parts := strings.Split(reflect.TypeOf(service).String(), ".")
-	name := strings.ToLower(parts[len(parts)-1])
+	parts 	:= strings.Split(reflect.TypeOf(service).String(), ".")
+	name 	:= strings.ToLower(parts[len(parts)-1])
 	log.WithFields(logrus.Fields{"service": "Name"}).Infof("name: %#v", name)
 	return name
 }
@@ -137,6 +94,4 @@ func checkMapHasKey(entitiesMap map[string]interface{}, key string) string {
 	}
 	return ""
 }
-
-
 

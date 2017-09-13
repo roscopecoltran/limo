@@ -5,6 +5,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	// logs
+	"github.com/sirupsen/logrus"
 )
 
 type EnvValue struct {
@@ -12,10 +14,6 @@ type EnvValue struct {
 	value        string
 	defaultValue interface{}
 }
-
-var (
-	ErrCannotConvert = errors.New("cannot convert type")
-)
 
 func (e EnvValue) String() (string, error) {
 	if e.Empty {
@@ -35,7 +33,6 @@ func (e EnvValue) Bytes() ([]byte, error) {
 			return []byte(""), ErrCannotConvert
 		}
 	}
-
 	return []byte(e.value), nil
 }
 
@@ -55,7 +52,6 @@ func (e EnvValue) Int() (int, error) {
 			return e.defaultValue.(int), nil
 		}
 	}
-
 	return strconv.Atoi(e.value)
 }
 
@@ -72,7 +68,6 @@ func (e EnvValue) Bool() (bool, error) {
 			return false, ErrCannotConvert
 		}
 	}
-
 	return e.value != "0", nil
 }
 
@@ -84,7 +79,6 @@ func Getenvdef(key string, val interface{}) EnvValue {
 		value:        out,
 		Empty:        false,
 	}
-
 	if out == "" {
 		ev.Empty = true
 	}

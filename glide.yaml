@@ -20,6 +20,21 @@ ignore:
 # - github.com/golang/protobuf
 # - github.com/go-kit/kit
 import:
+- package: gopkg.in/mgo.v2
+  version: v2-unstable
+  # version: v2
+  subpackages:
+  - bson
+  - txn
+- package: golang.org/x/net
+  subpackages:
+  - context
+- package: github.com/ChimeraCoder/gojson
+- package: github.com/mitchellh/mapstructure
+- package: github.com/kylelemons/godebug
+  subpackages:
+  - pretty
+  - diff
 - package: github.com/urandom/text-summary
   subpackages:
   - summarize

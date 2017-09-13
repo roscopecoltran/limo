@@ -1,0 +1,8 @@
+package: github.com/roscopecoltran/sniperkit-limo/cmd/tests/cmdln
+import:
+- package: github.com/roscopecoltran/sniperkit-limo
+  subpackages:
+  - utils/cmdline
+- package: github.com/anschelsc/finder
+- package: github.com/sirupsen/logrus
+- package: github.com/x-cray/logrus-prefixed-formatter

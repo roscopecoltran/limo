@@ -18,12 +18,10 @@ import (
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
-var defaultConfigFilePath string = "~/.config/limo/limo.yaml"
-var configuration *config.Config
-var db *gorm.DB
-var bucket *bolt.DB
-var index bleve.Index
-var	log 	= logrus.New()
+var defaultConfigFilePath 	string = "~/.config/limo/limo.yaml"
+var configuration 			*config.Config
+var	db 						*model.DatabaseDrivers
+var	log 					= logrus.New()
 
 var options struct {
 	config 		string
@@ -45,7 +43,6 @@ You can tag, display, and search your starred repositories.`,
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		//fmt.Println(err)
 		log.WithError(err).WithFields(logrus.Fields{"config": "Execute"}).Info("error while getting starting the program.")
 		os.Exit(-1)
 	}
@@ -66,10 +63,6 @@ func init() {
 		TimestampStyle: "white+h",
 	})
 
-	// https://github.com/x-cray/logrus-prefixed-formatter
-	// log.Formatter = new(prefixed.TextFormatter)
-	// log.Level = logrus.DebugLevel
-
 	log.Formatter = formatter
 
 	tmpDir := config.GetTmpDir()
@@ -87,27 +80,45 @@ func init() {
 		log.Level = logrus.InfoLevel
 	}
 
+	db, err := model.InitDatabases()
+	if err != nil {
+		log.WithError(err).WithFields(
+			logrus.Fields{	"action": 	"init"}).Fatal("error while loading the config files with configor package.")
+	}
+
 }
 
 func getConfiguration() (configuration config.Config, err error) {
-
-	//if configuration == nil {
-
-		configFilePath := config.FindLocalConfig()
-		if configFilePath != "" {
-			log.WithFields(logrus.Fields{"config": "getConfiguration"}).Info("FOUND configuration data to load.")
-			// return nil, Error(fmt.Print("could not find the config file "))
-		}
-
-		if err := configor.Load(&configuration, configFilePath, defaultConfigFilePath); err != nil {
-			log.WithError(err).WithFields(logrus.Fields{"config": "getConfiguration"}).Fatal("error while loading the config files with configor package.")
-		}		
-
-	//}
-
+	configFilePath := config.FindLocalConfig()
+	if configFilePath != "" {
+		log.WithFields(
+			logrus.Fields{	"config": 	"getConfiguration"}).Infof("FOUND configuration data to load: %#s", configFilePath)
+	}
+	if err := configor.Load(&configuration, configFilePath, defaultConfigFilePath); err != nil {
+		log.WithError(err).WithFields(
+			logrus.Fields{	"config": 	"getConfiguration"}).Fatal("error while loading the config files with configor package.")
+	}
 	return configuration, nil
 }
 
+func getDatabase() (*gorm.DB, error) {
+	db, _ := model.GetDatabases()
+	if db.gormCli == nil {
+		cfg, err := getConfiguration()
+		if err != nil {
+			return nil, err
+		}
+		//db, err = model.InitDB(cfg.DatabasePath, true)
+		gormCli, err := model.InitDB(cfg.DatabasePath, "sqlite3", options.verbose)
+		if err != nil {
+			return nil, err
+		}
+		db.gormCli = gormCli
+	}
+	return db.gormCli, nil
+}
+
+/*
 func getDatabase() (*gorm.DB, error) {
 	if db == nil {
 		cfg, err := getConfiguration()
@@ -122,44 +133,57 @@ func getDatabase() (*gorm.DB, error) {
 	}
 	return db, nil
 }
+*/
 
 func getBucket() (*bolt.DB, error) {
-	if bucket == nil {
+	db, _ := model.GetDatabases()
+	if db.boltCli == nil {
 		cfg, err := getConfiguration()
 		if err != nil {
-			log.WithError(err).WithFields(logrus.Fields{"config": "getBucket"}).Info("error while getting configuration.")
+			log.WithError(err).WithFields(
+				logrus.Fields{	"config": "getBucket"}).Info("error while getting configuration.")
 			return nil, err
 		}
-		bucket, err = model.InitBoltDB(cfg.DatastorePath)
+		boltCli, err := model.InitBoltDB(cfg.DatastorePath)
 		if err != nil {
-			log.WithError(err).WithFields(logrus.Fields{"config": "getBucket", "cfg.DatastorePath": cfg.DatastorePath}).Warnf("error while init the BoltDB bucket at %#s", cfg.DatastorePath)
+			log.WithError(err).WithFields(
+				logrus.Fields{	"config": 			 "getBucket", 
+								"cfg.DatastorePath": cfg.DatastorePath}).Warnf("error while init the BoltDB bucket at %#s", cfg.DatastorePath)
 			return nil, err
 		}
-	}
-	return bucket, nil
+		db.boltCli = boltCli
+	}	
+	return db.boltCli, nil
 }
 
 func getIndex() (bleve.Index, error) {
-	if index == nil {
+	db, _ := model.GetDatabases()
+	if db.bleveIdx == nil {
 		cfg, err := getConfiguration()
 		if err != nil {
-			log.WithError(err).WithFields(logrus.Fields{"config": "getIndex"}).Info("error while getting configuration.")
+			log.WithError(err).WithFields(
+				logrus.Fields{"config": "getIndex"}).Info("error while getting configuration.")
 			return nil, err
 		}
-		index, err = model.InitIndex(cfg.IndexPath)
+		bleveIdx, err := model.InitIndex(cfg.IndexPath)
 		if err != nil {
-			log.WithError(err).WithFields(logrus.Fields{"config": "getIndex", "cfg.IndexPath": cfg.IndexPath}).Warnf("error while init the search engine index: %#s", cfg.IndexPath)
+			log.WithError(err).WithFields(
+				logrus.Fields{	"config": "getIndex", 
+								"cfg.IndexPath": cfg.IndexPath}).Warnf("error while init the search engine index: %#s", cfg.IndexPath)
 			return nil, err
 		}
+		db.bleveIdx = bleveIdx
 	}
-	return index, nil
+	return db.bleveIdx, nil
 }
 
 func getOutput() output.Output {
 	output := output.ForName(options.output)
 	oc, err := getConfiguration()
 	if err != nil {
-		log.WithError(err).WithFields(logrus.Fields{"config": "getOutput", "options.output": options.output}).Warnf("error while getting output options.")
+		log.WithError(err).WithFields(
+			logrus.Fields{	"config": 		  "getOutput", 
+							"options.output": options.output}).Warnf("error while getting output options.")
 	} else {
 		output.Configure(oc.GetOutput(options.output))
 	}

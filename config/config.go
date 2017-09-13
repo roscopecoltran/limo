@@ -451,13 +451,6 @@ func configFilePath() string {
 	return ""
 }
 
-func configFilePath2() string {
-	configFilePath := path.Join(configDirectoryPath, fmt.Sprintf("%s.yaml", ProgramName))
-	log.WithFields(logrus.Fields{"config": "configFilePath"}).Infof("configDirectoryPath: %#v", configDirectoryPath)
-	log.WithFields(logrus.Fields{"config": "configFilePath"}).Infof("configFilePath: %#v", configFilePath)
-	return configFilePath
-}
-
 func setConfig(path string) {
 	// Default values
 	viper.SetDefault("host.listen", "")

@@ -71,9 +71,7 @@ var UpdateCmd = &cobra.Command{
 		starChan := make(chan *model.StarResult, 20)
 
 		// Get the stars for the authenticated user
-		go svc.GetStars(ctx, starChan, cfg.GetService(serviceName).Token, "", true, 20)
-		//go svc.GetReadmes(ctx, readmeChan, cfg.GetService(serviceName).Token, "")
-		//go svc.GetUserInfos(ctx, userInfoChan, cfg.GetService(serviceName).Token, "")
+		go svc.GetStars(ctx, starChan, cfg.GetService(serviceName).Token, "", true)
 
 		output := getOutput()
 
