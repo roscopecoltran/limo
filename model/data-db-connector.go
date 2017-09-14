@@ -46,6 +46,7 @@ type Databases struct {
 	SearchIdx 			map[string]*bleve.Index
 	KvIdx 				map[string]etcd.KeysAPI
 }
+// var databases = make(map[string]Service)
 
 var (
 	Tables       	= 	[]interface{}{
@@ -91,21 +92,6 @@ func init() {
 // New return a new db with config input
 //func NewDatabases(conf config.Config) (db *Databases, err error) {
 //}
-
-func GetDatabases() (*DatabaseDrivers,  error) {
-	if db, err := New(true, true); err != nil {
-		log.WithError(err).WithFields(
-			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
-							"prefix": 			"dbs-get-all",
-							"method.name": 		"GetDatabases(...)", 
-							"method.prev": 		"New(...)",
-							"db.driver": 		"all", 
-							"db.driver.groups": "sql,nosql,kvs", 
-							}).Error("error while trying to init all database drivers.")
-		return db, err
-	}
-	return db, nil
-}
 
 func (db *DatabaseDrivers) New(verbose bool, debug bool) (*DatabaseDrivers, error) {
 	adapter := "sqlite3"
@@ -179,7 +165,26 @@ func (db *DatabaseDrivers) New(verbose bool, debug bool) (*DatabaseDrivers, erro
 	return db, nil
 }
 
-func New(verbose bool) (db *DatabaseDrivers, err error) {
+//func GetDatabases(cfg *config.Config, verbose bool, debug bool) (db *DatabaseDrivers, err error) {
+func GetDatabases() (*DatabaseDrivers, error) {
+	var db = &DatabaseDrivers{}
+	var err error
+	if db, err 	= New(true, true); err != nil {
+		log.WithError(err).WithFields(
+			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
+							"prefix": 			"dbs-get-all",
+							"method.name": 		"GetDatabases(...)", 
+							"method.prev": 		"New(...)",
+							"db.driver": 		"all", 
+							"db.driver.groups": "sql,nosql,kvs", 
+							}).Error("error while trying to init all database drivers.")
+		return db, err
+	}
+	return db, nil
+}
+
+//func New(cfg *config.Config, verbose bool, debug bool) (db *DatabaseDrivers, err error) {
+func New(verbose bool, debug bool) (db *DatabaseDrivers, err error) {
 	adapter := "sqlite3"
 	if err := db.initGorm(adapter, "./shared/data/limo/limo.db", true); err != nil {
 		log.WithError(err).WithFields(
@@ -244,12 +249,16 @@ func New(verbose bool) (db *DatabaseDrivers, err error) {
 							}).Error("error while trying to auto-load all program the tables")
 		return db, err
 	}
+
+	// graphql
+	// client := graphql.NewClient("https://example.com/graphql", nil, nil)
+
 	return db, nil
 }
 
 func (db *DatabaseDrivers) Close() {
 	// others
-    db.RedisCli.Close()
+    db.redisCli.Close()
 }
 
 func InitDatabases() (db *DatabaseDrivers, err error) {
@@ -534,7 +543,7 @@ func (db *DatabaseDrivers) closeBoltDB() {
 
 func (db *DatabaseDrivers) initRedis(Password string, DbNum int) {
     var err error
-    db.redisCli, err = redis.Dial("tcp", ":6379")
+    redisCli, err := redis.Dial("tcp", ":6379")
     if err != nil {
         //log.Println("failed to create the client", err)
 		log.WithError(err).WithFields(
@@ -547,6 +556,8 @@ func (db *DatabaseDrivers) initRedis(Password string, DbNum int) {
 							}).Errorln("failed to create the client", err)
         return
     }
+	db.redisCli = redisCli
+	/*
     var err2 error
     _, err2 = db.redisCli.Client.Do("SELECT", DbNum)
     if err2 != nil {
@@ -560,10 +571,11 @@ func (db *DatabaseDrivers) initRedis(Password string, DbNum int) {
 							}).Errorln("failed to create the client", err2)
         // log.Println("failed to create the client", err2)
     }
+    */
 }
 
 func (db *DatabaseDrivers) closeRedis() {
-    db.RedisCli.Close()
+    db.redisCli.Close()
 }
 
 func (db *DatabaseDrivers) initEtcd(hosts []string, timeout time.Duration, verbose bool) error {

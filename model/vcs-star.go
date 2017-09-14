@@ -102,6 +102,8 @@ type Star struct {
 	ServiceID   		uint 				// `gorm:"index:idx_name_code"`
 	ReadmeDoc        	string
 
+	//Admins    		map[string]interface{}
+
 	// Extra
 	TopicsList 			string
 	Topics      		[]Topic 					`gorm:"many2many:star_topics;"`
@@ -118,6 +120,7 @@ type Star struct {
 type StarResult struct {
 	Star  			*Star
 	ExtraInfo 		*GatewayBucket_GithubRepoExtraInfo
+	//Cache  		map[string]*RepositoryInfo
 	Error 			error
 }
 

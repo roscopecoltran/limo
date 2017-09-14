@@ -18,4 +18,4 @@ type BoltDB_Github_DataStore interface {
 	UpdateCommitComment(*github.RepositoryComment) error
 }
 
-
+// https://github.com/hfurubotten/autograder/blob/master/database/database.go

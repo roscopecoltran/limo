@@ -1,6 +1,13 @@
 package service
 
+
+// https://github.com/shurcooL/notifications
+// Package fs implements notifications.Service using a virtual filesystem.
+// Package githubapi implements notifications.Service using GitHub API clients.
+// https://github.com/pachyderm/pachyderm
+
 /*
+
 import (
 	// data
 	"github.com/roscopecoltran/sniperkit-limo/model"

@@ -20,6 +20,11 @@ import (
 	// fuzz "github.com/google/gofuzz"
 )
 
+// https://github.com/hfurubotten/autograder/blob/master/game/entities/repo.go
+// https://github.com/hfurubotten/autograder/blob/master/game/entities/tokens.go
+// https://github.com/hfurubotten/autograder/blob/master/game/entities/entities.go
+// https://github.com/hfurubotten/autograder
+
 /*
 type GitHubUser struct {
 	Account 			string 		`json:"account"`
@@ -57,6 +62,10 @@ type Github struct {
 	//PerPage  		int 								`yaml:"-" json:"-"`
 }
 
+// Login + OAuth2
+// https://github.com/Jimdo/repos/blob/master/github.go#L33-L41
+// https://github.com/Jimdo/repos/blob/master/main.go#L31-L35
+
 // Login logs in to Github
 func (g *Github) Login(ctx context.Context) (string, error) {
 	interview := createInterview()
@@ -72,14 +81,21 @@ func (g *Github) Login(ctx context.Context) (string, error) {
 	if err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{
-				"prefix": 			"svc-github",
-				"parent": 			"(g *Github) Login(...)", 
-				"ancestor": 			"interview.Run(...)", 
+				"prefix": 				"svc-github",
+				"src.file": 			"svc-vcs-github.go",
+				"method.name": 			"(g *Github) Login(...)", 
+				"method.prev": 			"interview.Run(...)", 
 			}).Warn("asking the login credentials via the cli app.")
 		return "", err
 	}
 	return answers["token"].(string), nil
 }
+
+/*
+func NewGithubClient() *github.Client {
+	return github.NewClient(transport.NewMemoryCacheTransport().Client())
+}
+*/
 
 /*
 // https://raw.githubusercontent.com/blevesearch/bleve-wiki-indexer/master/git.go
@@ -146,6 +162,306 @@ func (g *Github) GetUserInfo(ctx context.Context, token string, user string) (*g
 		TextMatch:   false,
 		ListOptions: github.ListOptions{PerPage: c.Int("num"), Page: c.Int("page")},
 	}
+}
+*/
+
+/*
+
+func NewGithubClient() *github.Client {
+	return github.NewClient(transport.NewMemoryCacheTransport().Client())
+}
+
+func NewGithubClientWithToken(token string) *github.Client {
+	return github.NewClient(transport.NewMemoryCacheTransport().SetToken(token).Client())
+}
+
+func NewBiblio(client *github.Client) *Biblio {
+	biblio := &Biblio{
+		Cache:  make(map[string]*RepositoryInfo),
+		Client: client,
+	}
+	if client == nil {
+		biblio.Client = NewGithubClient()
+	}
+
+	return biblio
+}
+
+func (b *Biblio) listRepositoriesByOrg(org string) ([]*github.Repository, error) {
+	allRepositories := make([]*github.Repository, 0)
+	for i := 1; ; i++ {
+		repositories, _, err := b.Client.Repositories.ListByOrg(context.Background(), org,
+			&github.RepositoryListByOrgOptions{
+				ListOptions: github.ListOptions{
+					Page:    i,
+					PerPage: 100,
+				},
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+		if len(repositories) == 0 {
+			break
+		}
+		allRepositories = append(allRepositories, repositories...)
+	}
+	return allRepositories, nil
+}
+
+func (b *Biblio) getRepositories(org string, repositories ...string) ([]*github.Repository, error) {
+	var err error
+	var allRepositories []*github.Repository
+	if len(repositories) == 0 {
+		allRepositories, err = b.listRepositoriesByOrg(org)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		for _, repo := range repositories {
+			repository, _, err := b.Client.Repositories.Get(context.Background(), org, repo)
+			if err != nil {
+				return nil, err
+			}
+
+			allRepositories = append(allRepositories, repository)
+		}
+	}
+	return allRepositories, nil
+}
+
+func (b *Biblio) countNewOpenIssues(org, repo string, lastSyncedIssue int) (int, int, error) {
+	newLastSyncedIssue := lastSyncedIssue
+	count := 0
+	var once sync.Once
+
+	for i := 1; ; i++ {
+		var issues []*github.Issue
+		issues, _, err := b.Client.Issues.ListByRepo(context.Background(), org, repo, &github.IssueListByRepoOptions{
+			ListOptions: github.ListOptions{
+				Page:    i,
+				PerPage: 100,
+			},
+		})
+		if err != nil {
+			return 0, 0, err
+		}
+		if len(issues) == 0 {
+			break
+		}
+
+		for _, issue := range issues {
+			if *issue.Number <= lastSyncedIssue {
+				return count, newLastSyncedIssue, nil
+			} else {
+				once.Do(func() {
+					newLastSyncedIssue = *issue.Number
+				})
+				count++
+			}
+		}
+	}
+	return count, newLastSyncedIssue, nil
+}
+
+func (b *Biblio) getStargazers(org, repo string) ([]string, error) {
+	users := make([]string, 0)
+	for i := 1; ; i++ {
+		stargazers, _, err := b.Client.Activity.ListStargazers(context.Background(), org, repo,
+			&github.ListOptions{
+				Page:    i,
+				PerPage: 100,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+		if len(stargazers) == 0 {
+			break
+		}
+
+		for _, stargazer := range stargazers {
+			users = append(users, *(stargazer.User.Login))
+		}
+	}
+	return users, nil
+}
+
+func (b *Biblio) GetRepositoriesInfo(org string, repositoris ...string) (map[string]*RepositoryInfo, error) {
+	allRepositories, err := b.getRepositories(org, repositoris...)
+	if err != nil {
+		return nil, err
+	}
+
+	cachedOrganizationReposInfo := b.Cache
+	newOrganizationReposInfoMap := make(map[string]*RepositoryInfo)
+
+	for _, repo := range allRepositories {
+		repoName := ""
+		if repo.Name != nil {
+			repoName = *repo.Name
+		}
+
+		if repoName == "" {
+			continue
+		}
+
+		cachedRepoInfo := cachedOrganizationReposInfo[repoName]
+		repoInfo := new(RepositoryInfo)
+
+		// Track Issues
+		lastSyncedIssue := 0
+		if cachedRepoInfo != nil {
+			lastSyncedIssue = cachedRepoInfo.LastSyncedIssue.IssueNumber
+		}
+		count, issueNumber, err := b.countNewOpenIssues(org, repoName, lastSyncedIssue)
+		if err != nil {
+			return nil, err
+		}
+		repoInfo.LastSyncedIssue.IssueNumber = issueNumber
+		repoInfo.LastSyncedIssue.Count = count
+
+		// Track Stargazers
+		users, err := b.getStargazers(org, repoName)
+		if err != nil {
+			return nil, err
+		}
+		repoInfo.Stargazers = users
+
+		// Track
+		if repo.ForksCount != nil {
+			repoInfo.ForksCount = *repo.ForksCount
+		}
+
+		newOrganizationReposInfoMap[repoName] = repoInfo
+	}
+	return newOrganizationReposInfoMap, nil
+}
+
+func (b *Biblio) InitializeCache(org string, repositories ...string) error {
+	repositoriesInfo, err := b.GetRepositoriesInfo(org, repositories...)
+	if err != nil {
+		return err
+	}
+	b.Cache = repositoriesInfo
+	return nil
+}
+
+*/
+
+/*
+
+// gh notifications
+// https://github.com/timakin/octop/blob/master/client/github.go
+
+func GetTagList() []string {
+	client := github.NewClient(nil)
+	ctx := context.Background()
+	var tagList []string
+
+	opt := &github.ListOptions{}
+	tags, _, err := client.Repositories.ListTags(ctx, GITHUB_OWNER, GITHUB_REPO, opt)
+
+	if err != nil {
+		fmt.Printf("Unable to get tag list from GitHub: %s", err)
+	}
+
+	for _, tag := range tags {
+		tagList = append(tagList, tag.GetName())
+	}
+
+	return tagList
+}
+
+func GetLatest() string {
+	client := github.NewClient(nil)
+	ctx := context.Background()
+	release, _, err := client.Repositories.GetLatestRelease(ctx, GITHUB_OWNER, GITHUB_REPO)
+
+	if err != nil {
+		fmt.Printf("Unable to get latest release from GitHub: %s", err)
+	}
+
+	return release.GetTagName()
+}
+
+func downloadFile(tag string, outFileName string) {
+	client := github.NewClient(nil)
+	ctx := context.Background()
+	opt := &github.RepositoryContentGetOptions{
+		Ref: tag,
+	}
+	out, err := client.Repositories.DownloadContents(ctx, GITHUB_OWNER, GITHUB_REPO, "FINT-informasjonsmodell.xml", opt)
+	if err != nil {
+		fmt.Printf("Unable to download XMI file from GitHub: %s", err)
+	}
+	outFile, err := os.Create(outFileName)
+	defer outFile.Close()
+	_, err = io.Copy(outFile, out)
+	if err != nil {
+		fmt.Printf("Unable to write XMI file: %s", err)
+	}
+}
+
+func getFilePath(tag string) string {
+	homeDir, err := homedir.Dir()
+	if err != nil {
+		fmt.Println("Unable to get homedir.")
+		os.Exit(2)
+	}
+	dir := fmt.Sprintf("%s/.fint-model/.cache", homeDir)
+	err = os.MkdirAll(dir, 0777)
+
+	if err != nil {
+		fmt.Println("Unable to create .fint-model")
+		os.Exit(2)
+	}
+
+	outFileName := fmt.Sprintf("%s/%s.xml", dir, tag)
+
+	return outFileName
+}
+
+unc toUtf8(fileName string) {
+	f, err := os.Open(fileName)
+	if err != nil {
+		fmt.Printf("Error opening %s (%s)", fileName, err)
+		os.Exit(2)
+	}
+	defer f.Close()
+
+	r := charmap.Windows1252.NewDecoder().Reader(f)
+
+	content, err := ioutil.ReadAll(r)
+	if err != nil {
+		panic(err)
+	}
+
+	err = ioutil.WriteFile(fileName, content, 0777)
+
+	if err != nil {
+		fmt.Println("\nio.Copy failed:", err)
+	}
+
+}
+
+func GetBranchList() []string {
+	client := github.NewClient(nil)
+	ctx := context.Background()
+	var branchList []string
+
+	opt := &github.ListOptions{}
+	branches, _, err := client.Repositories.ListBranches(ctx, GITHUB_OWNER, GITHUB_REPO, opt)
+
+	if err != nil {
+		fmt.Printf("Unable to get branch list from GitHub: %s", err)
+	}
+
+	for _, b := range branches {
+		branchList = append(branchList, b.GetName())
+	}
+
+	return branchList
 }
 */
 
@@ -353,7 +669,7 @@ func (g *Github) GetStars(ctx context.Context, starChan chan<- *model.StarResult
 							// "extraInfo": 		*extraInfo, 
 							// "*repo.Repository": 	*repo.Repository, 
 							}).Warn("error while getting the additional readme related info.")
-					readmeInfo = &github.RepositoryContent{}
+					// readmeInfo := &github.RepositoryContent{}
 				}
 				starChan <- &model.StarResult{
 					Error: err,
@@ -395,7 +711,7 @@ func (g *Github) GetEvents(ctx context.Context, eventChan chan<- *model.EventRes
 					"next": 				"eventChan <- &model.EventResult{...}",
 					"currentPage": 			currentPage, 
 					"lastPage": 			lastPage, 
-					"fetchedEventCount": 	fetchedEventCount, 
+					"fetchedItemCount": 	fetchedItemCount, 
 					}).Warn("error while fetching additional events data/page info.")
 			eventChan <- &model.EventResult{
 				Error: err,
@@ -414,7 +730,7 @@ func (g *Github) GetEvents(ctx context.Context, eventChan chan<- *model.EventRes
 			"prefix": 				"svc-github",
 			"parent": 				"(g *Github) GetEvents(...)", 
 			"ancestor": 				"eventChan <- &model.EventResult{...}",
-			"fetchedEventCount": 	fetchedItemCount,
+			"fetchedItemCount": 	fetchedItemCount,
 			"currentPage": 			currentPage,
 			}).Info("fetching content from new pages...")
 		currentPage++
@@ -428,11 +744,11 @@ func (g *Github) GetTrending(ctx context.Context, trendingChan chan<- *model.Sta
 	log.WithFields(logrus.Fields{
 		"prefix": 			"svc-github",
 		"parent": 			"(g *Github) GetTrending(...)", 
-		"ancestor": 			"g.getClient(...)",
+		"ancestor": 		"g.getClient(...)",
 		"next": 			"g.getDateSearchString(...)",
-		"token", 			token,
-		"language", 		language,
-		"verbose", 			verbose,
+		"token": 			token,
+		"language": 		language,
+		"verbose": 			verbose,
 		}).Info("returning the trending repositories...")
 	// TODO perhaps allow them to specify multiple pages?
 	// Might be overkill -- first page probably plenty

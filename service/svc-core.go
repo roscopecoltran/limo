@@ -7,10 +7,10 @@ import (
 	"strings" 													// go-core
 	"os" 														// go-core
 	"github.com/fatih/color" 									// cli-output
-	"github.com/hoop33/entrevista" 								// cli	
-	"github.com/roscopecoltran/sniperkit-limo/model" 			// data
-	"github.com/sirupsen/logrus" 								// logs
-	prefixed "github.com/x-cray/logrus-prefixed-formatter" 		// logs
+	"github.com/hoop33/entrevista" 								// cli-interactive
+	"github.com/roscopecoltran/sniperkit-limo/model" 			// data-model
+	"github.com/sirupsen/logrus" 								// logs-logrus
+	prefixed "github.com/x-cray/logrus-prefixed-formatter" 		// logs-logrus
 )
 
 // https://github.com/cloudflavor/shep/blob/master/pkg/services/system.go
@@ -33,7 +33,6 @@ type Service interface {
 }
 
 // Add providers and engines here !
-
 var services = make(map[string]Service)
 
 func registerService(service Service) {
@@ -45,12 +44,12 @@ func Name(service Service) string {
 	parts 	:= strings.Split(reflect.TypeOf(service).String(), ".")
 	name 	:= strings.ToLower(parts[len(parts)-1])
 	log.WithFields(logrus.Fields{
-		"service": 		"service/service.go",
-		"prefix": 		"svc-core",
-		"call": 		"Name(...)",
-		"parts": 		parts,
-		"name": 		name,
-		}).Info("returning service name...")
+		"src.file": 		"service/svc-core.go",
+		"prefix": 			"svc-core",
+		"method.name": 		"Name(...)",
+		"var.parts": 		parts,
+		"var.name": 		name,
+		}).Info("returned service name...")
 	return name
 }
 
@@ -60,11 +59,11 @@ func ForName(name string) (Service, error) {
 		return service, nil
 	}
 	log.WithFields(logrus.Fields{
-		"service": 		"service/service.go",
-		"prefix": 		"svc-core",
-		"call": 		"ForName(...)",
-		"name": 		name,
-		}).Errorf("Service '%s' not found", name)
+		"src.file": 		"service/svc-core.go",
+		"prefix": 			"svc-core",
+		"method.name": 		"ForName(...)",
+		"var.name": 		name,
+		}).Error("Service not found...")
 	return &NotFound{}, fmt.Errorf("Service '%s' not found", name)
 }
 

@@ -113,10 +113,11 @@ func init() {
 	*/
 }																																	
 
-func New(verbose bool) (cfg *config.Config, db *model.DatabaseDrivers, err error) {
+func New(verbose bool) (*config.Config, *model.DatabaseDrivers, err error) {
 
-	configFiles := []string{defaultConfigFilePath}
-	cfg, err = config.New(cfg, true, true, true, configFiles)
+	configFiles 	:= []string{defaultConfigFilePath}
+	db 				:= &config.Config{}
+	cfg, err 		 = config.New(cfg, true, true, true, configFiles)
 	if err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	
@@ -125,7 +126,8 @@ func New(verbose bool) (cfg *config.Config, db *model.DatabaseDrivers, err error
 		return cfg, db, err
 	}
 
-	db, err = model.New(true)
+	db 			:= &model.DatabaseDrivers{}
+	db, err 	 = model.New(true, true)
 	if err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	
@@ -133,29 +135,45 @@ func New(verbose bool) (cfg *config.Config, db *model.DatabaseDrivers, err error
 				}).Fatal("error while loading the databases drivers.")
 		return cfg, db, err
 	}
-
-	log.WithFields(
-		logrus.Fields{	
-			"action": 	"init",
-			"status": 	"successful",
-			"cfg": 		cfg,
-			"db": 		db,
-			}).Debug("error while loading the databases drivers.")
-
+	if verbose {
+		log.WithFields(
+			logrus.Fields{	
+				"action": 	"init",
+				"status": 	"successful",
+				"cfg": 		cfg,
+				"db": 		db,
+				}).Debug("error while loading the databases drivers.")
+	}
 	return cfg, db, nil
 
+}
+
+func NewConfiguration() (*config.Config, err error) {
+	configFilePath 	:= config.FindLocalConfig()
+	configuration 	:= &config.Config{}
+	if configFilePath != "" {
+		log.WithFields(logrus.Fields{	
+			"config": 	"getConfiguration",
+			}).Infof("FOUND configuration data to load: %#s", configFilePath)
+	}
+	if err := configor.Load(&configuration, configFilePath, defaultConfigFilePath); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{	
+			"config": 	"getConfiguration",
+			}).Fatal("error while loading the config files with configor package.")
+	}
+	return configuration, nil
 }
 
 func getConfiguration() (configuration config.Config, err error) {
 	configFilePath := config.FindLocalConfig()
 	if configFilePath != "" {
 		log.WithFields(logrus.Fields{	
-			"config": 	"getConfiguration"
+			"config": 	"getConfiguration",
 			}).Infof("FOUND configuration data to load: %#s", configFilePath)
 	}
 	if err := configor.Load(&configuration, configFilePath, defaultConfigFilePath); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{	
-			"config": 	"getConfiguration"
+			"config": 	"getConfiguration",
 			}).Fatal("error while loading the config files with configor package.")
 	}
 	return configuration, nil
@@ -178,7 +196,7 @@ func getDatabase() (*gorm.DB, error) {
 			return nil, err
 		}
 		//db, err = model.InitDB(cfg.DatabasePath, true)
-		gormCli, err := model.InitDB(cfg.DatabasePath, "sqlite3", options.verbose)
+		gormCli, err := model.InitGorm(cfg.DatabasePath, "sqlite3", options.verbose)
 		if err != nil {
 			return nil, err
 		}

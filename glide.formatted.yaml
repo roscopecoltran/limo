@@ -1,3 +1,4 @@
+---
 package: github.com/roscopecoltran/sniperkit-limo
 homepage: https://github.com/roscopecoltran/sniperkit-limo
 license: MIT
@@ -8,8 +9,6 @@ owners:
 - name: Luc Michalski
   email: michalski.luc@gmail.com
   homepage: https://github.com/lucmichalski
-# templates in go
-# https://github.com/pilu/plate
 ignore:
 - gob
 - enterprise.getqor.com
@@ -18,183 +17,16 @@ ignore:
 - github.com/docker/distribution
 - golang.org/x/crypto/ssh/knownhosts
 - github.com/docker/docker
-# - github.com/golang/protobuf/ptypes
 - github.com/Sirupsen/logrus
-# - github.com/golang/protobuf
-# - github.com/go-kit/kit
 import:
-- package: github.com/d4l3k/messagediff
-#  subpackages:
-- package: github.com/d4l3k/go-internetarchive
-- package: github.com/degdb/degdb
-  subpackages:
-  - core
-  - crypto
-  - bitcoin
-  - network
-  - network/customhttp
-  - network/ip 
-  - protocol
-  - query
-  - triplestore
-- package: github.com/d4l3k/etcdummy
-- package: github.com/d4l3k/go-highlight
-  subpackages:
-  - languages
-  - registry
-  - trie 
-- package: github.com/rai-project/dlframework
-- package: github.com/rai-project/go-mxnet-predictor
-- package: github.com/rai-project/caffe
-- package: github.com/rai-project/caffe2
-- package: github.com/rai-project/go-caffe2
-- package: github.com/rai-project/carml
-- package: github.com/rai-project/mxnet
-- package: github.com/rai-project/tensorflow
-- package: github.com/docker/libkv
-  subpackages:
-  - store/boltdb
-  - store/consul
-  - store/etcd
-  - store/mock
-  - store/zookeeper
-- package: github.com/rai-project/inle
-- package: github.com/rai-project/raid
-- package: github.com/rai-project/rai
-- package: github.com/rai-project/dldataset
-  subpackages:
-  - vision
-- package: github.com/rai-project/rai-srcmanager
-  subpackages:
-  - pkg
-- package: github.com/dchest/cache
-- package: github.com/foobarcloud/emerald
-- package: github.com/patrickmn/go-cache
-- package: github.com/huandu/skiplist
-- package: github.com/ryszard/goskiplist
-  subpackages:
-  - skiplist
-# tensorflow
-- package: github.com/ryszard/tfutils
-  subpackages:
-  - go/tfrecord
-  - go/example
-- package: github.com/luk-ai/lukai
-  subpackages:
-  - bindable
-  - debounce
-  - metrics 
-  - net 
-  - protobuf/aggregatorpb
-  - protobuf/clientpb
-  - protobuf/managerpb
-  - protobuf/tensorflow
-  - tf
-- package: github.com/mellistibco/DataPrep
-  subpackages:
-  - HumanActivity/PreProcessData
-- package: github.com/mellistibco/flogo-ml
-  subpackages:
-  - activities/inference
-  - framework
-  - framework/tf 
-  - model
-  - tensorflow/core/framework 
-  - tensorflow/core/protobuf 
-  - tensorflow/core/example 
-  - utils
-- package: github.com/jbowles/lexer
-- package: github.com/antzucaro/matchr
-- package: github.com/mynameisfiber/gohll
-- package: github.com/jbowles/wordvec
-- package: github.com/jbowles/nlpt-detect
-- package: github.com/jbowles/nlpt-ir
-- package: github.com/jbowles/wordlab
-- package: github.com/jbowles/nlpt-tkz
-- package: github.com/cdipaolo/goml
-  subpackages:
-  - base
-  - perceptron
-  - linear
-  - text
-  - cluster
-- package: github.com/jbowles/topiclab
-- package: github.com/jbowles/nlpt-cld2
-- package: github.com/vseledkin/govector
-  subpackages:
-  - annoy
-  - govin
-  - index
-  - mmap
-- package: github.com/vseledkin/golda
-- package: github.com/vseledkin/gortex
-  subpackages:
-  - assembler
-  - utilities
-- package: github.com/vseledkin/goartm
-- package: github.com/alex023/eventbus
-- package: github.com/speps/go-hashids
-- package: github.com/wujiang/mglda  
-- package: gopkg.in/gormigrate.v1
-- package: github.com/maruel/panicparse
-  subpackages:
-  - internal
-  - stack
-- package: github.com/jirfag/go-queryset
-  subpackages:
-  - queryset
-- package: github.com/jdkato/prose
-  subpackages:
-  - tokenize
-  - transform
-  - summarize
-  - tag 
-  - internal/util
-  - internal/model
-  - chunk
-- package: github.com/shixzie/nlp
-- package: github.com/mholt/archiver
-- package: github.com/sybrexsys/RapidMQ
-  subpackages:
-  - queue
-- package: github.com/asaskevich/EventBus
-- package: github.com/muesli/beehive
-  subpackages:
-  - bees
-- package: github.com/muesli/regommend
-- package: github.com/yanpozka/allst  
-- package: github.com/golang/protobuf
-  version: master
-  vcs: git
-  subpackages:
-  - proto
-  - protoc-gen-go/descriptor
-  # - ptypes
-  - ptypes/any
-  - ptypes/duration  
-  - ptypes/empty
-  - ptypes/struct
-  - ptypes/timestamp
-  - ptypes/wrappers
-  - descriptor
-  - jsonpb
-  - proto
-- package: github.com/yanpozka/radixsort
-- package: github.com/yanpozka/trie
-- package: github.com/h2non/filetype
-# chromium
 - package: github.com/disintegration/pak
-# env 
+- package: github.com/disintegration/imageorient
 - package: github.com/kelseyhightower/envconfig
-# web camera
 - package: github.com/blackjack/webcam
   subpackages:
   - ioctl
-# crawlers / screenshots
 - package: github.com/tebeka/selenium
-# cache
 - package: gopkg.in/redis.v5
-# tensorflow
 - package: github.com/tensorflow/tensorflow
   subpackages:
   - tensorflow/go
@@ -211,19 +43,28 @@ import:
   subpackages:
   - config
 - package: github.com/galeone/tfgo
-# chrom
 - package: github.com/sauyon/go-chromemessage
-  subpackages: ["chrome"]
-# data processing
+  subpackages:
+  - chrome
 - package: github.com/gocarina/gocsv
 - package: github.com/raff/godet
-# machine learning
 - package: github.com/tchajed/wordenc
-  subpackages: ["shortdict"]
+  subpackages:
+  - shortdict
 - package: github.com/garyburd/redigo
-  subpackages: ["redis"]
+  subpackages:
+  - redis
 - package: golang.org/x/image
-  subpackages: ["bmp","font","math/fixed","riff","tiff","tiff/lzw","vp8","vp8l","webp"]
+  subpackages:
+  - bmp
+  - font
+  - math/fixed
+  - riff
+  - tiff
+  - tiff/lzw
+  - vp8
+  - vp8l
+  - webp
 - package: github.com/rainycape/unidecode
 - package: github.com/qor/oss
   subpackages:
@@ -251,7 +92,7 @@ import:
   - graph/mongo
   - graph/path
   - graph/sql
-- package: github.com/ynqa/word-embedding  
+- package: github.com/ynqa/word-embedding
   subpackages:
   - models
   - models/word2vec
@@ -260,15 +101,6 @@ import:
   - utils/fileio
   - utils/set
   - utils/vector
-# https://github.com/tensorflow/tensorflow/tree/master/tensorflow/go
-- package: github.com/johnsto/go-highlight
-  subpackages:
-  - output
-  - output/term
-  - lexers
-- package: github.com/juju/errors
-- package: github.com/sourcegraph/syntaxhighlight
-- package: github.com/pksunkara/pygments
 - package: github.com/tensorflow/tensorflow
   subpackages:
   - tensorflow/go
@@ -276,17 +108,12 @@ import:
 - package: github.com/jmcvetta/randutil
 - package: gopkg.in/mgo.v2
   version: v2-unstable
-  # version: v2
   subpackages:
   - bson
   - txn
-- package: github.com/gregjones/httpcache
 - package: golang.org/x/net
   subpackages:
   - context
-  - html
-  - html/atom
-  - webdav
 - package: github.com/ChimeraCoder/gojson
 - package: github.com/mitchellh/mapstructure
 - package: github.com/kylelemons/godebug
@@ -300,13 +127,13 @@ import:
   subpackages:
   - lang
 - package: github.com/inconshreveable/log15
-  version: ^2.11.0
+  version: "^2.11.0"
 - package: github.com/jessevdk/go-flags
-  version: ^1.2.0
+  version: "^1.2.0"
 - package: github.com/rwcarlsen/goexif
   version: go1
 - package: github.com/satori/go.uuid
-  version: ^1.1.0
+  version: "^1.1.0"
 - package: gopkg.in/src-d/go-billy.v3
   version: d0dc16de10d86398cc9aba4513a2453b401eceb3
   repo: https://github.com/src-d/go-billy.git
@@ -327,7 +154,7 @@ import:
   - storage/filesystem
   - utils/ioutil
 - package: gopkg.in/src-d/go-kallax.v1
-  version: ^1.3.1
+  version: "^1.3.1"
 - package: gopkg.in/src-d/core-retrieval.v0
   version: 7426f069e342b557b38853af1e372aa664a1678f
   subpackages:
@@ -345,19 +172,24 @@ import:
   - ssh
   - ssh/knownhosts
   - md4
-  - openpgp
-  - openpgp/armor
-  - openpgp/clearsign
+- package: github.com/golang/protobuf
+  subpackages:
+  - proto
+  - protoc-gen-go/descriptor
+  - ptypes/any
+  - descriptor
+  - jsonpb
+  - proto
 - package: github.com/src-d/go-billy
   subpackages:
   - helper
   - memfs
   - osfs
   - utill
-- package: gopkg.in/src-d/go-siva.v1  
+- package: gopkg.in/src-d/go-siva.v1
 - package: github.com/markbates/goth
 - package: github.com/volatiletech/authboss
-- package: github.com/kaneshin/pigeon  
+- package: github.com/kaneshin/pigeon
 - package: github.com/qor/qor-example
   subpackages:
   - config
@@ -373,20 +205,12 @@ import:
 - package: github.com/roscopecoltran/go-github
   version: sniperkit
   vcs: git
-## file system notification
 - package: github.com/fsnotify/fsnotify
-# wiki(s) - markdowns
 - package: github.com/russross/blackfriday
 - package: github.com/mschoch/blackfriday-text
-# linguist packages
-#- package: gopkg.in/src-d/enry.v1
 - package: github.com/src-d/enry
   subpackages:
   - data
-#  - internal/tokenizer
-#  - internal/code-generator/generator
-#  - internal/code-generator/assets
-#  - internal/code-generator/assets
 - package: github.com/GeertJohan/go.rice
 - package: github.com/rai-project/linguist
   subpackages:
@@ -416,7 +240,7 @@ import:
   - numerics
   - queue
   - rangetree
-  - rtree 
+  - rtree
   - set
   - slice
   - sort
@@ -448,18 +272,15 @@ import:
 - package: gopkg.in/fatih/set.v0
 - package: github.com/motemen/go-colorine
 - package: github.com/onsi/gomega
-# graphs
 - package: github.com/hydrogen18/memlistener
   version: master
 - package: github.com/segmentio/ksuid
   version: master
-#- package: github.com/segmentio/ksuid
-#  version: master
 - package: github.com/kayteh/waifudb
   subpackages:
-  - db 
+  - db
   - datastore
-  - client 
+  - client
   - util
 - package: github.com/ziahamza/blend
   subpackages:
@@ -481,43 +302,48 @@ import:
   - graph
   - wiki
 - package: github.com/ckaznocha/taggraph
-# plugins
 - package: github.com/zephyyrr/plugins
   subpackages:
   - structhandler
 - package: github.com/jsimnz/goplugin
 - package: github.com/rcrowley/go-metrics
-# - package: github.com/dustin/go-humanize
 - package: github.com/gtank/cryptopasta
 - package: github.com/hashicorp/go-plugin
-# - package: github.com/schorsch/go-callbacks
 - package: github.com/fatih/structs
 - package: github.com/imdario/mergo
 - package: github.com/golibri/list
-# kvs
 - package: github.com/coreos/etcd
   version: v3.2.7
   subpackages:
   - client
-  - clientv3
-# config
-- package: github.com/spf13/viper  
+- package: github.com/spf13/viper
   version: v1.0.0
-# auth
 - package: gopkg.in/dgrijalva/jwt-go.v3
-# grpc
 - package: google.golang.org/grpc
-  version: ^1.6.0
-  subpackages: ["codes","credentials","credentials/oauth","grpclb/grpc_lb_v1","grpclog","internal","keepalive","metadata","naming","peer","stats","status","tap","transport"]
+  version: "^1.6.0"
+  subpackages:
+  - codes
+  - credentials
+  - credentials/oauth
+  - grpclb/grpc_lb_v1
+  - grpclog
+  - internal
+  - keepalive
+  - metadata
+  - naming
+  - peer
+  - stats
+  - status
+  - tap
+  - transport
 - package: github.com/go-kit/kit
-  version: ~0.5.0
+  version: "~0.5.0"
   subpackages:
   - log
   - log/level
   - log/term
   - endpoint
   - transport/http
-# - package: "github.com/turtlemonvh/blanket-api
 - package: github.com/UltimateSoftware/udocs
   subpackages:
   - cli/cmd
@@ -525,16 +351,13 @@ import:
   - cli/server
   - cli/storage
   - cli/udocs
-# - package: google.golang.org/grpc
-#   subpackages:
-#   - reflection
 - package: github.com/k0kubun/pp
 - package: github.com/alaska/boltqueue
 - package: github.com/oliveagle/boltq
 - package: github.com/x-cray/logrus-prefixed-formatter
 - package: github.com/mgutz/ansi
 - package: github.com/BurntSushi/toml
-- package: github.com/mitchellh/go-homedir  
+- package: github.com/mitchellh/go-homedir
 - package: github.com/blevesearch/bleve
   version: v0.5.0
   subpackages:
@@ -583,44 +406,8 @@ import:
   version: master
   subpackages:
   - filesystem
-# - package: github.com/libgit2/git2go
-- package: github.com/toomore/lazyflickrgo
-  subpackages:
-  - utils
-  - flickr
-  - jsonstruct
-  - 
-- package: github.com/smoya/ghtop
-  subpackages:
-  - pkg/contributor
-  - pkg/e2e
-  - pkg/handler
-  - pkg/logx
-  - pkg/server
-  - pkg/httpx
-- package: github.com/neelance/graphql-go
-  subpackages:
-  - relay
-- package: github.com/shurcooL/githubql
-  subpackages:
-  - ident
-  - internal/jsonutil
-- package: github.com/shurcooL/events
-  subpackages:
-  - event
-  - fs
-  - githubapi
-- package: github.com/shurcooL/notifications
-  subpackages:
-  - fs
-  - githubapi
-- package: github.com/shurcooL/users
-- package: github.com/google/go-querystring
-  subpackages:
-  - query
 - package: github.com/qor/slug
   version: master
-- package: github.com/go-redis/redis
 - package: github.com/bndr/gojenkins
   version: master
 - package: github.com/cep21/xdgbasedir
@@ -652,7 +439,7 @@ import:
   version: master
   subpackages:
   - github
-- package: github.com/dwarvesf/glod  
+- package: github.com/dwarvesf/glod
 - package: github.com/jinzhu/configor
   version: master
 - package: github.com/boltdb/bolt
@@ -665,13 +452,6 @@ import:
   - dialects/sqlite
   - dialects/msyql
   - dialects/postgres
-- package: github.com/golang/groupcache
-  subpackages:
-  - lru
-  - groupcachepb
-  - consistenthash
-  - singleflight
-- package: github.com/SlyMarbo/rss
 - package: github.com/qor/admin
   version: master
 - package: github.com/qor/qor
@@ -685,22 +465,21 @@ import:
 - package: github.com/xanzy/go-gitlab
   version: v0.5.1
 - package: google.golang.org/genproto
-  subpackages: ["googleapis/api/annotations","googleapis/iam/v1","googleapis/rpc/status"]
+  subpackages:
+  - googleapis/api/annotations
+  - googleapis/iam/v1
+  - googleapis/rpc/status
 - package: golang.org/x/oauth2
   version: master
-  subpackages: ["facebook","github","google","internal","jws","jwt"]
+  subpackages:
+  - facebook
+  - github
+  - google
+  - internal
+  - jws
+  - jwt
 - package: gopkg.in/yaml.v2
 - package: github.com/theplant/cldr
 - package: github.com/devopsfaith/krakend
 - package: github.com/src-d/go-git-fixtures
-testImport:
-# - package: github.com/arschles/assert
-# - package: github.com/stretchr/testify
-#   version: v1.1.4
-#   subpackages:
-#   - assert
-#   - mock
-#   - require
-#   - suite
-# - package: github.com/src-d/go-git-fixtures
-#   version: 03ddd4bf3d4a1baf61e72fd8ee4746db9005f5e7
+testImport: 
