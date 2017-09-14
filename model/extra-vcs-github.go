@@ -44,6 +44,28 @@ package model
 // https://github.com/bassam/stargazers
 // https://github.com/spencerkimball/repo-digest
 
+// cache
+// https://github.com/cloudfoundry/go-fetcher/blob/master/cache/cache_loader.go
+// github.com/cloudfoundry/go-fetcher
+// 
+
+// branch cleaner
+// https://github.com/pdalpra/github-branch-cleaner/blob/master/main.go
+
+// https://github.com/theothertomelliott/github-unwatch/blob/master/app/controllers/app.go
+
+// models
+// https://github.com/foobarcloud/emerald/blob/master/models/team.go
+// https://github.com/foobarcloud/emerald/blob/master/models/user.go
+// https://github.com/foobarcloud/emerald/blob/master/models/course.go
+// https://github.com/foobarcloud/emerald/blob/master/models/contributor.go
+// https://github.com/foobarcloud/emerald/blob/master/models/relation.go
+// https://github.com/foobarcloud/emerald/blob/master/models/tag.go
+// https://github.com/foobarcloud/emerald/blob/master/models/organization.go
+// https://github.com/foobarcloud/emerald/blob/master/models/branch.go
+
+
+
 
 // travis Repo
 // https://github.com/Jimdo/repos/blob/master/github.go

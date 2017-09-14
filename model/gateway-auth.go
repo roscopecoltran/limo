@@ -3,6 +3,7 @@ package model
 // https://github.com/euclid1990/gstats/blob/develop/utilities/google.go
 // https://github.com/euclid1990/gstats/blob/develop/utilities/redmine.go
 // https://github.com/euclid1990/gstats/blob/develop/utilities/github.go
+// https://github.com/hfurubotten/autograder/blob/master/global/global.go
 
 import (
 	//"fmt"

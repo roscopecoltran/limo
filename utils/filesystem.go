@@ -14,6 +14,8 @@ import (
 	// logs
 	"github.com/sirupsen/logrus"
 )
+
+// https://github.com/theothertomelliott/pooledioutil
 // https://github.com/jakdept/dir/blob/master/dir_test.go
 // watch + create
 

@@ -1,0 +1,29 @@
+{
+    "requests": [{
+        "id": "1",
+        "url": "http://localhost:8080/test1",
+        "method": "GET"
+    }, {
+        "id": "2",
+        "url": "http://localhost:8080/test2",
+        "method": "POST",
+        "payload": "{\"data\":%s}",
+        "dependency": [{
+            "request": {
+                "id": "21",
+                "url": "http://localhost:8080/provide1",
+                "method": "GET"
+            }
+        }, {
+            "request": {
+                "id": "22",
+                "url": "http://localhost:8080/provide2",
+                "method": "GET"
+            }
+        }],
+        "useData": true,
+        "doJoin": true,
+        "joinChar": ","
+    }],
+    "strictorder": true
+}

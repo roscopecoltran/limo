@@ -103,7 +103,6 @@ func (s *DataCacheRamDisk) Set(name string, data []byte) error {
 			"method.name": 			"(s *DataCacheRamDisk) Set(...)", 
 			"method.prev": 			"os.Create(...)", 
 			"var.name": 			name,
-			"var.file": 			file.Name(),
 			"var.s.FullPath": 		s.FullPath,
 		}).Error("could not set the sniperkit cache directory...")
 	return err

@@ -1,5 +1,5 @@
-hash: 0dec002b28a290f021ac63d3a4c0a81bd1e03191fc3c57c1717625f58c4017a2
-updated: 2017-09-14T17:57:37.856084913+02:00
+hash: 0b62fb2aadc9b9df959aeee331d08e9d03874814caf1b73377fa67799b5f553a
+updated: 2017-09-14T18:34:40.815350618+02:00
 imports:
 - name: github.com/aaasen/kapok
   version: b3a454001825c4e26fe21fac61f214c1a6c284ed
@@ -50,6 +50,19 @@ imports:
   subpackages:
   - variable
   - word2vec
+- name: github.com/AsynkronIT/goconsole
+  version: bfa12eebf7161a928e20d11a627cc689e99e2e50
+- name: github.com/AsynkronIT/protoactor-go
+  version: 4c279d430ef6367d3e5bde92139746ad5eabfed5
+  subpackages:
+  - actor
+  - cluster
+  - mailbox
+  - persistence
+  - protobuf
+  - remote
+  - router
+  - stream
 - name: github.com/aviddiviner/gin-limit
   version: 825c226896ef004b7cfde59a3be3694016e4d577
 - name: github.com/bassam/stargazers
@@ -248,6 +261,10 @@ imports:
   version: a539ee1a749a2b895533f979515ac7e6e0f5b650
   subpackages:
   - request
+- name: github.com/die-net/lrucache
+  version: 36174c11a4bb5b86413af31527b6a1469426ed06
+  subpackages:
+  - twotier
 - name: github.com/disintegration/imaging
   version: a5858022df0e1734a59f973fffe3f87b51c087ed
 - name: github.com/disintegration/mqmq
@@ -388,10 +405,14 @@ imports:
   - log/level
   - log/term
   - transport/http
+- name: github.com/go-logfmt/logfmt
+  version: 390ab7935ee28ec6b286364bba9b4dd6410cb3d5
 - name: github.com/go-redis/redis
   version: fdafb11e5fa5d52d965e12073c8a58468c98ebe2
 - name: github.com/go-sql-driver/mysql
   version: 14f4292c08c0daf077adddd5824cffc82a797ff4
+- name: github.com/go-stack/stack
+  version: 817915b46b97fd7bb80e8ab6b69f01a53ac3eebf
 - name: github.com/gocarina/gocsv
   version: f266cf0be5f037d9a61782dafa0f342f96919188
 - name: github.com/gogo/protobuf
@@ -566,7 +587,7 @@ imports:
 - name: github.com/jsimnz/goplugin
   version: 4abda20728804eb4dd833196790aee1c112c7c9d
 - name: github.com/json-iterator/go
-  version: 6a4ba7bfa9e8d65cfd026267a44165b688352ad7
+  version: 90574c5ca3e8f95d1d620a3e3158e971ada7a298
 - name: github.com/juju/errors
   version: c7d06af17c68cd34c835053720b21f6549d9b0ee
 - name: github.com/k0kubun/pp
@@ -590,6 +611,8 @@ imports:
   - zlib
 - name: github.com/klauspost/cpuid
   version: ae7887de9fa5d2db4eaa8174a7eff2c1ac00f2da
+- name: github.com/kr/logfmt
+  version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/kr/pretty
   version: cfb55aafdaf3ec08f0db22699ab822c50091b1c4
 - name: github.com/kr/text
@@ -812,6 +835,10 @@ imports:
   version: a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0
 - name: github.com/pelletier/go-toml
   version: 1d6b12b7cb290426e27e6b4e38b89fcda3aeef03
+- name: github.com/pivotal-golang/clock
+  version: 2269160ae1757f96bbb8c6475e6fa36c805e73e0
+- name: github.com/pivotal-golang/lager
+  version: 0bfa98e49e7a976af91e918d47978f07c00b081f
 - name: github.com/pkg/errors
   version: 2b3a18b5f0fb6b4f9190549597d3f962c02bc5eb
 - name: github.com/pksunkara/pygments
@@ -944,6 +971,8 @@ imports:
   subpackages:
   - plugins/gitignore
   - sift
+- name: github.com/russellsimpkins/ensemble
+  version: a9f112c165cb17d129dd2f6697b3873dcd078f23
 - name: github.com/russross/blackfriday
   version: 4048872b16cc0fc2c5fd9eacf0ed2c2fedaa0c8c
 - name: github.com/rwcarlsen/goexif
@@ -1107,11 +1136,15 @@ imports:
   version: a06c872a6c402f194e9c817cf30f3840a75f8ffe
 - name: github.com/tebeka/selenium
   version: a7e71178aa40d9b298d464b912c4e831b2be4455
+- name: github.com/tedsuo/ifrit
+  version: d787ed1df88a79d9e9b1072738a40500b8ec22ee
 - name: github.com/tensorflow/tensorflow
   version: 1f19b8cf38dcf7b468cb7f4e6d969966a495e167
   subpackages:
   - tensorflow/go
   - tensorflow/go/op
+- name: github.com/theothertomelliott/pooledioutil
+  version: 7821710dcd2795be524b6b6e3388bdc0c35125ee
 - name: github.com/theplant/cldr
   version: b97a4c2a76cf8ba21d1cb8ed2f4c8ee103371e2d
 - name: github.com/theplant/gormutils
@@ -1123,9 +1156,9 @@ imports:
 - name: github.com/toomore/lazyflickrgo
   version: 65bd843972ba35be1891ff267072eedc223a3f58
   subpackages:
-  - ""
   - flickr
   - jsonstruct
+  - simplecache
   - utils
 - name: github.com/toqueteos/trie
   version: 56fed4a05683322f125e2d78ee269bb102280392

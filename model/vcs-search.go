@@ -13,3 +13,5 @@ package model
 //  - queries results
 //  - queries expansion
 
+// https://github.com/foobarcloud/emerald/blob/master/models/dockerhub.go
+

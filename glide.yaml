@@ -584,12 +584,31 @@ import:
   subpackages:
   - filesystem
 # - package: github.com/libgit2/git2go
+- package: github.com/russellsimpkins/ensemble
+- package: github.com/tedsuo/ifrit
+- package: github.com/pivotal-golang/clock
+- package: github.com/pivotal-golang/lager
+- package: github.com/theothertomelliott/pooledioutil
 - package: github.com/toomore/lazyflickrgo
   subpackages:
   - utils
   - flickr
   - jsonstruct
-  - 
+  - simplecache
+- package: github.com/AsynkronIT/goconsole
+- package: github.com/AsynkronIT/protoactor-go
+  subpackages:
+  - remote
+  - actor
+  - cluster
+  - mailbox
+  - persistence
+  - protobuf
+  - stream 
+  - router
+- package: github.com/die-net/lrucache
+  subpackages:
+  - twotier
 - package: github.com/smoya/ghtop
   subpackages:
   - pkg/contributor
