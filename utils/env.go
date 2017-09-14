@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"errors"
+	// "errors"
 	"os"
 	"strconv"
 	"strings"
@@ -82,6 +82,13 @@ func Getenvdef(key string, val interface{}) EnvValue {
 	if out == "" {
 		ev.Empty = true
 	}
-
+	log.WithFields(
+		logrus.Fields{	
+			"file": "env.go", 
+			"method_name": "Getenvdef", 
+			"key": key, 
+			"out": out, 
+			"ev": ev, 
+			}).Infof("got environment variable '%#s=%#s' and converted it as an interface.", key, out)
 	return ev
 }

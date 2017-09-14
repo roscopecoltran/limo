@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"github.com/sirupsen/logrus"
-	"github.com/jwaldrip/tint"
+	//"github.com/jwaldrip/tint"
 )
 
 func exitWithMsg(msgs ...interface{}) {

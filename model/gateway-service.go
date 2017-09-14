@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 	"github.com/devopsfaith/krakend/encoding"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -248,11 +249,22 @@ func (s *Gateway_ServiceConfig) initBackendURLMappings(e, b int, inputParams map
 func (e *Gateway_EndpointConfig) validate() error {
 	matched, err := regexp.MatchString(debugPattern, e.Endpoint)
 	if err != nil {
-		log.Printf("ERROR: parsing the endpoint url [%s]: %s. Ignoring\n", e.Endpoint, err.Error())
+		log.WithError(err).WithFields(
+			logrus.Fields{	"file": "gateway-service.go", 
+							"method_name": "validate", 
+							"engine": "sniperkit-gateway", 
+							}).Warnf("ERROR: parsing the endpoint url [%s]: %s. Ignoring\n", e.Endpoint, err.Error())
+		// log.Printf("ERROR: parsing the endpoint url [%s]: %s. Ignoring\n", e.Endpoint, err.Error())
 		return err
 	}
 	if matched {
-		return fmt.Errorf("ERROR: the endpoint url path [%s] is not a valid one!!! Ignoring\n", e.Endpoint)
+		err := fmt.Errorf("ERROR: the endpoint url path [%s] is not a valid one!!! Ignoring\n", e.Endpoint)
+		log.WithError(err).WithFields(
+			logrus.Fields{	"file": "gateway-service.go", 
+							"method_name": "validate", 
+							"engine": "sniperkit-gateway", 
+							}).Warnf("ERROR: the endpoint url path [%s] is not a valid one!!! Ignoring\n", e.Endpoint)
+		return err
 	}
 
 	if len(e.Backend) == 0 {

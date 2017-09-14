@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/sirupsen/logrus"
 	// "github.com/davecgh/go-spew/spew"
-	// "github.com/k0kubun/pp"
+	"github.com/k0kubun/pp"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
@@ -66,7 +66,11 @@ func init() {
 	log.Formatter = formatter
 
 	tmpDir := config.GetTmpDir()
-	log.WithFields(logrus.Fields{"action": "init", "step": "getTmpDir"}).Infof("tmp dir located at: %#s", tmpDir)
+	log.WithFields(
+		logrus.Fields{
+			"action": "init", 
+			"step": "getTmpDir",
+			}).Infof("tmp dir located at: %#s", tmpDir)
 
 	flags := RootCmd.PersistentFlags()
 	flags.StringVarP(&options.language, "language", "l", "", 								"language")
@@ -80,29 +84,94 @@ func init() {
 		log.Level = logrus.InfoLevel
 	}
 
-	db, err := model.InitDatabases()
+	/*
+	configFiles := []string{defaultConfigFilePath}
+
+	cfg, err := config.New(cfg, true, true, true, configFiles)
 	if err != nil {
 		log.WithError(err).WithFields(
-			logrus.Fields{	"action": 	"init"}).Fatal("error while loading the config files with configor package.")
+			logrus.Fields{	
+				"action": 	"init",
+				}).Fatal("error while loading the configuration files.")
 	}
+
+	db, err := model.New()
+	if err != nil {
+		log.WithError(err).WithFields(
+			logrus.Fields{	
+				"action": 	"init",
+				}).Fatal("error while loading the databases drivers.")
+	}
+
+	log.WithFields(
+		logrus.Fields{	
+			"action": 	"init",
+			"status": 	"successful",
+			"cfg": 	cfg,
+			"db": 	db,
+			}).Debug("error while loading the databases drivers.")
+	*/
+}																																	
+
+func New(verbose bool) (cfg *config.Config, db *model.DatabaseDrivers, err error) {
+
+	configFiles := []string{defaultConfigFilePath}
+	cfg, err = config.New(cfg, true, true, true, configFiles)
+	if err != nil {
+		log.WithError(err).WithFields(
+			logrus.Fields{	
+				"action": 	"init",
+				}).Fatal("error while loading the configuration files.")
+		return cfg, db, err
+	}
+
+	db, err = model.New(true)
+	if err != nil {
+		log.WithError(err).WithFields(
+			logrus.Fields{	
+				"action": 	"init",
+				}).Fatal("error while loading the databases drivers.")
+		return cfg, db, err
+	}
+
+	log.WithFields(
+		logrus.Fields{	
+			"action": 	"init",
+			"status": 	"successful",
+			"cfg": 		cfg,
+			"db": 		db,
+			}).Debug("error while loading the databases drivers.")
+
+	return cfg, db, nil
 
 }
 
 func getConfiguration() (configuration config.Config, err error) {
 	configFilePath := config.FindLocalConfig()
 	if configFilePath != "" {
-		log.WithFields(
-			logrus.Fields{	"config": 	"getConfiguration"}).Infof("FOUND configuration data to load: %#s", configFilePath)
+		log.WithFields(logrus.Fields{	
+			"config": 	"getConfiguration"
+			}).Infof("FOUND configuration data to load: %#s", configFilePath)
 	}
 	if err := configor.Load(&configuration, configFilePath, defaultConfigFilePath); err != nil {
-		log.WithError(err).WithFields(
-			logrus.Fields{	"config": 	"getConfiguration"}).Fatal("error while loading the config files with configor package.")
+		log.WithError(err).WithFields(logrus.Fields{	
+			"config": 	"getConfiguration"
+			}).Fatal("error while loading the config files with configor package.")
 	}
 	return configuration, nil
 }
 
 func getDatabase() (*gorm.DB, error) {
-	db, _ := model.GetDatabases()
+	db, err := model.GetDatabases()
+	if err != nil {
+		log.WithError(err).WithFields(
+			logrus.Fields{	
+				"method": 	"getDatabase",
+				"file": 	"root.go",
+				"db": 		&db,
+				}).Error("error while connecting to all databases.")
+	}
+	pp.Println(&db)
 	if db.gormCli == nil {
 		cfg, err := getConfiguration()
 		if err != nil {
@@ -115,7 +184,7 @@ func getDatabase() (*gorm.DB, error) {
 		}
 		db.gormCli = gormCli
 	}
-	return db.gormCli, nil
+	return &db.gormCli, nil
 }
 
 /*

@@ -11,11 +11,11 @@ import (
 	"github.com/spf13/viper"
 	"path/filepath"
 	"github.com/cep21/xdgbasedir"
-	//"github.com/jinzhu/configor"
+	"github.com/jinzhu/configor"
 	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 	"gopkg.in/yaml.v2"
-
+	"github.com/imdario/mergo"
 )
 
 var cfg 	*Config 				// config
@@ -358,6 +358,83 @@ func (config *Config) GetOutput(name string) *OutputConfig {
 		config.Outputs[name] = output
 	}
 	return output
+}
+
+type Foo struct {
+	A string
+	B int64
+}
+
+// type Variables map[string]string
+
+//func (v *Variables) Defaults(defaults Variables) {
+//	mergo.Merge(v, defaults)
+//}
+
+var (
+	// files ...string
+	defaultConfigFiles = []string{
+		"shared/conf.d/limo/limo.yml",
+		"shared/conf.d/limo/config.yml",
+		"shared/conf.d/limo/detection.yml",
+		"shared/conf.d/limo/patterns.yml",
+		"shared/conf.d/limo/filetypes.yml",
+		"shared/conf.d/limo/vcs.yml",
+		"shared/conf.d/limo/databases.yml",
+	}
+)
+
+func New(cfg *Config, configFallback bool, dryMode bool, verbose bool, configFiles []string) (*Config, error) {
+	if dryMode {
+		log.WithFields(logrus.Fields{
+			"config": "New",
+			"dryMode": dryMode,
+			}).Infof("running in dry mode...")		
+		src := Foo{
+			A: "one",
+			B: 2,
+		}
+		dest := Foo{
+			A: "two",
+		}
+		mergo.Merge(&dest, src)
+		log.WithFields(logrus.Fields{
+			"config": "New",
+			"src": src,
+			"dest": dest,
+			}).Infof("testing mergo package...")
+	}
+	if configFallback {
+		if err := mergo.Merge(&configFiles, defaultConfigFiles); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"config": "New",
+				"step": "mergo.Merge()",
+				"configFiles": configFiles,
+				"defaultConfigFiles": defaultConfigFiles,
+				"cfg": cfg,
+				}).Infof("cfg.DatabasePath: %#v", cfg.DatabasePath)
+		}
+	}
+	if dryMode == false {
+		// configFallback
+		if err := configor.Load(&cfg, strings.Join(configFiles, ",")); err != nil {
+			if verbose {
+				log.WithError(err).WithFields(logrus.Fields{
+					"config": "New",
+					"configFiles": configFiles,
+					"defaultConfigFiles": defaultConfigFiles,
+					"cfg": cfg,
+					}).Infof("cfg.DatabasePath: %#v", cfg.DatabasePath)
+			}
+			return cfg, err
+		}
+		log.WithFields(logrus.Fields{
+			"config": "New",
+			"cfg.Config": cfg,
+			}).Infof("configuration loaded successfully...")	
+		return cfg, nil
+	}	
+	return cfg, nil
 }
 
 // ReadConfig reads the configuration information

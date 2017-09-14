@@ -9,6 +9,7 @@ owners:
   email: michalski.luc@gmail.com
   homepage: https://github.com/lucmichalski
 ignore:
+- gob
 - enterprise.getqor.com
 - enterprise.getqor.com/microsite
 - github.com/qor/qor-example
@@ -20,6 +21,92 @@ ignore:
 # - github.com/golang/protobuf
 # - github.com/go-kit/kit
 import:
+# env 
+- package: github.com/kelseyhightower/envconfig
+# web camera
+- package: github.com/blackjack/webcamgl
+# crawlers / screenshots
+- package: github.com/tebeka/selenium
+# cache
+- package: gopkg.in/redis.v5
+# tensorflow
+- package: github.com/tensorflow/tensorflow
+  subpackages:
+  - tensorflow/go
+  - tensorflow/go/op
+- package: github.com/asimshankar/go-tensorflow
+  subpackages:
+  - variable
+  - word2vec
+- package: github.com/helinwang/tfsum
+  subpackages:
+  - tensorflow/core/util
+  - tensorflow/core/framework
+- package: github.com/danieldk/tensorflow
+  subpackages:
+  - config
+- package: github.com/galeone/tfgo
+# chrom
+- package: github.com/sauyon/go-chromemessage
+  subpackages:
+  - chrome
+# data processing
+- package: github.com/gocarina/gocsv
+- package: github.com/raff/godet
+# machine learning
+- package: github.com/tchajed/wordenc
+  subpackages:
+  - shortdict
+- package: github.com/garyburd/redigo
+  subpackages:
+  - redis
+- package: golang.org/x/image
+  subpackages:
+  - tiff
+  - webp
+  - bmp
+- package: github.com/rainycape/unidecode
+- package: github.com/qor/oss
+  subpackages:
+  - filesystem
+  - s3
+- package: github.com/qor/oss
+- package: github.com/qor/middlewares
+- package: github.com/cayleygraph/cayley
+  subpackages:
+  - quad
+  - query
+  - schema
+  - writer
+  - voc
+  - voc/core
+  - voc/rdf
+  - voc/rdfs
+  - voc/schema
+  - graph
+  - graph/bolt
+  - graph/bolt2
+  - graph/kv
+  - graph/leveldb
+  - graph/memstore
+  - graph/mongo
+  - graph/path
+  - graph/sql
+- package: github.com/ynqa/word-embedding  
+  subpackages:
+  - models
+  - models/word2vec
+  - similarity
+  - utils
+  - utils/fileio
+  - utils/set
+  - utils/vector
+# https://github.com/tensorflow/tensorflow/tree/master/tensorflow/go
+- package: github.com/tensorflow/tensorflow
+  subpackages:
+  - tensorflow/go
+- package: github.com/jmcvetta/neoism
+- package: github.com/jmcvetta/randutil
 - package: gopkg.in/mgo.v2
   version: v2-unstable
   # version: v2
@@ -122,7 +209,8 @@ import:
 - package: github.com/russross/blackfriday
 - package: github.com/mschoch/blackfriday-text
 # linguist packages
-- package: gopkg.in/src-d/enry.v1
+#- package: gopkg.in/src-d/enry.v1
+- package: github.com/src-d/enry
   subpackages:
   - data
 #  - internal/tokenizer
@@ -384,12 +472,15 @@ import:
 - package: gopkg.in/yaml.v2
 - package: github.com/theplant/cldr
 - package: github.com/devopsfaith/krakend
-testImport:
-- package: github.com/arschles/assert
-- package: github.com/stretchr/testify
-  subpackages:
-  - assert
-  - mock
-  - suite
 - package: github.com/src-d/go-git-fixtures
-  version: 03ddd4bf3d4a1baf61e72fd8ee4746db9005f5e7
+testImport:
+# - package: github.com/arschles/assert
+# - package: github.com/stretchr/testify
+#   version: v1.1.4
+#   subpackages:
+#   - assert
+#   - mock
+#   - require
+#   - suite
+# - package: github.com/src-d/go-git-fixtures
+#   version: 03ddd4bf3d4a1baf61e72fd8ee4746db9005f5e7

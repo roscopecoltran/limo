@@ -16,40 +16,27 @@ import (
 	"github.com/roscopecoltran/sniperkit-limo/model"
 	// tablib "github.com/agrison/go-tablib"
 	"github.com/davecgh/go-spew/spew"
-
 	// jsoniter "github.com/json-iterator/go"
 	// fuzz "github.com/google/gofuzz"
 )
 
-const GITHUB__RAW_URL = "https://raw.githubusercontent.com/"
-
 /*
-const (
-	NOTSTART = "NotStart"
-	FETCHING = "Fetching"
-	INDEXING = "Indexing"
-	INDEXED  = "Indexed"
-	ERROR    = "Error"
-)
-
 type GitHubUser struct {
-	Account string `json:"account"`
-	// AccessToken       string `json:"accessToken"`
-	Tokens            []string `json:"tokens"`
-	Status            string   `json:"status"`
-	NumOfStarred      int
-	IndicesOfStarrerd int
+	Account 			string 		`json:"account"`
+	// AccessToken      string 		`json:"accessToken"`
+	Tokens            	[]string 	`json:"tokens"`
+	Status            	string   	`json:"status"`
+	NumOfStarred      	int
+	IndicesOfStarrerd 	int
 }
 */
 
 // Github represents the Github service
 // GitHub holds specific information that is used for GitHub integration.
 type Github struct {	
-
 	IgnoreRepos 	[]string 							`yaml:"ignore_repos,omitempty" json:"ignore_repos,omitempty"` // A list of URLs that the bot can ignore.
 	/*
 	Catalog  		map[string][]github.Repository 		`yaml:"-" json:"-"`
-
 	// Github API v3 - responses
 	User 			*github.User 						`yaml:"-" json:"-"`						// https://github.com/google/go-github/blob/master/github/users.go#L20-L68
 	Repo 			*github.Repository 		  			`yaml:"-" json:"-"`						// https://github.com/google/go-github/blob/master/github/repos.go#L22-L117
@@ -57,7 +44,6 @@ type Github struct {
 	Readme 			*github.RepositoryContent 			`yaml:"-" json:"-"`						// https://github.com/google/go-github/blob/master/github/repos_contents.go#L22-L38
 	Related  		map[string][]github.Repository 		`yaml:"-" json:"-"` 					// https://github.com/google/go-github/blob/master/github/repos.go#L22-L117
 	Language 		map[string]int 						`yaml:"-" json:"-"` 					// https://github.com/google/go-github/blob/master/github/repos.go#L445-L469
-
 	// search
 	SearchOptions  	*github.SearchOptions 				`yaml:"-" json:"-"`						// https://github.com/google/go-github/blob/master/github/search.go#L29-L49
 	SearchRepo 		*github.RepositoriesSearchResult 	`yaml:"-" json:"-"`						// https://github.com/google/go-github/blob/master/github/search.go#L52-L56
@@ -66,12 +52,9 @@ type Github struct {
 	SearchIssues 	*github.IssuesSearchResult 			`yaml:"-" json:"-"`						// https://github.com/google/go-github/blob/master/github/search.go#L99-L102
 	SearchCommits 	*github.CommitsSearchResult 		`yaml:"-" json:"-"`						// https://github.com/google/go-github/blob/master/github/search.go#L67-L72
 	*/
-
 	OwnerAccount 	string 								`yaml:"-" json:"-"`
-
 	//Type     		string 								`yaml:"-" json:"-"`
 	//PerPage  		int 								`yaml:"-" json:"-"`
-
 }
 
 // Login logs in to Github
@@ -87,6 +70,12 @@ func (g *Github) Login(ctx context.Context) (string, error) {
 	}
 	answers, err := interview.Run()
 	if err != nil {
+		log.WithError(err).WithFields(
+			logrus.Fields{
+				"prefix": 			"svc-github",
+				"parent": 			"(g *Github) Login(...)", 
+				"ancestor": 			"interview.Run(...)", 
+			}).Warn("asking the login credentials via the cli app.")
 		return "", err
 	}
 	return answers["token"].(string), nil
@@ -161,11 +150,24 @@ func (g *Github) GetUserInfo(ctx context.Context, token string, user string) (*g
 */
 
 func (g *Github) GetUserInfo(ctx context.Context, token string, user string) (*github.User, error) {
-	log.WithFields(logrus.Fields{"service": "GetUserInfo", "token": token, "owner": user}).Infoln("token: ", token, ", owner: ", user)
+	log.WithFields(logrus.Fields{
+		"prefix": 			"svc-github",
+		"parent": 			"(g *Github) GetUserInfo(...)", 
+		"ancestor": 			"GetUserInfo(...)",
+		"token":	 		token, 
+		"owner": 			user,
+		}).Info("fetching github user info...")
 	client := g.getClient(token)
 	userInfo, _, err := client.Users.Get(ctx, user)
 	if err != nil {
-		log.WithFields(logrus.Fields{"service": "GetUserInfo", "token": token, "owner": user}).Warn("error while getting the content of the readme.")
+		log.WithError(err).WithFields(
+			logrus.Fields{
+				"prefix": 			"svc-github",
+				"parent": 			"(g *Github) GetUserInfo(...)", 
+				"ancestor": 			"client.Users.Get(...)", 
+				"token": 			token, 
+				"owner": 			user,
+			}).Warn("error while getting the content of the readme.")
 		return nil, err
 	}
 	return userInfo, nil
@@ -176,18 +178,39 @@ func (g *Github) GetLanguages(ctx context.Context, token string, user string, na
 	client := g.getClient(token)
 	languages, _, err := client.Repositories.ListLanguages(ctx, user, name)
 	if err != nil {
-		log.WithFields(logrus.Fields{"service": "GetLanguages", "token": token, "owner": user, "repo": name}).Warn("error while getting the languages of the repo.")
+		log.WithError(err).WithFields(
+			logrus.Fields{
+				"prefix": 			"svc-github",
+				"parent": 			"(g *Github) GetLanguages(...)", 
+				"ancestor": 			"client.Repositories.ListLanguages(...)", 
+				"token": 			token, 
+				"owner": 			user, 
+				"repo": 			name,
+				}).Warn("error while getting the languages of the repo.")
 		return nil, err
 	}
 	return languages, nil
 }
 
 func (g *Github) GetReadme(ctx context.Context, token string, user string, name string) (*github.RepositoryContent, error) {
-	log.WithFields(logrus.Fields{"service": "GetReadme", "token": token, "user": user, "repo": name}).Info("")
+	log.WithFields(logrus.Fields{
+		"prefix": 			"svc-github",
+		"ancestor": 			"GetReadme(...)", 
+		"token": 			token, 
+		"owner": 			user, 
+		"repo": 			name,
+		}).Info("fetching readme info from repository")
 	client := g.getClient(token)
 	readme, _, err := client.Repositories.GetReadme(ctx, user, name, nil)
 	if err != nil {
-		log.WithFields(logrus.Fields{"service": "GetReadme", "token": token, "owner": user, "repo": name}).Warn("error while getting the content of the readme.")
+		log.WithError(err).WithFields(
+			logrus.Fields{
+				"prefix": 			"svc-github",
+				"ancestor": 			"client.Repositories.GetReadme(...)", 
+				"token": 			token, 
+				"owner": 			user, 
+				"repo": 			name,
+				}).Warn("error while getting the content of the readme.")
 		return nil, err
 	}
 	return readme, nil
@@ -195,16 +218,18 @@ func (g *Github) GetReadme(ctx context.Context, token string, user string, name 
 
 // GetStars returns the stars for the specified user (empty string for authenticated user)
 func (g *Github) GetStars(ctx context.Context, starChan chan<- *model.StarResult, token string, user string, isAugmented bool) {
-	log.WithFields(logrus.Fields{"service": "GetStars", "token": token, "isAugmented": isAugmented}).Info("")
-	//log.WithFields(logrus.Fields{"service": "GetStars", "user": user}).Infof("user: %#v", user)
-	//"application/vnd.github.mercy-preview+json"
-	client := g.getClient(token)
-	// The first response will give us the correct value for the last page
-	currentPage := 1
-	lastPage := 1
+	log.WithFields(logrus.Fields{
+		"prefix": 				"svc-github",
+		"parent": 				"(g *Github) GetStars(...)", 
+		"ancestor": 				"(g *Github) GetStars(...)", 
+		"next": 				"g.getClient(...)", 
+		"token": 				token, 
+		"isAugmented": 			isAugmented,
+		}).Info("GetStars returns the stars for the specified user (empty string for authenticated user).")
+	client 		:= g.getClient(token) 			// Important: topics are requiring a change in the header sent by go-github, please append "application/vnd.github.mercy-preview+json"
+	currentPage := 1 						// The first response will give us the correct value for the last page
+	lastPage 	:= 1
 	currentStar := 1
-
-	// , topics []string
 	// https://github.com/seiffert/ghrepos/blob/master/ghrepos.go
 	for currentPage <= lastPage {
 		// https://github.com/dougt/githubwebpush/blob/master/src/githubpusher/frontend/main.go
@@ -215,91 +240,134 @@ func (g *Github) GetStars(ctx context.Context, starChan chan<- *model.StarResult
 		})
 		// If we got an error, put it on the channel
 		if err != nil {
+			log.WithError(err).WithFields(
+				logrus.Fields{
+					"prefix": 			"svc-github",
+					"parent": 			"(g *Github) GetStars(...)", 
+					"ancestor": 			"client.Activity.ListStarred(...)", 
+					"next": 			"starChan <- &model.StarResult{}",
+					"token": 			token, 
+					"currentPage": 		currentPage, 
+					"lastPage": 		lastPage,
+					}).Warn("error while processing a list of starred repositories, let's forward it to the channel.")
 			starChan <- &model.StarResult{
 				Error: err,
 				Star:  nil,
-
 			}
-		} else {
-			// Set last page only if we didn't get an error
-			lastPage = response.LastPage
-			// Create a Star for each repository and put it on the channel
-			for _, repo := range repos {
-
-				// readme
+		} else {		
+			lastPage 	= 	response.LastPage 												// Set last page only if we didn't get an error			
+			for _, repo := range repos { 													// Create a Star for each repository and put it on the channel
 				var ownerName, repoUri, repoName string
-
-				// strPointerValue := *strPointer
-
 				if *repo.Repository.Owner.Login != "" {
-					ownerName 		= fmt.Sprintf("%s", *repo.Repository.Owner.Login)
+					ownerName 		 = fmt.Sprintf("%s", *repo.Repository.Owner.Login)
 				}
-
 				if *repo.Repository.Name != "" {
-					repoName 		= fmt.Sprintf("%s", *repo.Repository.Name) // string(*repo.Repository.Name)
+					repoName 		 = fmt.Sprintf("%s", *repo.Repository.Name) 			// string(*repo.Repository.Name)
 				}
-
-				repoUri 		 = path.Join("github.com", ownerName, repoName)
-
-				extraInfo 		:= &model.GatewayBucket_GithubRepoExtraInfo{}
-
+				repoUri 		 	 = path.Join("github.com", ownerName, repoName)
+				extraInfo 			:= &model.GatewayBucket_GithubRepoExtraInfo{}
 				if isAugmented {
-					// language
+					// repository languages details returned by Github API v3
 					languageInfo, err := g.GetLanguages(ctx, token, ownerName, repoName)
 					if err != nil {
-						log.WithError(err).WithFields(logrus.Fields{"service": "GetReadme", "star_owner": ownerName, "star_owner_id": *repo.Repository.Owner.ID, "star_name": repoName, "star_id": *repo.Repository.ID}).Warn("error while getting the readme content.")
+						log.WithError(err).WithFields(
+							logrus.Fields{
+								"prefix": 				"svc-github",
+								"parent": 				"(g *Github) GetStars(...)", 
+								"ancestor": 				"g.GetLanguages(...)", 
+								"star_owner": 			ownerName, 
+								"star_owner_id": 		*repo.Repository.Owner.ID, 
+								"star_name": 			repoName, 
+								"star_id": 				*repo.Repository.ID,
+								}).Warn("error while getting the readme content.")
 						languageInfo = make(map[string]int)
 					}
-
-					// user
+					// repository owner details
 					userInfo, err := g.GetUserInfo(ctx, token, ownerName)
 					if err != nil {
-						log.WithError(err).WithFields(logrus.Fields{"service": "GetReadme", "star_owner": ownerName, "star_owner_id": *repo.Repository.Owner.ID}).Warn("error while getting the user info content.")
+						log.WithError(err).WithFields(
+							logrus.Fields{
+								"prefix": 				"svc-github",
+								"parent": 				"(g *Github) GetStars(...)", 
+								"ancestor": 				"g.GetUserInfo(...)", 
+								"star_owner": 			ownerName, 
+								"star_owner_id": 		*repo.Repository.Owner.ID,
+								}).Warn("error while getting additional info about the repository's owner.")
 						userInfo = &github.User{}
 					}
-
-					// readme
-					log.WithFields(logrus.Fields{"service": "GetReadme", "step": "NewLanguageFromGithub", "repoUri": repoUri, "repoName": repoName, "ownerName": ownerName}).Warn("new repo")
+					// repository readme details, and decoded verion
+					log.WithFields(logrus.Fields{
+						"prefix": 				"svc-github",
+						"parent": 				"(g *Github) GetStars(...)", 
+						"ancestor": 				"GetReadme", 
+						"step": 				"g.GetReadme(...)", 
+						"repoUri": 				repoUri, 
+						"repoName": 			repoName,
+						"ownerName": 			ownerName,
+						}).Warn("getting additional info about repo's 'README' markdown.")
 					readmeInfo, err := g.GetReadme(ctx, token, ownerName, repoName)
-
 					if err != nil {
-						log.WithError(err).WithFields(logrus.Fields{"service": "GetReadme", "star_owner": ownerName, "star_owner_id": *repo.Repository.Owner.ID, "star_name": repoName, "star_id": *repo.Repository.ID}).Warn("error while getting the readme content.")
+						log.WithError(err).WithFields(
+							logrus.Fields{
+								"prefix": 				"svc-github",
+								"parent": 				"(g *Github) GetStars(...)", 
+								"ancestor": 				"g.GetReadme(...)", 
+								"star_owner": 			ownerName, 
+								"star_owner_id": 		*repo.Repository.Owner.ID, 
+								"star_name": 			repoName, 
+								"star_id": 				*repo.Repository.ID,
+								}).Warn("error while getting the additional readme related info.")
 						readmeInfo = &github.RepositoryContent{}
 					} else {
 						if _, err := model.NewReadmeFromGithub(*readmeInfo, *repo.Repository.Owner.ID, *repo.Repository.ID, repoUri); err != nil {
-							log.WithFields(logrus.Fields{"service": "GetReadme", "step": "NewReadmeFromGithub", "repoUri": repoUri}).Warn("could not fetched new readme.")
+							log.WithError(err).WithFields(
+								logrus.Fields{
+									"prefix": 							"svc-github",
+									"parent": 							"(g *Github) GetStars(...)", 
+									"ancestor": 							"model.NewReadmeFromGithub(...)", 
+									"repoUri": 							repoUri,
+									"*repo.Repository.Owner.Name": 		*repo.Repository.Owner.Name,
+									"*repo.Repository.Owner.ID": 		*repo.Repository.Owner.ID,
+									"*repo.Repository.Name": 			*repo.Repository.Name,
+									"*repo.Repository.ID": 			 	*repo.Repository.ID,
+									}).Warn("could not fetched new readme.")
 						}
 					}
-
 					extraInfo  = &model.GatewayBucket_GithubRepoExtraInfo{
 						Readme: 	readmeInfo,
 						User: 		userInfo,
 						Languages: 	languageInfo,
 					}
-
 				}
-
-				spew.Dump(extraInfo)
-
-				// userinfo
-				/*
-				user, err := model.NewStarFromGithub(repo.Owner.ID)
-				userChan <- &model.UserResult{
-					Error: err,
-					User:  user,
-				}				
-				*/
-
-				// star
-				star, err := model.NewStarFromGithub(repo.StarredAt, *repo.Repository, *extraInfo)
+				//if debugMode {
+					spew.Dump(extraInfo)
+				//}
+				star, err := model.NewStarFromGithub(repo.StarredAt, *repo.Repository, *extraInfo) 	// channels (default: 20)
+				if err != nil {
+					log.WithError(err).WithFields(
+						logrus.Fields{
+							"prefix": 				"svc-github",
+							"parent": 				"(g *Github) GetStars(...)", 
+							"ancestor": 				"model.NewStarFromGithub(...)",
+							"repo.StarredAt": 		repo.StarredAt, 
+							// "extraInfo": 		*extraInfo, 
+							// "*repo.Repository": 	*repo.Repository, 
+							}).Warn("error while getting the additional readme related info.")
+					readmeInfo = &github.RepositoryContent{}
+				}
 				starChan <- &model.StarResult{
 					Error: err,
 					Star:  star,
 					ExtraInfo: extraInfo,
 				}
-
 				currentStar++
-				log.WithFields(logrus.Fields{"service": "GetStars"}).Infoln("star=",currentStar,",page=",currentPage)
+				log.WithFields(logrus.Fields{
+					"prefix": 			"svc-github",
+					"parent": 			"(g *Github) GetStars(...)", 
+					"ancestor": 			"starChan <- &model.StarResult{...}",
+					"currentStar": 		currentStar,
+					"currentPage": 		currentPage,
+					}).Info("fetching content from new pages...")
 			}
 		}
 		// Go to the next page
@@ -310,15 +378,25 @@ func (g *Github) GetStars(ctx context.Context, starChan chan<- *model.StarResult
 
 // GetEvents returns the events for the authenticated user
 func (g *Github) GetEvents(ctx context.Context, eventChan chan<- *model.EventResult, token, user string, page, count int) {
-	client := g.getClient(token)
-	currentPage := page
-	lastPage := page + count - 1
+	client 				:= g.getClient(token)
+	currentPage 		:= page
+	lastPage 			:= page + count - 1
+	fetchedItemCount	:= 1
 	for currentPage <= lastPage {
 		events, _, err := client.Activity.ListEventsReceivedByUser(ctx, user, false, &github.ListOptions{
 			Page: currentPage,
 		})
-
 		if err != nil {
+			log.WithError(err).WithFields(
+				logrus.Fields{
+					"prefix": 				"svc-github",
+					"parent": 				"(g *Github) GetEvents(...)", 
+					"ancestor": 				"client.Activity.ListEventsReceivedByUser(...)",
+					"next": 				"eventChan <- &model.EventResult{...}",
+					"currentPage": 			currentPage, 
+					"lastPage": 			lastPage, 
+					"fetchedEventCount": 	fetchedEventCount, 
+					}).Warn("error while fetching additional events data/page info.")
 			eventChan <- &model.EventResult{
 				Error: err,
 				Event: nil,
@@ -329,8 +407,16 @@ func (g *Github) GetEvents(ctx context.Context, eventChan chan<- *model.EventRes
 					Error: nil,
 					Event: model.NewEventFromGithub(event),
 				}
+				fetchedItemCount++
 			}
 		}
+		log.WithFields(logrus.Fields{
+			"prefix": 				"svc-github",
+			"parent": 				"(g *Github) GetEvents(...)", 
+			"ancestor": 				"eventChan <- &model.EventResult{...}",
+			"fetchedEventCount": 	fetchedItemCount,
+			"currentPage": 			currentPage,
+			}).Info("fetching content from new pages...")
 		currentPage++
 	}
 	close(eventChan)
@@ -339,7 +425,15 @@ func (g *Github) GetEvents(ctx context.Context, eventChan chan<- *model.EventRes
 // GetTrending returns the trending repositories
 func (g *Github) GetTrending(ctx context.Context, trendingChan chan<- *model.StarResult, token string, language string, verbose bool) {
 	client := g.getClient(token)
-	log.WithFields(logrus.Fields{"service": "GetTrending"}).Infof("token: %#v", token)
+	log.WithFields(logrus.Fields{
+		"prefix": 			"svc-github",
+		"parent": 			"(g *Github) GetTrending(...)", 
+		"ancestor": 			"g.getClient(...)",
+		"next": 			"g.getDateSearchString(...)",
+		"token", 			token,
+		"language", 		language,
+		"verbose", 			verbose,
+		}).Info("returning the trending repositories...")
 	// TODO perhaps allow them to specify multiple pages?
 	// Might be overkill -- first page probably plenty
 	// TODO Make this more configurable. Sort by stars, forks, default.
@@ -348,32 +442,58 @@ func (g *Github) GetTrending(ctx context.Context, trendingChan chan<- *model.Sta
 	q := g.getDateSearchString()
 	if language != "" {
 		q = fmt.Sprintf("language:%s %s", language, q)
-		log.WithFields(logrus.Fields{"service": "GetTrending"}).Infof("language: %#v", language)
+		log.WithFields(logrus.Fields{
+			"prefix": 		"svc-github",
+			"parent": 		"(g *Github) GetTrending(...)", 
+			"ancestor": 	"g.getDateSearchString(...)",
+			}).Info("language is not empty...")
 	}
 	if verbose {
-		fmt.Println("q =", q)
-		log.WithFields(logrus.Fields{"service": "GetTrending"}).Infof("q: %#v", q)
+		// fmt.Println("q =", q)
+		log.WithFields(logrus.Fields{
+			"prefix": 		"svc-github",
+			"parent": 		"(g *Github) GetTrending(...)", 
+			"ancestor": 	"g.getDateSearchString(...)",
+			"q": 			q,
+			}).Info("verbose mode")
 	}
+	fetchedItemCount	:= 1
 	result, _, err := client.Search.Repositories(ctx, q, &github.SearchOptions{
 		Sort:  "stars",
 		Order: "desc",
 	})
-
 	// If we got an error, put it on the channel
 	if err != nil {
+		log.WithError(err).WithFields(
+			logrus.Fields{
+				"prefix": 				"svc-github",
+				"parent": 				"(g *Github) GetTrending(...)", 
+				"ancestor": 			"client.Search.Repositories(...)",
+				"next": 				"trendingChan <- &model.StarResult{...}",
+				}).Warn("error while fetching additional trending infos.")
 		trendingChan <- &model.StarResult{
 			Error: err,
 			Star:  nil,
 		}
 	} else {
 		// Create a Star for each repository and put it on the channel
-		for _, repo := range result.Repositories {
-			// add extra info from trending
-			star, err := model.NewStarFromGithub(nil, repo, model.GatewayBucket_GithubRepoExtraInfo{})
+		for _, repo := range result.Repositories {			
+			star, err := model.NewStarFromGithub(nil, repo, model.GatewayBucket_GithubRepoExtraInfo{}) 	// add extra info from trending
+			if err != nil {
+				log.WithError(err).WithFields(
+					logrus.Fields{
+						"prefix": 				"svc-github",
+						"parent": 				"(g *Github) GetTrending(...)", 
+						"ancestor": 			"model.NewStarFromGithub(...)",
+						"next": 				"trendingChan <- &model.StarResult{...}",
+						"fetchedEventCount": 	fetchedItemCount, 
+						}).Warn("error while trying to register a new star from trendings.")
+			}
 			trendingChan <- &model.StarResult{
 				Error: err,
 				Star:  star,
 			}
+			fetchedItemCount++
 		}
 	}
 	close(trendingChan)
@@ -381,14 +501,21 @@ func (g *Github) GetTrending(ctx context.Context, trendingChan chan<- *model.Sta
 
 // get CreatedAt from repo
 // func (g *Github) getCreatedAtFromRepo(owner string, repo string) (createdAt time.Time, err error) {
-func getCreatedAtFromRepo(ctx context.Context, client *github.Client, owner string, repo string) (createdAt time.Time, err error) {
-	repoinfo, _, err := client.Repositories.Get(ctx, owner, repo)
+func getCreatedAtFromRepo(ctx context.Context, client *github.Client, owner string, name string) (createdAt time.Time, err error) {
+	repoInfo, _, err := client.Repositories.Get(ctx, owner, name)
 	if err != nil {
-		fmt.Println(err)
+		log.WithError(err).WithFields(
+			logrus.Fields{
+				"prefix": 				"svc-github",
+				"parent": 				"getCreatedAtFromRepo(...)", 
+				"repoOwner": 			owner,
+				"repoName": 			name,
+				// "repoInfo": 			repoInfo,
+				}).Warnln("converting repository creation date...")
 		return
 	}
 	var shortForm = "2006-01-02 15:04:05 -0700 UTC"
-	ctime, _ := time.Parse(shortForm, fmt.Sprintf("%s", repoinfo.CreatedAt))
+	ctime, _ := time.Parse(shortForm, fmt.Sprintf("%s", repoInfo.CreatedAt))
 	return ctime, nil
 }
 
@@ -397,9 +524,15 @@ func (g *Github) getDateSearchString() string {
 	// Default should be in configuration file
 	// and should be able to override from command line
 	// TODO should be able to specify whether "created" or "pushed"
-	date := time.Now().Add(-7 * (24 * time.Hour))
-	log.WithFields(logrus.Fields{"service": "getDateSearchString"}).Infof("date > %#v", date)
-	return fmt.Sprintf("created:>%s", date.Format("2006-01-02"))
+	date 	:= time.Now().Add(-7 * (24 * time.Hour))
+	dateStr := fmt.Sprintf("created:>%s", date.Format("2006-01-02"))
+	log.WithFields(logrus.Fields{
+		"prefix": 		"svc-github",
+		"parent": 		"getDateSearchString()",
+		"date": 		date,
+		"dateStr":		dateStr,
+		}).Info("convert date to search str.")
+	return dateStr
 }
 
 func (g *Github) getClient(token string) *github.Client {
@@ -413,7 +546,6 @@ func (g *Github) getClient(token string) *github.Client {
 func init() {
 	registerService(&Github{})
 }
-
 
 /*
 func NewSyncer(conf Config, data DataStore) *Syncer {

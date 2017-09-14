@@ -1,5 +1,8 @@
 package model
 
+// https://github.com/monbro/opensemanticapi-go-lang/blob/master/database/redis_do.go
+// https://github.com/monbro/opensemanticapi-go-lang/blob/master/database/redis_multi.go
+
 /*
 import (
 	// "log"
@@ -7,6 +10,14 @@ import (
 	"github.com/garyburd/redigo/redis"
 	// "github.com/roscopecoltran/sniperkit-limo/model"
 	"github.com/roscopecoltran/sniperkit-limo/config"	
+)
+
+// redis
+const (
+    QUEUED_PAGES = "queued_page_title"
+    DONE_PAGES = "done_page_title"
+    MOST_POPULAR_WORDS = "most_popular_words"
+    TEXTBLOCKS_COUNTER = "textblocks_counter"
 )
 
 //CacheRedis connects to a redis node and encapsulates caching.

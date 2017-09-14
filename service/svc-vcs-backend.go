@@ -4,7 +4,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-
 	"github.com/roscopecoltran/sniperkit-limo/utils"
 )
 
@@ -23,7 +22,6 @@ var GitBackend = &VCSBackend{
 		if err != nil {
 			return err
 		}
-
 		args := []string{"clone"}
 		if shallow {
 			args = append(args, "--depth", "1")

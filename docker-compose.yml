@@ -1,0 +1,20 @@
+---
+version: '2.1'
+
+services:
+  data:
+    image: tianon/true
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - "./shared/models:/shared/models"
+    - "./shared/dicts:/shared/dicts"
+    # - "./shared/data:/shared/data"
+
+  github_topics:
+    container_name: gh-topics 
+    image: srcd/github_topics
+    volumes_from:
+    - data
+    volumes:
+    - ./shared/data/github-topics:/opt
+    entrypoint: ["/bin/bash"]

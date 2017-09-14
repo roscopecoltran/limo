@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"errors"
+	//"errors"
 	"io"
 	// logs
 	"github.com/sirupsen/logrus"
