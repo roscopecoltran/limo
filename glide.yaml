@@ -338,6 +338,9 @@ import:
   subpackages:
   - lock
   - queue
+- package: github.com/mediocregopher/radix.v2
+- package: github.com/mediocregopher/radix.v3
+- package: github.com/Pallinder/go-randomdata
 - package: gopkg.in/src-d/go-errors.v0
 - package: golang.org/x/crypto
   version: dd96d35c1b251a7ef77f057fc5c4f92ea2b285b4
@@ -345,6 +348,7 @@ import:
   - ssh
   - ssh/knownhosts
   - md4
+  - bcrypt
   - openpgp
   - openpgp/armor
   - openpgp/clearsign
