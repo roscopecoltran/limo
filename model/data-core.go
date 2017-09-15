@@ -4,7 +4,7 @@ package model
 // 
 
 import (
-    "path/filepath" 												// go-core
+    // "path/filepath" 												// go-core
     "errors" 														// go-core
 	"time" 															// go-core
 	"path" 															// go-core
@@ -22,6 +22,7 @@ import (
 	"github.com/boltdb/bolt" 										// db-kvs-boltdb
 	"github.com/garyburd/redigo/redis" 								// db-kvs-redis
 	"github.com/jmcvetta/neoism" 									// db-graph-neo4j
+	//"github.com/cayleygraph/cayley" 								// db-graph-cayley
 	// "github.com/cayleygraph/cayley" 								// db-graph-cayley
 	// "github.com/cayleygraph/cayley/graph" 						// db-graph-cayley
 	// _ "github.com/cayleygraph/cayley/graph/bolt" 				// db-graph-cayley
@@ -168,6 +169,7 @@ func New(verbose bool, debug bool) (*DatabaseDrivers, error) {
 							}).Error("error while trying to init 'BoltDB' database driver")
 		return dbs, err
 	}
+	/*
 	etcdDefaultHost 	:= []string{"http://127.0.0.1:2379"}
 	etcdDefaultTimeout 	:= 1 * time.Second
 	etcdCli, err := InitEtcd(etcdDefaultHost, etcdDefaultTimeout, true)
@@ -183,6 +185,7 @@ func New(verbose bool, debug bool) (*DatabaseDrivers, error) {
 							}).Error("error while trying to auto-load all program the tables")
 		return dbs, err
 	}
+	*/
 
 	// graphql
 	// client := graphql.NewClient("https://example.com/graphql", nil, nil)
@@ -190,7 +193,7 @@ func New(verbose bool, debug bool) (*DatabaseDrivers, error) {
 	return &DatabaseDrivers{
 			gormCli: 	gormCli,
 			boltCli:  	boltCli,
-			etcdCli: 	etcdCli,
+			//etcdCli: 	etcdCli,
 		}, nil
 
 }
@@ -250,6 +253,7 @@ func InitDatabases() (*DatabaseDrivers, error) {
 		return db, err
 	}
 
+	/*
 	etcdDefaultHost 	:= []string{"http://127.0.0.1:2379"}
 	etcdDefaultTimeout 	:= 1 * time.Second
 	if err := db.initEtcd(etcdDefaultHost, etcdDefaultTimeout, true); err != nil {
@@ -263,6 +267,7 @@ func InitDatabases() (*DatabaseDrivers, error) {
 							}).Error("error while trying to auto-load all program the tables")
 		return db, err
 	}
+	*/
 	return db, nil
 }
 
@@ -356,7 +361,7 @@ func AutoLoadGorm(clientSQL *gorm.DB, isAutoMigrate bool, isTruncate bool, isAdm
 
 func InitBoltDB(filePath string) (*bolt.DB, error) {
 	// Get more config options to setup the bucket or the queue of tasks
-	boltDB, err := bolt.Open(filepath, 0600, &bolt.Options{Timeout: time.Second})
+	boltDB, err := bolt.Open(filePath, 0600, &bolt.Options{Timeout: time.Second})
 	if err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"prefix": 				"db-boltdb",
@@ -364,7 +369,7 @@ func InitBoltDB(filePath string) (*bolt.DB, error) {
 							"method.prev": 			"bolt.Open(...)",
 							"db.adapter": 			"boltdb", 
 							"src.file": 			"model/data-db-connector.go", 
-							"var.bolt.filepath": 	filepath, 
+							"var.bolt.filepath": 	filePath, 
 							"var.bolt.options": 	&bolt.Options{Timeout: time.Second},
 							}).Warn("error while init the database with boltDB.")
 		return nil, err
@@ -372,11 +377,10 @@ func InitBoltDB(filePath string) (*bolt.DB, error) {
 	return boltDB, err
 }
 
-func InitEtcd(hosts []string, timeOut time.Duration, verbose bool) (etcd.KeysAPI, error) {
+func InitEtcd(hosts []string, timeOut time.Duration, verbose bool) (*etcd.Client, error) {
 	ectdConfig := etcd.Config{
 		Endpoints:               hosts,
-		Transport:               etcd.DefaultTransport,
-		HeaderTimeoutPerRequest: timeOut,
+		DialTimeout: 			 timeOut,
 	}
 	cli, err := etcd.New(ectdConfig)
 	if err != nil {
@@ -385,26 +389,26 @@ func InitEtcd(hosts []string, timeOut time.Duration, verbose bool) (etcd.KeysAPI
 							"method.name": 			"InitEtcd(...)", 
 							"method.prev": 			"etcd.New(...)",
 							"db.adapter": 			"etcd", 
-							"var.etcd.cfg": 		cfg,
+							"var.etcd.cfg": 		ectdConfig,
 							"src.file": 			"model/data-db-connector.go", 
 							}).Warn("error while init the client connection with Etcd Key/Value store.")
-		return err
+		return cli, err
 	}
-	etcdClient := etcd.NewKeysAPI(cli)
-	_, err = etcdClient.Get(context.Background(), "/foo", nil)
-	if err != nil && err.Error() == etcd.ErrClusterUnavailable.Error() {
+	defer cli.Close()
+	etcdKvc := etcd.NewKV(cli)
+	_, err = etcdKvc.Get(context.Background(), "/foo", nil)
+	if err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"method.name": 			"InitEtcd(...)", 
 							"db.adapter": 			"etcd", 
 							"prefix": 				"kvs-etcd",
 							"method.prev": 			"etcdClient.Get(...)",
-							"var.etcd.cfg": 		cfg,
-							"msg.error":  			etcd.ErrClusterUnavailable.Error(),
+							"var.etcd.cfg": 		ectdConfig,
 							"src.file": 			"model/data-db-connector.go", 
 							}).Warn("error while init the client connection with Etcd Key/Value store.")
-		return err
+		return cli, err
 	}
-	return nil
+	return cli, nil
 }
 
 /*
@@ -425,11 +429,23 @@ type DatabaseDrivers struct {
 	//dynamodbClient 	*dynamodb.DynamoDB
 	boltCli  			*bolt.DB
 	bleveIdx 			*bleve.Index
+	//cayleyCli 			*cayley.Handle
 	neo4jCli 			*neoism.Database
 	cache 				*bigcache.BigCache
+	etcdKV				etcd.Client
 	etcdCli   			*EtcdClientPool
 	redisCli 			redis.Conn
 }
+
+/*
+// GetCommands returns the view commands.
+func GetCommands(conn *db.DB, store *cayley.Handle) *cobra.Command {
+	mgoDB = conn
+	graphDB = store
+
+	addExecute()
+	return viewCmd
+}*/
 
 func (dbs *DatabaseDrivers) New(verbose bool, debug bool) (*DatabaseDrivers, error) {
 	adapter := "sqlite3"
@@ -675,6 +691,7 @@ func (dbs *DatabaseDrivers) closeRedis() {
     dbs.redisCli.Close()
 }
 
+/*
 type EtcdCli struct {
 	EtcdCli 				*etcd.Client
 	inUse   				bool
@@ -682,7 +699,7 @@ type EtcdCli struct {
 
 type EtcdClientPool struct {
 	connPool 				chan 			EtcdCli
-	Address  				string
+	Address  				[]string
 }
 
 const (
@@ -690,28 +707,28 @@ const (
 	ETCD_CLIENT_POOL_COUNT = 10
 )
 
-func (dbs *DatabaseDrivers) initEtcd(etcdAP, hosts []string, timeout time.Duration, verbose bool) error {
+func (dbs *DatabaseDrivers) initEtcd(hosts []string, timeout time.Duration, verbose bool) error {
 	// If ETCD is not provided, we assme that we are in single instance mode.
 	// We keep our client data in a map.
-	if etcdAP == "" {
-		keyValMap = make(map[string]string)
-		etcdCli = nil
-		return
-	}
-	etcdCliLocal := EtcdClientPool{Address: etcdAP, connPool: make(chan EtcdCli, ETCD_CLIENT_POOL_COUNT)}
+	//if len(hosts) < 0 {
+	//	keyValMap = make(map[string]string)
+	//	etcdCli = nil
+	//	return
+	//}
+	etcdKVC := EtcdClientPool{Address: hosts, connPool: make(chan EtcdCli, ETCD_CLIENT_POOL_COUNT)}
 	for i := 0; i < ETCD_CLIENT_POOL_COUNT; i++ {
 		var etcdCli EtcdCli
-		if err := etcdCli.initEtcdCli(etcdAP); err == nil {
-			etcdCliLocal.connPool <- etcdCli
+		if err := dbs.initEtcdCli(hosts); err == nil {
+			etcdKVC.connPool <- etcdCli
 		}
 	}
-	dbs.etcdCli = &etcdCliLocal
+	dbs.etcdCli = &etcdKVC
 
 }
 
-func RegisterCallBk(etcdAP, path string, callbk func(interface{}, bool, string, string), cbkctx interface{}) {
-	if etcdAP != "" {
-		go EtcdV3Monitor(etcdAP, path, callbk, cbkctx)
+func RegisterCallBk(hosts []string, path string, callbk func(interface{}, bool, string, string), cbkctx interface{}) {
+	if len(hosts) > 0 {
+		go EtcdV3Monitor(hosts, path, callbk, cbkctx)
 	}
 }
 
@@ -722,7 +739,12 @@ func (cliPool *EtcdClientPool) getCli() EtcdCli {
 
 func (cliPool *EtcdClientPool) putCli(cli EtcdCli) {
 	if cli.EtcdCli == nil {
-		log.Crit(ctx, "Releasing invalid client", nil)
+		// log.Crit(ctx, "Releasing invalid client", nil)
+		log.WithFields(
+			logrus.Fields{	"method.name": 			"(dbs *DatabaseDrivers) init(...)", 
+							"db.client.engine": 	"etcd", 
+							"db.client.version": 	"v3", 
+							}).Error("Releasing invalid client")
 	}
 	cliPool.connPool <- cli
 }
@@ -731,28 +753,27 @@ func (cliPool *EtcdClientPool) reconnectCli(cli EtcdCli) error {
 	if cli.EtcdCli != nil {
 		cli.EtcdCli.Close()
 	}
-	return cli.init(cliPool.Address)
+	return cli.initEtcdCli(cliPool.Address)
 }
 
-func (cli *EtcdCli) initEtcdCli(etcdAddress string) error {
-	dialTimeout 	:= time.Duration(ETCDCLIENTTIMEOUT)
-	localCli, err 	:= etcd.New(etcd.Config{
-		Endpoints:   []string{etcdAddress},
-		DialTimeout: dialTimeout,
+func (cli *EtcdCli) initEtcdCli(etcdAddress []string) error {
+	dialTimeout 		:= time.Duration(ETCDCLIENTTIMEOUT)
+	localCli, err 		:= etcd.New(etcd.Config{
+		Endpoints:   	etcdAddress,
+		DialTimeout: 	dialTimeout,
 	})
 	if err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"method.name": 			"(dbs *DatabaseDrivers) init(...)", 
 							"db.client.engine": 	"etcd", 
 							"db.client.version": 	"v3", 
-							"var.cfg": 		   		cfg,
 							"var.etcdAddress": 		etcdAddress,
 							"var.dialTimeout": 		dialTimeout,
-							}).Warnf("Failed to connect to ETCD")
+							}).Warn("Failed to connect to ETCD")
 		return err
 	}
-	dbs.EtcdCli 	= localCli
-	dbs.inUse 		= false
+	dbs.etcdCli 	= localCli
+	// dbs.inUse 		= false
 	return nil
 }
 
@@ -810,7 +831,7 @@ func EtcdV3Set(key, value string, timeout int64) {
 			// log.Err(ctx, "ETCD grant set Failed", blog.Fields{"key": key, "val": value})
 			return
 		}
-		_, err = cli.Put(context.Background(), key, value, clientv3.WithLease(resp.ID))
+		_, err = cli.Put(context.Background(), key, value, etcd.WithLease(resp.ID))
 		cancel()
 	} else {
 		_, err = cli.Put(context.Background(), key, value)
@@ -860,7 +881,7 @@ func EtcdV3Del(key string) {
 	// delete the keys
 	requestTimeout := time.Duration(ETCDCLIENTTIMEOUT)
 	lctx, cancel := context.WithTimeout(context.Background(), requestTimeout)
-	_, err := cli.Delete(lctx, key, clientv3.WithPrefix())
+	_, err := cli.Delete(lctx, key, etcd.WithPrefix())
 	cancel()
 	if err != nil {
 		log.WithError(err).WithFields(
@@ -873,10 +894,10 @@ func EtcdV3Del(key string) {
 	}
 }
 
-func EtcdV3Monitor(etcdAP, keytoWatch string, callbk func(interface{}, bool, string, string), cbkctx interface{}) {
+func EtcdV3Monitor(hosts []string, keytoWatch string, callbk func(interface{}, bool, string, string), cbkctx interface{}) {
 	dialTimeout := time.Duration(ETCDCLIENTTIMEOUT)
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{etcdAP},
+	cli, err := etcd.New(etcd.Config{
+		Endpoints:   hosts,
 		DialTimeout: dialTimeout,
 	})
 	//We cannot make any progress if client connection fails.
@@ -887,7 +908,7 @@ func EtcdV3Monitor(etcdAP, keytoWatch string, callbk func(interface{}, bool, str
 							"db.client.version": 	"v3", 
 							"var.keytoWatch": 		keytoWatch,
 							"var.dialTimeout": 		dialTimeout,
-							"var.etcdAP": 			etcdAP,
+							"var.hosts": 			hosts,
 							}).Error("ETCD connection failed.")
 		// log.Err(ctx, "ETCD connection failed ", blog.Fields{"err": err.Error()})
 		time.Sleep(10 * time.Second)
@@ -901,19 +922,20 @@ func EtcdV3Monitor(etcdAP, keytoWatch string, callbk func(interface{}, bool, str
 			"db.client.version": 	"v3", 
 			"var.keytoWatch": 		keytoWatch,
 			"var.dialTimeout": 		dialTimeout,
-			"var.etcdAP": 			etcdAP,
+			"var.hosts": 			hosts,
 			}).Error("Watching for change")
-	rch := cli.Watch(context.Background(), keytoWatch, clientv3.WithPrefix())
+	rch := cli.Watch(context.Background(), keytoWatch, etcd.WithPrefix())
 	for wresp := range rch {
 		for _, ev := range wresp.Events {
 			bdelete := false
-			if ev.Type == clientv3.EventTypeDelete {
+			if ev.Type == etcd.EventTypeDelete {
 				bdelete = true
 			}
 			callbk(cbkctx, bdelete, string(ev.Kv.Key), string(ev.Kv.Value))
 		}
 	}
 }
+*/
 
 /*
 func (dbs *DatabaseDrivers) initEtcd(hosts []string, timeout time.Duration, verbose bool) error {
@@ -948,7 +970,7 @@ func (dbs *DatabaseDrivers) initEtcd(hosts []string, timeout time.Duration, verb
 }
 */
 
-func (dbs *DatabaseDrivers) getEtcd() etcd.KeysAPI {
+func (dbs *DatabaseDrivers) getEtcd() etcd.Client {
     return dbs.etcdCli
 }
 

@@ -60,3 +60,14 @@ sift-alpine.env
 .notes
 .notes/
 .notes/**
+
+*.gz
+*.tar.gz
+*.pickle
+*.txt
+*.csv
+
+!*.gz.*
+!*.zip.*
+!*.bz2.*
+!*.tar.gz.*
