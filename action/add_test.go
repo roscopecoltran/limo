@@ -1,8 +1,7 @@
-package actions
+package action
 
 import (
 	"testing"
-
 	"github.com/stretchr/testify/assert"
 )
 

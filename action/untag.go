@@ -1,19 +1,19 @@
-package actions
+package action
 
 import (
-	"fmt"
-
-	"github.com/roscopecoltran/sniperkit-limo/config"
-	"github.com/roscopecoltran/sniperkit-limo/model"
-	"github.com/spf13/cobra"
+	"fmt"																									// go-core
+	"github.com/roscopecoltran/sniperkit-limo/config" 														// app-config
+	"github.com/roscopecoltran/sniperkit-limo/model" 														// data-models
+	"github.com/spf13/cobra" 																				// cli-cmd
+	"github.com/sirupsen/logrus" 																			// logs-logrus
 )
 
-// UntagCmd tags a star
-var UntagCmd = &cobra.Command{
+var UntagCmd = &cobra.Command{ 																				// UntagCmd tags a star
 	Use:     "untag <star> [tag]...",
-	Short:   "Untag a star",
+	Short:   "Untag a star", 
 	Long:    "Untag the star identified by <star> with the tags specified by [tag], or all if [tag] not specified.",
 	Example: fmt.Sprintf("  %s untag limo gui", config.ProgramName),
+	Aliases: []string{"untag", "utag", "ut"},
 	Run: func(cmd *cobra.Command, args []string) {
 		output := getOutput()
 
@@ -32,27 +32,43 @@ var UntagCmd = &cobra.Command{
 		output.StarLine(&stars[0])
 
 		if len(args) == 1 {
-			// Untag all
-			fatalOnError(stars[0].RemoveAllTags(db))
+
+			fatalOnError(stars[0].RemoveAllTags(db)) 														// Untag all
+
 			output.Info(fmt.Sprintf("Removed all tags"))
+
 		} else {
+
 			fatalOnError(stars[0].LoadTags(db))
 
 			for _, tagName := range args[1:] {
+
 				tag, err := model.FindTagByName(db, tagName)
 				if err != nil {
+
 					output.Error(err.Error())
+
 				} else if tag == nil {
+
 					output.Error(fmt.Sprintf("Tag '%s' does not exist", tagName))
+
 				} else if !stars[0].HasTag(tag) {
+
 					output.Error(fmt.Sprintf("'%s' isn't tagged with '%s'", *stars[0].FullName, tagName))
+
 				} else {
+
 					err = stars[0].RemoveTag(db, tag)
 					if err != nil {
+
 						output.Error(err.Error())
+
 					} else {
+
 						output.Info(fmt.Sprintf("Removed tag '%s'", tag.Name))
+
 					}
+
 				}
 			}
 		}
@@ -60,5 +76,12 @@ var UntagCmd = &cobra.Command{
 }
 
 func init() {
+	log.WithFields(
+		logrus.Fields{
+			"src.file": 			"action/untag.go", 
+			"cmd.name": 			"UntagCmd",
+			"method.name": 			"init()", 
+			"var.options": 			options, 
+			}).Info("registering command...")
 	RootCmd.AddCommand(UntagCmd)
 }

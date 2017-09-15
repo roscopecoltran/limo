@@ -1,11 +1,11 @@
-package actions
+package action
 
 import (
-	"fmt"
-
-	"github.com/roscopecoltran/sniperkit-limo/config"
-	"github.com/roscopecoltran/sniperkit-limo/model"
-	"github.com/spf13/cobra"
+	"fmt"																					// go-core
+	"github.com/roscopecoltran/sniperkit-limo/config" 										// app-config
+	"github.com/roscopecoltran/sniperkit-limo/model" 										// data-models
+	"github.com/spf13/cobra" 																// cli-cmd
+	"github.com/sirupsen/logrus" 															// logs-logrus
 )
 
 var homepage = false
@@ -37,6 +37,13 @@ var OpenCmd = &cobra.Command{
 }
 
 func init() {
+	log.WithFields(
+		logrus.Fields{
+			"src.file": 			"action/open.go", 
+			"cmd.name": 			"OpenCmd",
+			"method.name": 			"init()", 
+			"var.options": 			options, 
+			}).Info("registering command...")
 	OpenCmd.Flags().BoolVarP(&homepage, "homepage", "H", false, "open home page instead of URL")
 	RootCmd.AddCommand(OpenCmd)
 }

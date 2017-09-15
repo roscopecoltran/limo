@@ -1,11 +1,12 @@
-package actions
+package action
 
 import (
-	//"context"
-	"fmt"
-	"github.com/roscopecoltran/sniperkit-limo/config"
-	"github.com/spf13/cobra"
-	// bleve_http "github.com/blevesearch/bleve/http"
+	"fmt"																					// go-core
+	"github.com/roscopecoltran/sniperkit-limo/config" 										// app-config
+	//"github.com/roscopecoltran/sniperkit-limo/service" 									// svc-registry
+	//"github.com/roscopecoltran/sniperkit-limo/model" 										// data-models
+	"github.com/spf13/cobra" 																// cli-cmd
+	//"github.com/sirupsen/logrus" 															// logs-logrus
 )
 
 // ClassifyCmd lets you log in
@@ -23,5 +24,12 @@ var ApiCmd = &cobra.Command{
 }
 
 func init() {
+	log.WithFields(
+		logrus.Fields{
+			"src.file": 			"action/api.go", 
+			"cmd.name": 			"ApiCmd",
+			"method.name": 			"init()", 
+			"var.options": 			options, 
+			}).Info("registering command...")
 	RootCmd.AddCommand(ApiCmd)
 }

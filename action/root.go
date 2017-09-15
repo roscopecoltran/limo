@@ -1,27 +1,52 @@
-package actions
+package action
 
 import (
-	"fmt"
-	"os"
-	"github.com/jinzhu/configor"
-	"github.com/blevesearch/bleve"
-	"github.com/roscopecoltran/sniperkit-limo/config"
-	"github.com/roscopecoltran/sniperkit-limo/model"
-	"github.com/roscopecoltran/sniperkit-limo/output"
-	"github.com/roscopecoltran/sniperkit-limo/service"
-	"github.com/jinzhu/gorm"
-	"github.com/boltdb/bolt"
-	"github.com/spf13/cobra"
-	"github.com/sirupsen/logrus"
-	// "github.com/davecgh/go-spew/spew"
-	"github.com/k0kubun/pp"
-	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+	"fmt"																							// go-core
+	"os"																							// go-core
+	"github.com/jinzhu/configor" 																	// cfg-load
+	"github.com/jinzhu/gorm" 																		// data-sql
+	"github.com/boltdb/bolt" 																		// data-kvs
+	"github.com/blevesearch/bleve" 																	// search-idx
+	"github.com/roscopecoltran/sniperkit-limo/config" 												// app-config
+	"github.com/roscopecoltran/sniperkit-limo/model" 												// data-models
+	"github.com/roscopecoltran/sniperkit-limo/service" 												// svc-registry
+	"github.com/roscopecoltran/sniperkit-limo/output" 												// data-output
+	"github.com/spf13/cobra" 																		// cli-cmd
+	"github.com/k0kubun/pp" 																		// debug-print
+	//"github.com/davecgh/go-spew/spew" 															// debug-print
+	"github.com/sirupsen/logrus" 																	// logs-logrus
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"  										// logs-logrus
 )
 
-var defaultConfigFilePath 	string = "~/.config/limo/limo.yaml"
-var configuration 			*config.Config
-var	db 						*model.DatabaseDrivers
-var	log 					= logrus.New()
+
+const defaultConfigFilePath 	= 	"~/.config/limo/limo.yaml"
+
+var (
+	configuration 				*config.Config 														// cfg-init
+	db 							= &model.DatabaseDrivers{} 											// data-drivers
+	log 						= logrus.New() 														// logs-logrus
+)
+
+var (
+	inputFile, outputFile 		string 																// ai-word-embed
+	dimension, window     		int 																// ai-word-embed
+	learningRate          		float64 															// ai-word-embed
+)
+
+//type queueDrivers struct {
+	//MQ 				map[string]*nsq.Producer
+	//NOSQL   			map[string]*gorm.DB
+	//SQL   			map[string]*gorm.DB
+	//IDX 				map[string]*bleve.Index
+	//KVS 				map[string]etcd.KeysAPI
+//}
+
+var queue struct {
+	Disabled 	bool 		
+	// QueueDrivers                 queueDrivers	
+}
+
+// https://github.com/toorop/tmail/blob/master/core/scope.go
 
 var options struct {
 	config 		string
@@ -30,6 +55,11 @@ var options struct {
 	service  	string
 	tag      	string
 	verbose  	bool
+	dir 		struct {
+		tmp 	string 
+		data 	string
+		conf 	string
+	}
 }
 
 // RootCmd is the root command for limo
@@ -50,27 +80,25 @@ func Execute() {
 
 func init() {
 
-	// logs
-	log.Out = os.Stdout
-	// log.Formatter = new(prefixed.TextFormatter)
-
+	log.Out = os.Stdout 																	// logs
 	formatter := new(prefixed.TextFormatter)
 	formatter.FullTimestamp = true
-
-	// Set specific colors for prefix and timestamp
-	formatter.SetColorScheme(&prefixed.ColorScheme{
+	formatter.SetColorScheme(&prefixed.ColorScheme{ 										// Set specific colors for prefix and timestamp
 		PrefixStyle:    "blue+b",
 		TimestampStyle: "white+h",
 	})
-
 	log.Formatter = formatter
 
-	tmpDir := config.GetTmpDir()
+	options.dir.tmp 		:= config.GetTmpDir()
+
 	log.WithFields(
 		logrus.Fields{
-			"action": "init", 
-			"step": "getTmpDir",
-			}).Infof("tmp dir located at: %#s", tmpDir)
+			"src.file": 			"action/root.go", 
+			"method.name": 			"init()", 
+			"method.prev": 			"config.GetTmpDir()",
+			"var.options.dir": 		options.dir, 
+			"var.log": 				log, 
+			}).Info("config adjusting defaults to current machine...")
 
 	flags := RootCmd.PersistentFlags()
 	flags.StringVarP(&options.language, "language", "l", "", 								"language")
@@ -78,88 +106,102 @@ func init() {
 	flags.StringVarP(&options.service, 	"service", 	"s", "github", 							"service")
 	flags.StringVarP(&options.tag, 		"tag", 		"t", "", 								"tag")
 	flags.BoolVarP(&options.verbose, 	"verbose", 	"v", false, 							"verbose output")
-	flags.StringVarP(&options.config, 	"config", 	"c", "./config/settings_default.yml", 	"Path to the configuration filename")
+	flags.StringVarP(&options.config, 	"config", 	"c", "./shared/conf.d/limo.yaml", 		"Path to the configuration filename")
 
 	if options.verbose {
 		log.Level = logrus.InfoLevel
 	}
-
-	/*
-	configFiles := []string{defaultConfigFilePath}
-
-	cfg, err := config.New(cfg, true, true, true, configFiles)
-	if err != nil {
-		log.WithError(err).WithFields(
-			logrus.Fields{	
-				"action": 	"init",
-				}).Fatal("error while loading the configuration files.")
-	}
-
-	db, err := model.New()
-	if err != nil {
-		log.WithError(err).WithFields(
-			logrus.Fields{	
-				"action": 	"init",
-				}).Fatal("error while loading the databases drivers.")
-	}
-
-	log.WithFields(
-		logrus.Fields{	
-			"action": 	"init",
-			"status": 	"successful",
-			"cfg": 	cfg,
-			"db": 	db,
-			}).Debug("error while loading the databases drivers.")
-	*/
 }																																	
 
-func New(verbose bool) (*config.Config, *model.DatabaseDrivers, err error) {
+/*
 
-	configFiles 	:= []string{defaultConfigFilePath}
-	db 				:= &config.Config{}
-	cfg, err 		 = config.New(cfg, true, true, true, configFiles)
-	if err != nil {
-		log.WithError(err).WithFields(
-			logrus.Fields{	
-				"action": 	"init",
-				}).Fatal("error while loading the configuration files.")
-		return cfg, db, err
+// Machine Learning
+
+// GetCommonFlagSet sets the common flags for models.
+func GetCommonFlagSet() *flag.FlagSet {
+	fs := flag.NewFlagSet(RootCmd.Name(), flag.ContinueOnError)
+	fs.StringVarP(&inputFile, "input", "i", "example/input.txt", "Input file path for learning")
+	fs.StringVarP(&outputFile, "output", "o", "example/word_vectors.txt", "Output file path for each learned word vector")
+	fs.IntVarP(&dimension, "dimension", "d", 10, "Set word vector dimension size")
+	fs.IntVarP(&window, "window", "w", 5, "Set window size")
+	fs.Float64Var(&learningRate, "lr", 0.025, "Set init learning rate")
+	return fs
+}
+
+// NewCommon creates the common struct.
+func NewCommon() models.Common {
+	return models.Common{
+		InputFile:    inputFile,
+		OutputFile:   outputFile,
+		Dimension:    dimension,
+		Window:       window,
+		LearningRate: learningRate,
 	}
+}
+*/
 
-	db 			:= &model.DatabaseDrivers{}
-	db, err 	 = model.New(true, true)
-	if err != nil {
+func New(verbose bool) (*config.Config, *model.DatabaseDrivers, error) {
+	// if no user-defined config file to load, pick defaults filepaths
+	if options.config != "" {
+
+	}
+	configFiles 	:= []string{defaultConfigFilePath}
+	// init new configuration
+	if _, err 	:= config.New(configuration, true, true, true, configFiles); err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	
-				"action": 	"init",
+				"src.file": 		"action/root.go",
+				"action.type": 		"load-db",
+				"var.verbose": 		verbose,
+				}).Fatal("error while loading the config files.")
+		return configuration, db, err
+	}
+	// init new data clients
+	if _, err 		:= db.New(true, true); err != nil {
+		log.WithError(err).WithFields(
+			logrus.Fields{	
+				"src.file": 		"action/root.go",
+				"action.type": 		"load-db",
+				"var.verbose": 		verbose,
 				}).Fatal("error while loading the databases drivers.")
-		return cfg, db, err
+		return configuration, db, err
 	}
 	if verbose {
 		log.WithFields(
 			logrus.Fields{	
-				"action": 	"init",
-				"status": 	"successful",
-				"cfg": 		cfg,
-				"db": 		db,
-				}).Debug("error while loading the databases drivers.")
+				"src.file": 		"action/root.go",
+				"action.type": 		"new-instance",
+				"var.cfg": 			cfg,
+				"var.db": 			db,
+				"var.verbose": 		verbose,
+				}).Debug("error while loading the new sniperkit instance.")
 	}
-	return cfg, db, nil
-
+	return configuration, db, nil
 }
 
-func NewConfiguration() (*config.Config, err error) {
-	configFilePath 	:= config.FindLocalConfig()
-	configuration 	:= &config.Config{}
+func NewConfiguration() (*config.Config, error) {
+	configFilePath 	:= 	config.FindLocalConfig()
+	configuration 	:= 	&config.Config{}
 	if configFilePath != "" {
 		log.WithFields(logrus.Fields{	
-			"config": 	"getConfiguration",
-			}).Infof("FOUND configuration data to load: %#s", configFilePath)
+			"src.file": 					"action/root.go",
+			"action.type": 					"new-config",
+			"method.name": 					"NewConfiguration(...)",
+			"method.prev": 					"config.FindLocalConfig(...)",
+			"var.configFilePath": 			configFilePath,
+			"var.defaultConfigFilePath": 	defaultConfigFilePath,
+			}).Info("found local config files")
 	}
 	if err := configor.Load(&configuration, configFilePath, defaultConfigFilePath); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{	
-			"config": 	"getConfiguration",
-			}).Fatal("error while loading the config files with configor package.")
+			"src.file": 					"action/root.go",
+			"action.type": 					"new-config",
+			"method.name": 					"NewConfiguration(...)",
+			"method.prev": 					"configor.Load(...)",
+			"var.configFilePath": 			configFilePath,
+			"var.defaultConfigFilePath": 	defaultConfigFilePath,
+			}).Error("error while loading configs with 'configor'")
+			//}).Fatal("error while loading the config files with configor package.")
 	}
 	return configuration, nil
 }
@@ -168,41 +210,55 @@ func getConfiguration() (configuration config.Config, err error) {
 	configFilePath := config.FindLocalConfig()
 	if configFilePath != "" {
 		log.WithFields(logrus.Fields{	
-			"config": 	"getConfiguration",
-			}).Infof("FOUND configuration data to load: %#s", configFilePath)
+			"src.file": 					"action/root.go",
+			"action.type": 					"new-config",
+			"method.name": 					"NewConfiguration(...)",
+			"method.prev": 					"config.FindLocalConfig(...)",
+			"var.configFilePath": 			configFilePath,
+			}).Info("found local config file")
 	}
 	if err := configor.Load(&configuration, configFilePath, defaultConfigFilePath); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{	
-			"config": 	"getConfiguration",
-			}).Fatal("error while loading the config files with configor package.")
+			"src.file": 					"action/root.go",
+			"action.type": 					"new-config",
+			"method.name": 					"getConfiguration(...)",
+			"method.prev": 					"configor.Load(...)",
+			"var.configFilePath": 			configFilePath,
+			}).Fatal("error while loading configs with 'configor'")
 	}
 	return configuration, nil
 }
 
 func getDatabase() (*gorm.DB, error) {
-	db, err := model.GetDatabases()
-	if err != nil {
+	//db 				:= 	&model.DatabaseDrivers{}
+	if _, err 		:= 	db.New(true, true); err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	
-				"method": 	"getDatabase",
-				"file": 	"root.go",
-				"db": 		&db,
-				}).Error("error while connecting to all databases.")
+				"src.file": 					"action/root.go",
+				"action.type": 					"get-db",
+				"method.name": 					"getDatabase(...)",
+				"method.prev": 					"model.GetDatabases(...)",
+				"var.db": 						db,
+				}).Fatal("error while connecting to all active database drivers.")
+		return db.gormCli, err
 	}
-	pp.Println(&db)
+	pp.Println(db)
+	//db.gormCli = gormCli
+	/*
 	if db.gormCli == nil {
-		cfg, err := getConfiguration()
+		cfg, err 		:= getConfiguration()
 		if err != nil {
 			return nil, err
 		}
 		//db, err = model.InitDB(cfg.DatabasePath, true)
-		gormCli, err := model.InitGorm(cfg.DatabasePath, "sqlite3", options.verbose)
+		gormCli, err 	:= model.InitGorm(cfg.DatabasePath, "sqlite3", options.verbose)
 		if err != nil {
 			return nil, err
 		}
 		db.gormCli = gormCli
 	}
-	return &db.gormCli, nil
+	*/
+	return db.gormCli, nil
 }
 
 /*

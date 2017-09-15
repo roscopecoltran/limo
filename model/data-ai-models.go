@@ -2,6 +2,7 @@ package model
 
 // https://github.com/tchajed/wordenc/tree/master/shortdict
 // https://github.com/dustin/go-wikiparse
+// https://github.com/sjwhitworth/golearn/blob/master/examples/knnclassifier/knnclassifier_iris.go
 // 
 
 type MachineLearningModelFiles struct {

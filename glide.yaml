@@ -111,6 +111,11 @@ import:
 - package: github.com/jbowles/nlpt-ir
 - package: github.com/jbowles/wordlab
 - package: github.com/jbowles/nlpt-tkz
+- package: gopkg.in/cheggaaa/pb.v1
+- package: google.golang.org/api
+  subpackages:
+  - gmail/v1
+- package: github.com/sjwhitworth/golearn
 - package: github.com/cdipaolo/goml
   subpackages:
   - base
@@ -251,6 +256,8 @@ import:
   - graph/mongo
   - graph/path
   - graph/sql
+- package: github.com/Smerity/govarint
+- package: github.com/Smerity/gopagerank
 - package: github.com/ynqa/word-embedding  
   subpackages:
   - models
@@ -338,6 +345,21 @@ import:
   subpackages:
   - lock
   - queue
+- package: github.com/sajari/docconv
+  subpackages:
+  - client
+  - iWork
+  - iWork/pb-schema
+  - snappy
+- package: github.com/allegro/bigcache
+- package: github.com/nsqio/go-nsq
+- package: github.com/sajari/fuzzy
+- package: github.com/sajari/storage
+- package: github.com/sajari/regression
+- package: github.com/sajari/fastentity
+- package: github.com/sajari/word2vec
+  subpackages:
+  - partition
 - package: github.com/mediocregopher/radix.v2
 - package: github.com/mediocregopher/radix.v3
 - package: github.com/Pallinder/go-randomdata

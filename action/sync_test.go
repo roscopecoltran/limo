@@ -1,2 +1,2 @@
-package actions
+package action
 

@@ -11,10 +11,32 @@ import (
 	"github.com/sirupsen/logrus"									// logs-logrus
 )
 
-// ref. https://raw.githubusercontent.com/hfurubotten/autograder/master/database/database_test.go
+// refs. 
+//  - https://raw.githubusercontent.com/hfurubotten/autograder/master/database/database_test.go
+//  - https://github.com/ssut/pocketnpm/blob/master/db/bolt_backend.go
+//  - https://github.com/ssut/pocketnpm/blob/master/db/bolt_backend.go#L42-L55
 
 var boltDB *bolt.DB
 var registeredBucketNames = make([]string, 0)
+
+/*
+// InitBolt init bolt
+func InitBolt() error {
+	var err error
+	// init Bolt DB
+	Bolt, err = bolt.Open(Cfg.GetBoltFile(), 0600, nil)
+	if err != nil {
+		return err
+	}
+	// create buckets if not exists
+	return Bolt.Update(func(tx *bolt.Tx) error {
+		if _, err = tx.CreateBucketIfNotExists([]byte("koip")); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+*/
 
 // Start will start up the database. If the database does not already exist, a new one will be created.
 func Start(dbloc string) (err error) {

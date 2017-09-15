@@ -107,3 +107,8 @@ todo
 .git
 *.swp
 `
+
+const (
+	// Time822 formt time for RFC 822
+	Time822 = "02 Jan 2006 15:04:05 -0700" // "02 Jan 06 15:04 -0700"
+)

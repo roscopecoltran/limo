@@ -1,11 +1,11 @@
-package actions
+package action
 
 import (
-	"fmt"
-
-	"github.com/roscopecoltran/sniperkit-limo/config"
-	"github.com/roscopecoltran/sniperkit-limo/model"
-	"github.com/spf13/cobra"
+	"fmt"																							// go-core
+	"github.com/roscopecoltran/sniperkit-limo/config" 												// app-config
+	"github.com/roscopecoltran/sniperkit-limo/model" 												// data-models
+	"github.com/spf13/cobra" 																		// cli-cmd
+	"github.com/sirupsen/logrus" 																	// logs-logrus
 )
 
 // ShowCmd shows the version
@@ -40,5 +40,12 @@ var ShowCmd = &cobra.Command{
 }
 
 func init() {
+	log.WithFields(
+		logrus.Fields{
+			"src.file": 			"action/show.go", 
+			"cmd.name": 			"ShowCmd",
+			"method.name": 			"init()", 
+			"var.options": 			options, 
+			}).Info("registering command...")
 	RootCmd.AddCommand(ShowCmd)
 }

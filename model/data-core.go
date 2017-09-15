@@ -1,10 +1,14 @@
 package model
 
+// https://github.com/ssut/pocketnpm/blob/master/db/gorm_backend.go
+// 
+
 import (
     "errors" 														// go-core
 	"time" 															// go-core
 	"path" 															// go-core
 	"os" 															// go-core
+	"github.com/allegro/bigcache" 									// data-cache-bigcache
 	"github.com/jinzhu/gorm" 										// db-sql-gorm
 	_ "github.com/jinzhu/gorm/dialects/sqlite" 						// db-sql-gorm-sqlite3
 	_ "github.com/jinzhu/gorm/dialects/mysql" 						// db-sql-gorm-mysql
@@ -31,6 +35,7 @@ import (
     "github.com/qor/admin" 											// web-qor-admin-ui
 	"github.com/sirupsen/logrus"									// logs-logrus
 	prefixed "github.com/x-cray/logrus-prefixed-formatter" 			// logs-logrus
+	"github.com/roscopecoltran/sniperkit-limo/config" 				// go-core
 )
 
 var validDataOutput 	= []string{"md","csv","yaml","json","xlsx","xml","tsv","mysql","postgres","html","ascii"} // datasets - formats
@@ -40,12 +45,14 @@ var availableLocales 	= []string{"en-US", "fr-FR", "pl-PL"}
 
 type EnhancedTime 		time.Time
 
+/*
 type Databases struct {
 	Datastore 			map[string]*bolt.DB
 	Database   			map[string]*gorm.DB
 	SearchIdx 			map[string]*bleve.Index
 	KvIdx 				map[string]etcd.KeysAPI
 }
+*/
 // var databases = make(map[string]Service)
 
 var (
@@ -58,19 +65,11 @@ var (
 
 var (
 	adminUI 			*admin.Admin
-	db 					DatabaseDrivers
+	configuration 		*config.Config 		//
+	dbs 				*DatabaseDrivers 	// *DatabaseDrivers //New(true, true)
 	log 				= logrus.New()
 	tagg 				= taggraph.NewTagGaph()
 )
-
-type DatabaseDrivers struct {
-	boltCli  			*bolt.DB
-	gormCli 			*gorm.DB
-	bleveIdx 			*bleve.Index
-	redisCli 			redis.Conn
-	etcdCli  			etcd.KeysAPI
-	neo4jCli 			*neoism.Database
-}
 
 // ref. https://github.com/tinrab/go-mmo/blob/master/db/dbobjects_gen.go
 //type Database interface {
@@ -93,83 +92,11 @@ func init() {
 //func NewDatabases(conf config.Config) (db *Databases, err error) {
 //}
 
-func (db *DatabaseDrivers) New(verbose bool, debug bool) (*DatabaseDrivers, error) {
-	adapter := "sqlite3"
-	if err := db.initGorm(adapter, "./shared/data/limo/limo.db", true); err != nil {
-		log.WithError(err).WithFields(
-			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
-							"prefix": 			"dbs-new",
-							"db.adapater": 		adapter, 
-							"db.type": 			"sql", 
-							"db.driver": 		"gorm", 
-							"method.name": 		"(db *DatabaseDrivers) New(...)", 
-							"method.prev": 		"db.initGorm(...)",
-							"var.verbose": 		verbose,
-							"var.debug": 		debug,
-							}).Error("error while trying to init 'Gorm' database driver.")
-		return db, err
-	}
-	if err := db.autoloadGorm(true, true, true, Tables...); err != nil {
-		log.WithError(err).WithFields(
-			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
-							"db.adapater": 		adapter, 
-							"db.type": 			"sql", 
-							"db.driver": 		"gorm", 
-							"method.name": 		"(db *DatabaseDrivers) New(...)", 
-							"method.prev": 		"db.autoloadGorm(...)",
-							"prefix": 			"dbs-new",
-							"var.verbose": 		verbose,
-							"var.debug": 		debug,
-							}).Error("error while trying to init 'Gorm' database driver.")
-		return db, err
-	}
-	/*
-	if cfg.Database.Seeds.AutoLoad {
-		// cfg.Database.Seeds.PrefixPath
-		// cfg.Database.Seeds.Format
-		filepaths, _ := filepath.Glob("db/seeds/data/*.yml")
-		if err := configor.Load(&Seeds, filepaths...); err != nil {
-			panic(err)
-		}
-	}
-	*/
-	if err := db.initBoltDB("./shared/data/limo/limo.boltdb", 0600, &bolt.Options{Timeout: 1 * time.Second}, true); err != nil {
-		log.WithError(err).WithFields(
-			logrus.Fields{	"prefix": 						"dbs-new",
-							"src.file": 					"model/data-db-connector.go", 
-							"db.adapter": 					"bolt",
-							"db.driver": 					"boltdb", 
-							"db.type": 						"kvs",
-							"method.name": 					"(db *DatabaseDrivers) New(...)", 
-							"method.prev": 					"db.initBoltDB(...)",
-							"var.bolt.Options.Timeout": 	1 * time.Second,
-							"var.bolt.file.permissions": 	0600,
-							"var.bolt.file.prefix.path": 	"./shared/data/limo/limo.boltdb",
-							}).Error("error while trying to init 'BoltDB' database driver")
-		return db, err
-	}
-	etcdDefaultHost 	:= []string{"http://127.0.0.1:2379"}
-	etcdDefaultTimeout 	:= 1 * time.Second
-	if err := db.initEtcd(etcdDefaultHost, etcdDefaultTimeout, true); err != nil {
-		log.WithError(err).WithFields(
-			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
-							"prefix": 			"dbs-new",
-							"method.name": 		"(db *DatabaseDrivers) New(...)", 
-							"method.prev": 		"db.initEtcd(...)",
-							"db.type": 			"kvs", 
-							"db.driver": 		"etcd",
-							"db.adapter": 		"etcd",
-							}).Error("error while trying to auto-load all program the tables")
-		return db, err
-	}
-	return db, nil
-}
-
 //func GetDatabases(cfg *config.Config, verbose bool, debug bool) (db *DatabaseDrivers, err error) {
 func GetDatabases() (*DatabaseDrivers, error) {
-	var db = &DatabaseDrivers{}
+	dbs 						:= 	&DatabaseDrivers{}
 	var err error
-	if db, err 	= New(true, true); err != nil {
+	if dbs, err 	= New(true, true); err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
 							"prefix": 			"dbs-get-all",
@@ -178,15 +105,16 @@ func GetDatabases() (*DatabaseDrivers, error) {
 							"db.driver": 		"all", 
 							"db.driver.groups": "sql,nosql,kvs", 
 							}).Error("error while trying to init all database drivers.")
-		return db, err
+		return dbs, err
 	}
-	return db, nil
+	return dbs, nil
 }
 
 //func New(cfg *config.Config, verbose bool, debug bool) (db *DatabaseDrivers, err error) {
-func New(verbose bool, debug bool) (db *DatabaseDrivers, err error) {
+func New(verbose bool, debug bool) (*DatabaseDrivers, error) {
+	dbs 						:= 	&DatabaseDrivers{}
 	adapter := "sqlite3"
-	if err := db.initGorm(adapter, "./shared/data/limo/limo.db", true); err != nil {
+	if gormCli, err := InitGorm(adapter, "./shared/data/limo/limo.db", true); err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
 							"method.name": 		"New(...)", 
@@ -197,20 +125,21 @@ func New(verbose bool, debug bool) (db *DatabaseDrivers, err error) {
 							"prefix": 			"dbs-new",
 							"action": 			"InitGorm",
 							}).Error("error while trying to init 'Gorm' database driver.")
-		return db, err
+		return dbs, err
 	}
-	if err := db.autoloadGorm(true, true, true, Tables...); err != nil {
+
+	if err := AutoloadGorm(true, true, true, Tables...); err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
 							"method.name": 		"New(...)", 
 							"db.type": 			"sql", 
 							"db.driver": 		"gorm", 
 							"db.adpater": 		adapter,
-							"method.prev": 		"db.autoloadGorm(...)",
+							"method.prev": 		"db.autoLoadGorm(...)",
 							"prefix": 			"dbs-new",
 							"action": 			"InitGorm",
 							}).Error("error while trying to init 'Gorm' database driver.")
-		return db, err
+		return dbs, err
 	}
 	/*
 	if cfg.Database.Seeds.AutoLoad {
@@ -222,7 +151,7 @@ func New(verbose bool, debug bool) (db *DatabaseDrivers, err error) {
 		}
 	}
 	*/
-	if err := db.initBoltDB("./shared/data/limo/limo.boltdb", 0600, &bolt.Options{Timeout: 1 * time.Second}, true); err != nil {
+	if boltCli, err := InitBoltDB("./shared/data/limo/limo.boltdb", 0600, &bolt.Options{Timeout: 1 * time.Second}, true); err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
 							"method.name": 		"New(...)", 
@@ -235,9 +164,10 @@ func New(verbose bool, debug bool) (db *DatabaseDrivers, err error) {
 							}).Error("error while trying to init 'BoltDB' database driver")
 		return db, err
 	}
+
 	etcdDefaultHost 	:= []string{"http://127.0.0.1:2379"}
 	etcdDefaultTimeout 	:= 1 * time.Second
-	if err := db.initEtcd(etcdDefaultHost, etcdDefaultTimeout, true); err != nil {
+	if etcdCli, err := InitEtcd(etcdDefaultHost, etcdDefaultTimeout, true); err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
 							"prefix": 			"dbs-new",
@@ -247,22 +177,25 @@ func New(verbose bool, debug bool) (db *DatabaseDrivers, err error) {
 							"method.prev": 		"db.initEtcd(...)",
 							"action": 			"AutoloadDB",
 							}).Error("error while trying to auto-load all program the tables")
-		return db, err
+		return &db, err
 	}
 
 	// graphql
 	// client := graphql.NewClient("https://example.com/graphql", nil, nil)
 
-	return db, nil
+	return &DatabaseDrivers{
+			gormCli: 	gormCli,
+			boltCli:  	boltCli,
+			etcdCli: 	etcdCli,
+		}, nil
+
 }
 
-func (db *DatabaseDrivers) Close() {
-	// others
-    db.redisCli.Close()
-}
+func InitDatabases() (*DatabaseDrivers, error) {
 
-func InitDatabases() (db *DatabaseDrivers, err error) {
-	adapter := "sqlite3"
+	db 				:= &DatabaseDrivers{}
+	adapter 		:= "sqlite3"
+
 	if err := db.initGorm(adapter, "./shared/data/limo/limo.db", true); err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
@@ -273,19 +206,21 @@ func InitDatabases() (db *DatabaseDrivers, err error) {
 							"db.type": 			"sql",
 							"db.driver": 		"gorm", 
 							}).Error("error while trying to init 'Gorm' database driver.")
-		return nil, err
+		return db, err
 	}
-	if err := db.autoloadGorm(true, true, true, Tables...); err != nil {
+
+	if err := db.autoLoadGorm(true, true, true, Tables...); err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
 							"prefix": 			"dbs-init",
 							"method.name": 		"Init", 
-							"method.prev": 		"db.autoloadGorm(...)",
+							"method.prev": 		"db.autoLoadGorm(...)",
 							"db.adapter": 		adapter, 
 							"db.type": 			"sql",
 							"db.driver": 		"gorm", 
 							}).Error("error while trying to init 'Gorm' database driver.")
-		return nil, err
+		return db, err
+
 	}
 
 	/*
@@ -308,7 +243,7 @@ func InitDatabases() (db *DatabaseDrivers, err error) {
 							"prefix": 			"dbs-init",
 							"action": 			"InitBoltDB",
 							}).Error("error while trying to init 'BoltDB' database driver")
-		return nil, err
+		return db, err
 	}
 
 	etcdDefaultHost 	:= []string{"http://127.0.0.1:2379"}
@@ -322,7 +257,7 @@ func InitDatabases() (db *DatabaseDrivers, err error) {
 							"prefix": 			"dbs-init",							
 							"action": 			"AutoloadDB",
 							}).Error("error while trying to auto-load all program the tables")
-		return nil, err
+		return db, err
 	}
 	return db, nil
 }
@@ -355,6 +290,64 @@ func InitGorm(filepath string, adapter string, verbose bool) (*gorm.DB, error) {
 	}
 	*/
 	return gormDB, nil
+}
+
+func AutoLoadGorm(clientSQL *gorm.DB, isAutoMigrate bool, isTruncate bool, isAdminUI bool, tables ...interface{}) (error) {
+	if isAdminUI {
+		adminUI 	= 	admin.New(&qor.Config{DB: clientSQL})
+	}
+	for _, table := range tables {
+		if isTruncate {
+			if err := clientSQL.DropTableIfExists(table).Error; err != nil {
+				log.WithError(err).WithFields(
+					logrus.Fields{	"src.file": 			"model/data-db-connector.go", 
+									"prefix": 				"db-gorm",
+									"method.name": 			"(db *DatabaseDrivers) autoLoadGorm(...)", 
+									"method.prev": 			"db.gormCli.DropTableIfExists(...)",
+									"var.db.isTruncate": 	isTruncate,
+									"var.db.table": 		table,
+									}).Warn("error while trying to drop an existing SQL table")
+				return err
+			}
+		}
+		if isAutoMigrate {
+			if err := clientSQL.AutoMigrate(table).Error; err != nil {
+				log.WithError(err).WithFields(
+					logrus.Fields{	"src.file": 				"model/data-db-connector.go", 
+									"prefix": 					"db-gorm",
+									"method.name": 				"(db *DatabaseDrivers) autoLoadGorm(...)", 
+									"method.prev": 				"db.gormCli.AutoMigrate(...)",
+									"var.db.isAutoMigrate": 	isAutoMigrate,
+									"var.db.table": 			table,
+									}).Warn("error while trying to auto-migrate db table")
+				return err
+			}
+		}
+		if isAdminUI {
+			adminUI.AddResource(table)
+			log.WithFields(
+				logrus.Fields{	"src.file": 			"model/data-db-connector.go", 
+								"method.name": 			"(db *DatabaseDrivers) autoLoadGorm(...)", 
+								"method.prev": 			"adminUI.AddResource(...)",
+								"var.adminui.status": 	isAdminUI,
+								"var.adminui.table": 	table,
+								}).Info("adding admin UI resource for the table")
+		}
+	}
+	if isAdminUI {
+		if len(adminUI.GetResources()) > 0 {
+			for _, resource := range adminUI.GetResources() {	
+				log.WithFields(
+					logrus.Fields{	"src.file": 				"model/data-db-connector.go", 
+									"method.name": 				"(db *DatabaseDrivers) autoLoadGorm(...)", 
+									"method.prev": 				"adminUI.GetResources()",
+									"prefix": 					"webui-admin",
+									"var.adminui.resource": 	resource,
+									}).Info("detected new admin UI resource")
+			}		
+		}
+	}
+	return nil
 }
 
 func InitBoltDB(filepath string) (*bolt.DB, error) {
@@ -410,22 +403,109 @@ func InitEtcd(hosts []string, timeOut time.Duration, verbose bool) error {
 	return nil
 }
 
-func TimeToMicroseconds(t time.Time) int64 {
-	return t.Unix()*int64(time.Second/time.Microsecond) + int64(t.Nanosecond())/int64(time.Microsecond)
-}
-
 /*
-type DatabaseDrivers struct {
-	boltCli  			*bolt.DB
-	gormCli 			*gorm.DB
-	etcdCli  			etcd.KeysAPI
-	bleveIdx 			bleve.Index
-	//dynamodbClient 	*dynamodb.DynamoDB
+// ref. https://github.com/ssut/pocketnpm/blob/master/db/database.go
+func InitBigCache(filepath string) (*bolt.DB, error) {
+	cacheConfig := bigcache.DefaultConfig(time.Duration(config.CacheLifetime) * time.Minute)
+	cacheConfig.MaxEntrySize = 8192
+	cacheConfig.HardMaxCacheSize = config.MaxCacheSize
+	cache, err := bigcache.NewBigCache(cacheConfig)
+	if err != nil {
+		log.Fatalf("Failed to initialize in-memory cache: %v", err)
+	}
 }
 */
 
+type DatabaseDrivers struct {
+	gormCli 			*gorm.DB
+	//dynamodbClient 	*dynamodb.DynamoDB
+	boltCli  			*bolt.DB
+	bleveIdx 			*bleve.Index
+	neo4jCli 			*neoism.Database
+	cache 				*bigcache.BigCache
+	redisCli 			redis.Conn
+	etcdCli  			etcd.KeysAPI
+}
+
+func (dbs *DatabaseDrivers) New(verbose bool, debug bool) (*DatabaseDrivers, error) {
+	adapter := "sqlite3"
+	if err := dbs.initGorm(adapter, "./shared/data/limo/limo.db", true); err != nil {
+		log.WithError(err).WithFields(
+			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
+							"prefix": 			"dbs-new",
+							"db.adapater": 		adapter, 
+							"db.type": 			"sql", 
+							"db.driver": 		"gorm", 
+							"method.name": 		"(db *DatabaseDrivers) New(...)", 
+							"method.prev": 		"db.initGorm(...)",
+							"var.verbose": 		verbose,
+							"var.debug": 		debug,
+							}).Error("error while trying to init 'Gorm' database driver.")
+		return dbs, err
+	}
+	if err := dbs.autoLoadGorm(true, true, true, Tables...); err != nil {
+		log.WithError(err).WithFields(
+			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
+							"db.adapater": 		adapter, 
+							"db.type": 			"sql", 
+							"db.driver": 		"gorm", 
+							"method.name": 		"(db *DatabaseDrivers) New(...)", 
+							"method.prev": 		"db.autoLoadGorm(...)",
+							"prefix": 			"dbs-new",
+							"var.verbose": 		verbose,
+							"var.debug": 		debug,
+							}).Error("error while trying to init 'Gorm' database driver.")
+		return dbs, err
+	}
+	/*
+	if cfg.Database.Seeds.AutoLoad {
+		// cfg.Database.Seeds.PrefixPath
+		// cfg.Database.Seeds.Format
+		filepaths, _ := filepath.Glob("db/seeds/data/*.yml")
+		if err := configor.Load(&Seeds, filepaths...); err != nil {
+			panic(err)
+		}
+	}
+	*/
+	if err := dbs.initBoltDB("./shared/data/limo/limo.boltdb", 0600, &bolt.Options{Timeout: 1 * time.Second}, true); err != nil {
+		log.WithError(err).WithFields(
+			logrus.Fields{	"prefix": 						"dbs-new",
+							"src.file": 					"model/data-db-connector.go", 
+							"db.adapter": 					"bolt",
+							"db.driver": 					"boltdb", 
+							"db.type": 						"kvs",
+							"method.name": 					"(db *DatabaseDrivers) New(...)", 
+							"method.prev": 					"db.initBoltDB(...)",
+							"var.bolt.Options.Timeout": 	1 * time.Second,
+							"var.bolt.file.permissions": 	0600,
+							"var.bolt.file.prefix.path": 	"./shared/data/limo/limo.boltdb",
+							}).Error("error while trying to init 'BoltDB' database driver")
+		return dbs, err
+	}
+	etcdDefaultHost 	:= []string{"http://127.0.0.1:2379"}
+	etcdDefaultTimeout 	:= 1 * time.Second
+	if err := db.initEtcd(etcdDefaultHost, etcdDefaultTimeout, true); err != nil {
+		log.WithError(err).WithFields(
+			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
+							"prefix": 			"dbs-new",
+							"method.name": 		"(db *DatabaseDrivers) New(...)", 
+							"method.prev": 		"db.initEtcd(...)",
+							"db.type": 			"kvs", 
+							"db.driver": 		"etcd",
+							"db.adapter": 		"etcd",
+							}).Error("error while trying to auto-load all program the tables")
+		return dbs, err
+	}
+	return dbs, nil
+}
+
+func (dbs *DatabaseDrivers) Close() {
+	// others (map ?!)
+    dbs.gormCli.Close()
+}
+
 //func initGorm(db *gorm.DB) {
-func (db *DatabaseDrivers) initGorm(filepath string, adapter string, verbose bool) (error) {
+func (dbs *DatabaseDrivers) initGorm(filepath string, adapter string, verbose bool) (error) {
 //(db *DatabaseDrivers) func initGorm(filepath string, adapter string, verbose bool) (error) {
 	gormDB, err := gorm.Open(adapter, filepath) 	// Get more config options to setup the SQL database
 	if err != nil {
@@ -441,37 +521,42 @@ func (db *DatabaseDrivers) initGorm(filepath string, adapter string, verbose boo
 	}
 	gormDB.LogMode(verbose) 	// cfg.App.DebugMode
 	// isAutoMigrate, isTruncate, isAdminUIResource
-	if err := db.autoloadGorm(true, true, false, Tables...); err != nil {
+	if err := db.autoLoadGorm(true, true, false, Tables...); err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"src.file": 			"model/data-db-connector.go", 
 							"prefix": 				"db-gorm",
 							"method.name": 			"(db *DatabaseDrivers) initGorm(...)", 
-							"method.prev": 			"db.autoloadGorm(...)",
+							"method.prev": 			"db.autoLoadGorm(...)",
 							"db.adapter": 			adapter, 
 							"var.db.verbose": 		verbose,
 							}).Warn("error while trying to auto-load all program the tables")
 		return err
 	}
-	db.gormCli = gormDB
+	dbs.gormCli = gormDB
 	return nil
 }
 
-func (db *DatabaseDrivers) closeGorm() {
-    //db.gormCli.Close()
+func (dbs *DatabaseDrivers) getGorm() *gorm.DB {
+    return dbs.gormCli
 }
 
-func (db *DatabaseDrivers) autoloadGorm(isAutoMigrate bool, isTruncate bool, isAdminUI bool, tables ...interface{}) (error) {
-//(db *DatabaseDrivers) func autoloadGorm(isAutoMigrate bool, isTruncate bool, isAdminUIResource bool, tables ...interface{}) (error) {
+
+func (dbs *DatabaseDrivers) closeGorm() {
+    db.gormCli.Close()
+}
+
+func (dbs *DatabaseDrivers) autoLoadGorm(isAutoMigrate bool, isTruncate bool, isAdminUI bool, tables ...interface{}) (error) {
+//(db *DatabaseDrivers) func autoLoadGorm(isAutoMigrate bool, isTruncate bool, isAdminUIResource bool, tables ...interface{}) (error) {
 	if isAdminUI {
 		adminUI 	= 	admin.New(&qor.Config{DB: db.gormCli})
 	}
 	for _, table := range tables {
 		if isTruncate {
-			if err := db.gormCli.DropTableIfExists(table).Error; err != nil {
+			if err := dbs.gormCli.DropTableIfExists(table).Error; err != nil {
 				log.WithError(err).WithFields(
 					logrus.Fields{	"src.file": 			"model/data-db-connector.go", 
 									"prefix": 				"db-gorm",
-									"method.name": 			"(db *DatabaseDrivers) autoloadGorm(...)", 
+									"method.name": 			"(db *DatabaseDrivers) autoLoadGorm(...)", 
 									"method.prev": 			"db.gormCli.DropTableIfExists(...)",
 									"var.db.isTruncate": 	isTruncate,
 									"var.db.table": 		table,
@@ -480,11 +565,11 @@ func (db *DatabaseDrivers) autoloadGorm(isAutoMigrate bool, isTruncate bool, isA
 			}
 		}
 		if isAutoMigrate {
-			if err := db.gormCli.AutoMigrate(table).Error; err != nil {
+			if err := dbs.gormCli.AutoMigrate(table).Error; err != nil {
 				log.WithError(err).WithFields(
 					logrus.Fields{	"src.file": 				"model/data-db-connector.go", 
 									"prefix": 					"db-gorm",
-									"method.name": 				"(db *DatabaseDrivers) autoloadGorm(...)", 
+									"method.name": 				"(db *DatabaseDrivers) autoLoadGorm(...)", 
 									"method.prev": 				"db.gormCli.AutoMigrate(...)",
 									"var.db.isAutoMigrate": 	isAutoMigrate,
 									"var.db.table": 			table,
@@ -496,7 +581,7 @@ func (db *DatabaseDrivers) autoloadGorm(isAutoMigrate bool, isTruncate bool, isA
 			adminUI.AddResource(table)
 			log.WithFields(
 				logrus.Fields{	"src.file": 			"model/data-db-connector.go", 
-								"method.name": 			"(db *DatabaseDrivers) autoloadGorm(...)", 
+								"method.name": 			"(db *DatabaseDrivers) autoLoadGorm(...)", 
 								"method.prev": 			"adminUI.AddResource(...)",
 								"var.adminui.status": 	isAdminUI,
 								"var.adminui.table": 	table,
@@ -508,7 +593,7 @@ func (db *DatabaseDrivers) autoloadGorm(isAutoMigrate bool, isTruncate bool, isA
 			for _, resource := range adminUI.GetResources() {	
 				log.WithFields(
 					logrus.Fields{	"src.file": 				"model/data-db-connector.go", 
-									"method.name": 				"(db *DatabaseDrivers) autoloadGorm(...)", 
+									"method.name": 				"(db *DatabaseDrivers) autoLoadGorm(...)", 
 									"method.prev": 				"adminUI.GetResources()",
 									"prefix": 					"webui-admin",
 									"var.adminui.resource": 	resource,
@@ -519,7 +604,7 @@ func (db *DatabaseDrivers) autoloadGorm(isAutoMigrate bool, isTruncate bool, isA
 	return nil
 }
 
-func (db *DatabaseDrivers) initBoltDB(filePath string, filePermissions os.FileMode, options *bolt.Options, verbose bool) (error) {
+func (dbs *DatabaseDrivers) initBoltDB(filePath string, filePermissions os.FileMode, options *bolt.Options, verbose bool) (error) {
 //(db *DatabaseDrivers) func initBoltDB(filePath string, filePermissions string, options *bolt.Options, verbose bool) (error) {
 	boltDB, err := bolt.Open(filePath, filePermissions, options)
 	if err != nil {
@@ -533,15 +618,19 @@ func (db *DatabaseDrivers) initBoltDB(filePath string, filePermissions os.FileMo
 							}).Warnf("error while init the database with boltDB.")
 		return err
 	}
-	db.boltCli = boltDB
+	dbs.boltCli = boltDB
 	return nil
 }
 
-func (db *DatabaseDrivers) closeBoltDB() {
-    //db.BoltCli.Close()
+func (dbs *DatabaseDrivers) getBoltDB() *bolt.DB {
+    return dbs.boltCli
 }
 
-func (db *DatabaseDrivers) initRedis(Password string, DbNum int) {
+func (dbs *DatabaseDrivers) closeBoltDB() {
+    dbs.boltCli.Close()
+}
+
+func (dbs *DatabaseDrivers) initRedis(Password string, DbNum int) {
     var err error
     redisCli, err := redis.Dial("tcp", ":6379")
     if err != nil {
@@ -556,7 +645,7 @@ func (db *DatabaseDrivers) initRedis(Password string, DbNum int) {
 							}).Errorln("failed to create the client", err)
         return
     }
-	db.redisCli = redisCli
+	dbs.redisCli = redisCli
 	/*
     var err2 error
     _, err2 = db.redisCli.Client.Do("SELECT", DbNum)
@@ -574,11 +663,15 @@ func (db *DatabaseDrivers) initRedis(Password string, DbNum int) {
     */
 }
 
-func (db *DatabaseDrivers) closeRedis() {
-    db.redisCli.Close()
+func (dbs *DatabaseDrivers) getRedis() redis.Conn {
+    return dbs.redisCli
 }
 
-func (db *DatabaseDrivers) initEtcd(hosts []string, timeout time.Duration, verbose bool) error {
+func (dbs *DatabaseDrivers) closeRedis() {
+    dbs.redisCli.Close()
+}
+
+func (dbs *DatabaseDrivers) initEtcd(hosts []string, timeout time.Duration, verbose bool) error {
 //(db *DatabaseDrivers) func initEtcd(hosts []string, timeout time.Second, verbose bool) error {
 	cfg := etcd.Config{
 		Endpoints:               hosts,
@@ -604,87 +697,23 @@ func (db *DatabaseDrivers) initEtcd(hosts []string, timeout time.Duration, verbo
 							}).Warnf("error while init the database with boltDB.")
 		return err
 	}
-	db.etcdCli = etcdClient
+	dbs.etcdCli = etcdClient
 	return nil
 }
 
-func (db *DatabaseDrivers) CloseEtcd() {
-    //db.EtcdCli.Close()
+func (dbs *DatabaseDrivers) getEtcd() etcd.KeysAPI {
+    return dbs.EtcdCli
+}
+
+func (dbs *DatabaseDrivers) closeEtcd() {
+    dbs.EtcdCli.Close()
 }
 
 //func (o *DatabaseDrivers) LoadDefaults() {
 //}
 
-func (o *DatabaseDrivers) LoadDefaults() {
-}
-
-/*
-// Open opens the connection to the bolt database defined by path.
-func (d *Driver) OpenBoltDriver(path string) error {
-	if d.bucket != nil {
-		return errors.New("store alread open")
-	}
-
-	store, err := bolt.Open(path, 0600, &bolt.Options{Timeout: 1 * time.Second})
-	if err != nil {
-		log.WithError(err).WithFields(logrus.Fields{"db": "OpenBoltDriver", "engine": "boltdb", "path": path}).Warnf("error while opening the boltDB bucket.")
-		return err
-	}
-
-	err = store.Update(func(tx *bolt.Tx) error {
-		buckets := [][]byte{
-			importsBucket,
-		}
-		for _, bucket := range buckets {
-			_, err := tx.CreateBucketIfNotExists(bucket)
-			if err != nil {
-				log.WithError(err).WithFields(logrus.Fields{"db": "OpenBoltDriver", "method": "CreateBucketIfNotExists", "engine": "boltdb", "path": path}).Warnf("error while creating the boltDB bucket if missing.")
-				return err
-			}
-		}
-
-		return nil
-	})
-
-	d.bucket = store
-	return nil
-}
-
-// Close closes the underlying database.
-func (d *Driver) CloseBoltDriver() error {
-	if d.bucket != nil {
-		err := d.bucket.Close()
-		d.bucket = nil
-		log.WithError(err).WithFields(logrus.Fields{"db": "CloseBoltDriver", "method": "d.bucket.Close()", "engine": "boltdb"}).Warnf("error while closing the boltDB bucket.")
-		return err
-	}
-	return nil
-}
-*/
-
-/*
-// move this piece of code into an admin dedicated file.
-// qor admin - web ui
-// qo beego - 
-func InitAdmin(db *gorm.DB) (error) {
-	// Initalize
-	adm, err := admin.New(&qor.Config{DB: &db.DB})
-	if err != nil {
-		log.WithError(err).WithFields(logrus.Fields{"db": "InitAdmin", "action": "admin.New").Warnf("error while init the admin webui powered by qor-admin.")
-		return err
-	}
-	adm.AddResource(&db.User{}, &admin.Config{Menu: []string{"Limo"}})
-	mux, err := http.NewServeMux()
-	if err != nil {
-		log.WithError(err).WithFields(logrus.Fields{"db": "InitAdmin", "action": "NewServeMux").Warnf("error while init the mux web-server.")
-		return err
-	}
-	adm.MountTo("/admin", mux)
-	beego.Handler("/admin", mux)
-	beego.Handler("/admin/*", mux)
-	beego.Run()
-}
-*/
+//func (dbs *DatabaseDrivers) LoadDefaults() {
+//}
 
 // https://github.com/skyrunner2012/xormplus/blob/master/xorm/dataset.go
 // NewDataset creates a new Dataset.
@@ -761,6 +790,10 @@ func NewDump(content []byte, dumpPrefixPath string, dumpType string, dataFormat 
 		file.Close()
 	}
 	return nil
+}
+
+func TimeToMicroseconds(t time.Time) int64 {
+	return t.Unix()*int64(time.Second/time.Microsecond) + int64(t.Nanosecond())/int64(time.Microsecond)
 }
 
 /*
@@ -1221,3 +1254,70 @@ func IsValidDatabaseType() bool {
 }
 */
 
+/*
+// Open opens the connection to the bolt database defined by path.
+func (d *Driver) OpenBoltDriver(path string) error {
+	if d.bucket != nil {
+		return errors.New("store alread open")
+	}
+
+	store, err := bolt.Open(path, 0600, &bolt.Options{Timeout: 1 * time.Second})
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"db": "OpenBoltDriver", "engine": "boltdb", "path": path}).Warnf("error while opening the boltDB bucket.")
+		return err
+	}
+
+	err = store.Update(func(tx *bolt.Tx) error {
+		buckets := [][]byte{
+			importsBucket,
+		}
+		for _, bucket := range buckets {
+			_, err := tx.CreateBucketIfNotExists(bucket)
+			if err != nil {
+				log.WithError(err).WithFields(logrus.Fields{"db": "OpenBoltDriver", "method": "CreateBucketIfNotExists", "engine": "boltdb", "path": path}).Warnf("error while creating the boltDB bucket if missing.")
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	d.bucket = store
+	return nil
+}
+
+// Close closes the underlying database.
+func (d *Driver) CloseBoltDriver() error {
+	if d.bucket != nil {
+		err := d.bucket.Close()
+		d.bucket = nil
+		log.WithError(err).WithFields(logrus.Fields{"db": "CloseBoltDriver", "method": "d.bucket.Close()", "engine": "boltdb"}).Warnf("error while closing the boltDB bucket.")
+		return err
+	}
+	return nil
+}
+*/
+
+/*
+// move this piece of code into an admin dedicated file.
+// qor admin - web ui
+// qo beego - 
+func InitAdmin(db *gorm.DB) (error) {
+	// Initalize
+	adm, err := admin.New(&qor.Config{DB: &db.DB})
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitAdmin", "action": "admin.New").Warnf("error while init the admin webui powered by qor-admin.")
+		return err
+	}
+	adm.AddResource(&db.User{}, &admin.Config{Menu: []string{"Limo"}})
+	mux, err := http.NewServeMux()
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"db": "InitAdmin", "action": "NewServeMux").Warnf("error while init the mux web-server.")
+		return err
+	}
+	adm.MountTo("/admin", mux)
+	beego.Handler("/admin", mux)
+	beego.Handler("/admin/*", mux)
+	beego.Run()
+}
+*/

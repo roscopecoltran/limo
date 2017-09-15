@@ -1,13 +1,13 @@
-package actions
+package action
 
 import (
-	"context"
-	"fmt"
-	"github.com/roscopecoltran/sniperkit-limo/config"
-	"github.com/roscopecoltran/sniperkit-limo/model"
-	"github.com/roscopecoltran/sniperkit-limo/service"
-	"github.com/spf13/cobra"
-	"github.com/sirupsen/logrus"
+	"fmt"																							// go-core
+	"context"																						// go-core
+	"github.com/roscopecoltran/sniperkit-limo/config" 												// app-config
+	"github.com/roscopecoltran/sniperkit-limo/service" 												// svc-registry
+	"github.com/roscopecoltran/sniperkit-limo/model" 												// data-models
+	"github.com/spf13/cobra" 																		// cli-cmd
+	"github.com/sirupsen/logrus" 																	// logs-logrus
 )
 
 // SyncCmd lets you log in
@@ -92,5 +92,12 @@ var SyncCmd = &cobra.Command{
 }
 
 func init() {
+	log.WithFields(
+		logrus.Fields{
+			"src.file": 			"action/sync.go", 
+			"cmd.name": 			"SyncCmd",
+			"method.name": 			"init()", 
+			"var.options": 			options, 
+			}).Info("registering command...")
 	RootCmd.AddCommand(SyncCmd)
 }

@@ -1,115 +1,144 @@
-package actions
+package action
 
 import (
-	"context"
-	"fmt"
-	"github.com/roscopecoltran/sniperkit-limo/config"
-	"github.com/roscopecoltran/sniperkit-limo/model"
-	"github.com/roscopecoltran/sniperkit-limo/service"
-	"github.com/spf13/cobra"
-	"github.com/sirupsen/logrus"
-	// tablib "github.com/agrison/go-tablib"
-	// "github.com/davecgh/go-spew/spew"
-	// jsoniter "github.com/json-iterator/go"
-	//"github.com/k0kubun/pp"
+	"context" 																						// go-core
+	"fmt"																							// go-core
+	"github.com/roscopecoltran/sniperkit-limo/config" 												// app-config
+	"github.com/roscopecoltran/sniperkit-limo/model" 												// data-models
+	"github.com/roscopecoltran/sniperkit-limo/service" 												// svc-registry
+	"github.com/spf13/cobra" 																		// cli-cmd
+	"github.com/sirupsen/logrus" 																	// logs-logrus
 )
 
-// top priority
-// https://github.com/Termina1/starlight
+/* 
+refs:
+	- high_priority:
+		- https://github.com/Termina1/starlight
+	- links:
+		- https://github.com/indraniel/srasearch/blob/master/makeindex/main.go
+		- https://github.com/ulrf/ulrf/blob/master/models/svuldb.go
+		- https://github.com/Jonexlee/project/blob/1d794ed0db1f47cac807381a468f1baea5e910a6/model/batch/batchInfo.go
+		- https://github.com/urandom/readeef
+*/
 
-// https://github.com/indraniel/srasearch/blob/master/makeindex/main.go
-// https://github.com/ulrf/ulrf/blob/master/models/svuldb.go
-// https://github.com/Jonexlee/project/blob/1d794ed0db1f47cac807381a468f1baea5e910a6/model/batch/batchInfo.go
-// https://github.com/urandom/readeef
-
-// UpdateCmd lets you log in
-var UpdateCmd = &cobra.Command{
+var UpdateCmd = &cobra.Command{ 																	// UpdateCmd lets you log in
 	Use:     "update",
 	Short:   "Update stars from a service",
 	Long:    "Update your local database with your stars from the service specified by [--service] (default: github).",
+	Aliases: []string{"update", "up"},
 	Example: fmt.Sprintf("  %s update", config.ProgramName),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		ctx := context.Background()
-
-		// Get configuration
-		cfg, err := getConfiguration()
+		ctx 									:= context.Background() 							// Init the context background
+		cfg, err 								:= getConfiguration() 								// Get configuration
 		fatalOnError(err)
-		// spew.Printf(&cfg)
 
-		// Get the database
-		db, err := getDatabase()
+		db, err 								:= getDatabase() 									// Get the SQL database (default: sqlite3)
 		fatalOnError(err)
-		// spew.Printf(&db)
 
-		// Get the database
-		bucket, err := getBucket()
+		// kvs, err 							:= getBucket() 										// Get the KV bucket (default: boltDB)
+		// fatalOnError(err)
+		// fmt.Println(kvs) 																		// Just to use it once, at least, for the moment, we can put the config struct in the bucket		
+
+		index, err 								:= getIndex() 										// Get the search index
 		fatalOnError(err)
-		// spew.Printf(&bucket)
 
-		// Just to use it once, at least, for the moment
-		// we can put the config struct in the bucket
-		fmt.Println(bucket)
-
-		// Get the search index
-		index, err := getIndex()
+		svc, err 								:= getService() 									// Get the specified service
 		fatalOnError(err)
-		// spew.Printf(&index)
-
-		// Get the specified service
-		svc, err := getService()
+		
+		serviceName 							:= service.Name(svc) 								// Get the database record for the specified service
+		dbSvc, _, err 							:= model.FindOrCreateServiceByName(db, serviceName)
 		fatalOnError(err)
-		// spew.Printf(&svc)
 
-		// Get the database record for the specified service
-		serviceName := service.Name(svc)
-		dbSvc, _, err := model.FindOrCreateServiceByName(db, serviceName)
-		fatalOnError(err)
-		// spew.Printf(&dbSvc)
+		starChanCount 							:= 20 												// Create a channel to receive stars, since service can page (default: 20)
+		starChan 								:= make(chan *model.StarResult, starChanCount)
+		go svc.GetStars(ctx, starChan, cfg.GetService(serviceName).Token, "", true) 				// Get the stars for the authenticated user
 
-		// Create a channel to receive stars, since service can page
-		starChan := make(chan *model.StarResult, 20)
+		output 									:= getOutput() 										// Get the output options
+		totalCreated, totalUpdated, totalErrors := 0, 0, 0 											// init new default counters
 
-		// Get the stars for the authenticated user
-		go svc.GetStars(ctx, starChan, cfg.GetService(serviceName).Token, "", true)
-
-		output := getOutput()
-
-		totalCreated, totalUpdated, totalErrors := 0, 0, 0
-
-		for starResult := range starChan {
+		for starResult 		:= range starChan {
 			if starResult.Error != nil {
 				totalErrors++
 				output.Error(starResult.Error.Error())
+				log.WithError(starResult.Error).WithFields(
+					logrus.Fields{
+						"src.file": 							"action/update.go", 
+						"method.name": 							"UpdateCmd = &cobra.Command{...}", 
+						"method.prev": 							"starResult.Error != nil",
+						"var.options": 							options, 
+						"var.totalCreated": 					totalCreated,
+						"var.totalUpdated": 					totalUpdated,
+						"var.totalErrors": 						totalErrors,
+						"var.starChanCount": 					starChanCount,
+						"var.starResult": 						*starResult.Star,
+						}).Error("error occured while iterating through the starred repository channel.")
 			} else {
-				created, err := model.CreateOrUpdateStar(db, starResult.Star, dbSvc)
+				created, err := model.CreateOrUpdateStar(db, starResult.Star, dbSvc) 				// create or update new starred repository
 				if err != nil {
 					totalErrors++
-					log.WithError(err).WithFields(logrus.Fields{"config": "UpdateCmd", "starResult.Star.FullName": *starResult.Star.FullName}).Warnf("error while getting creating/updating a vcs starred project. \n Error %s: %s", *starResult.Star.FullName, err.Error())
-					output.Error(fmt.Sprintf("Error %s: %s", *starResult.Star.FullName, err.Error()))
+					log.WithError(err).WithFields(
+						logrus.Fields{
+							"src.file": 							"action/update.go", 
+							"method.name": 							"UpdateCmd = &cobra.Command{...}", 
+							"method.prev": 							"model.CreateOrUpdateStar(...)",
+							"var.options": 							options, 
+							"var.totalCreated": 					totalCreated,
+							"var.totalUpdated": 					totalUpdated,
+							"var.totalErrors": 						totalErrors,
+							"var.starChanCount": 					starChanCount,
+							"var.starResult.Star.RemoteURI": 		*starResult.Star.RemoteURI,
+							}).Error("error while getting creating/updating the starred repo into the data-store.")
+					//output.Error(fmt.Sprintf("Error %s: %s", *starResult.Star.FullName, err.Error()))
 				} else {
-					if created {
-						totalCreated++
+					if created { 									
+						totalCreated++ 																// increment created counter
 					} else {
-						totalUpdated++
+						totalUpdated++ 																// increment updated counter
 					}
-					err = starResult.Star.Index(index, db)
+					err = starResult.Star.Index(index, db) 											// index the new content in the full-text search engine
 					if err != nil {
 						totalErrors++
-						log.WithError(err).WithFields(logrus.Fields{"config": "UpdateCmd", "starResult.Star.Index.FullName": *starResult.Star.FullName}).Warnf("error while getting creating/updating a vcs starred project. \n Error %s: %s", *starResult.Star.FullName, err.Error())
-						output.Error(fmt.Sprintf("Error %s: %s", *starResult.Star.FullName, err.Error()))
+						log.WithError(err).WithFields(
+							logrus.Fields{
+								"src.file": 							"action/update.go", 
+								"method.name": 							"UpdateCmd = &cobra.Command{...}", 
+								"method.prev": 							"starResult.Star.Index(...)",
+								"var.options": 							options, 
+								"var.totalCreated": 					totalCreated,
+								"var.totalUpdated": 					totalUpdated,
+								"var.totalErrors": 						totalErrors,
+								"var.starChanCount": 					starChanCount,
+								"var.starResult.Star.RemoteURI": 		*starResult.Star.RemoteURI,
+								}).Error("error while indexing the star into the full-text engine.")
+						//output.Error(fmt.Sprintf("Error %s: %s", *starResult.Star.FullName, err.Error()))
 					}
-					// output.Tick()
+					// output.Tick() 																// display tick if logrus is disabled or compatible with the tick display
 				}
 			}
 		}
-		log.WithFields(logrus.Fields{"config": "UpdateCmd", "action": "SyncedStar"}).Infof("\nCreated: %d; Synced: %d; Errors: %d", totalCreated, totalUpdated, totalErrors)
-		output.Info(fmt.Sprintf("\nCreated: %d; Updated: %d; Errors: %d", totalCreated, totalUpdated, totalErrors))
+		log.WithFields(
+			logrus.Fields{
+				"src.file": 							"action/update.go", 
+				"method.name": 							"UpdateCmd = &cobra.Command{...}", 
+				"method.prev": 							"starResult.Star.Index(...)",
+				"var.options": 							options, 
+				"var.totalCreated": 					totalCreated,
+				"var.totalUpdated": 					totalUpdated,
+				"var.totalErrors": 						totalErrors,
+				"var.starChanCount": 					starChanCount,
+				}).Info("update completed.")
+		// output.Info(fmt.Sprintf("\nCreated: %d; Updated: %d; Errors: %d", totalCreated, totalUpdated, totalErrors))
 	},
 }
 
-// functions to update languages, topics
-
 func init() {
+	log.WithFields(
+		logrus.Fields{
+			"src.file": 			"action/update.go", 
+			"cmd.name": 			"UpdateCmd",
+			"method.name": 			"init()", 
+			"var.options": 			options, 
+			}).Info("registering command...")
 	RootCmd.AddCommand(UpdateCmd)
 }

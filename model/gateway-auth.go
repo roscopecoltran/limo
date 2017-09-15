@@ -5,6 +5,8 @@ package model
 // https://github.com/euclid1990/gstats/blob/develop/utilities/github.go
 // https://github.com/hfurubotten/autograder/blob/master/global/global.go
 
+// git subtree add --prefix ./shared/models/tensorflow https://github.com/tensorflow/models master --squash
+
 import (
 	//"fmt"
 	//"strings"

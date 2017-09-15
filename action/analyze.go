@@ -1,13 +1,11 @@
-package actions
+package action
 
 import (
-	"fmt"
-	// "strconv"
-	// "strings"
-	// "github.com/blevesearch/bleve"
-	"github.com/roscopecoltran/sniperkit-limo/config"
-	// "github.com/roscopecoltran/sniperkit-limo/model"
-	"github.com/spf13/cobra"
+	"fmt"																					// go-core
+	"github.com/roscopecoltran/sniperkit-limo/config" 										// app-config
+	//"github.com/roscopecoltran/sniperkit-limo/model" 										// data-models
+	"github.com/spf13/cobra" 																// cli-cmd
+	"github.com/sirupsen/logrus" 															// logs-logrus
 )
 
 // AnalyzeCmd does a full-text gateway
@@ -25,5 +23,12 @@ var AnalyzeCmd = &cobra.Command{
 }
 
 func init() {
+	log.WithFields(
+		logrus.Fields{
+			"src.file": 			"action/analyze.go", 
+			"cmd.name": 			"AnalyzeCmd",
+			"method.name": 			"init()", 
+			"var.options": 			options, 
+			}).Info("registering command...")
 	RootCmd.AddCommand(AnalyzeCmd)
 }
