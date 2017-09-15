@@ -1,0 +1,5 @@
+google-news-vectors-negative300.bin
+google-news-vectors-negative300.bin.gz
+*.gz
+*.tar.gz
+# google-news-vectors-negative300.bin.gz.*

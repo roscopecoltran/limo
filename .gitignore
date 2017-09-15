@@ -60,8 +60,3 @@ sift-alpine.env
 .notes
 .notes/
 .notes/**
-
-*.bin.gz
-*.bin
-google-news-vectors-negative300.bin
-google-news-vectors-negative300.bin.gz

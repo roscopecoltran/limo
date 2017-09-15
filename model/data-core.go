@@ -114,7 +114,8 @@ func GetDatabases() (*DatabaseDrivers, error) {
 func New(verbose bool, debug bool) (*DatabaseDrivers, error) {
 	dbs 						:= 	&DatabaseDrivers{}
 	adapter := "sqlite3"
-	if gormCli, err := InitGorm(adapter, "./shared/data/limo/limo.db", true); err != nil {
+	gormCli, err := InitGorm(adapter, "./shared/data/limo/limo.db", true)
+	if err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
 							"method.name": 		"New(...)", 
@@ -127,8 +128,7 @@ func New(verbose bool, debug bool) (*DatabaseDrivers, error) {
 							}).Error("error while trying to init 'Gorm' database driver.")
 		return dbs, err
 	}
-
-	if err := AutoloadGorm(true, true, true, Tables...); err != nil {
+	if err := AutoLoadGorm(gormCli, true, true, true, Tables...); err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
 							"method.name": 		"New(...)", 
@@ -151,7 +151,8 @@ func New(verbose bool, debug bool) (*DatabaseDrivers, error) {
 		}
 	}
 	*/
-	if boltCli, err := InitBoltDB("./shared/data/limo/limo.boltdb", 0600, &bolt.Options{Timeout: 1 * time.Second}, true); err != nil {
+	boltCli, err := InitBoltDB("./shared/data/limo/limo.boltdb")
+	if err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
 							"method.name": 		"New(...)", 
@@ -162,12 +163,12 @@ func New(verbose bool, debug bool) (*DatabaseDrivers, error) {
 							"prefix": 			"dbs-new",
 							"action": 			"InitBoltDB",
 							}).Error("error while trying to init 'BoltDB' database driver")
-		return db, err
+		return dbs, err
 	}
-
 	etcdDefaultHost 	:= []string{"http://127.0.0.1:2379"}
 	etcdDefaultTimeout 	:= 1 * time.Second
-	if etcdCli, err := InitEtcd(etcdDefaultHost, etcdDefaultTimeout, true); err != nil {
+	etcdCli, err := InitEtcd(etcdDefaultHost, etcdDefaultTimeout, true)
+	if err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
 							"prefix": 			"dbs-new",
@@ -177,7 +178,7 @@ func New(verbose bool, debug bool) (*DatabaseDrivers, error) {
 							"method.prev": 		"db.initEtcd(...)",
 							"action": 			"AutoloadDB",
 							}).Error("error while trying to auto-load all program the tables")
-		return &db, err
+		return dbs, err
 	}
 
 	// graphql
@@ -350,7 +351,7 @@ func AutoLoadGorm(clientSQL *gorm.DB, isAutoMigrate bool, isTruncate bool, isAdm
 	return nil
 }
 
-func InitBoltDB(filepath string) (*bolt.DB, error) {
+func InitBoltDB(filePath string) (*bolt.DB, error) {
 	// Get more config options to setup the bucket or the queue of tasks
 	boltDB, err := bolt.Open(filepath, 0600, &bolt.Options{Timeout: time.Second})
 	if err != nil {
@@ -484,7 +485,7 @@ func (dbs *DatabaseDrivers) New(verbose bool, debug bool) (*DatabaseDrivers, err
 	}
 	etcdDefaultHost 	:= []string{"http://127.0.0.1:2379"}
 	etcdDefaultTimeout 	:= 1 * time.Second
-	if err := db.initEtcd(etcdDefaultHost, etcdDefaultTimeout, true); err != nil {
+	if err := dbs.initEtcd(etcdDefaultHost, etcdDefaultTimeout, true); err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"src.file": 		"model/data-db-connector.go", 
 							"prefix": 			"dbs-new",
@@ -521,7 +522,7 @@ func (dbs *DatabaseDrivers) initGorm(filepath string, adapter string, verbose bo
 	}
 	gormDB.LogMode(verbose) 	// cfg.App.DebugMode
 	// isAutoMigrate, isTruncate, isAdminUIResource
-	if err := db.autoLoadGorm(true, true, false, Tables...); err != nil {
+	if err := dbs.autoLoadGorm(true, true, false, Tables...); err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	"src.file": 			"model/data-db-connector.go", 
 							"prefix": 				"db-gorm",
@@ -542,13 +543,13 @@ func (dbs *DatabaseDrivers) getGorm() *gorm.DB {
 
 
 func (dbs *DatabaseDrivers) closeGorm() {
-    db.gormCli.Close()
+    dbs.gormCli.Close()
 }
 
 func (dbs *DatabaseDrivers) autoLoadGorm(isAutoMigrate bool, isTruncate bool, isAdminUI bool, tables ...interface{}) (error) {
 //(db *DatabaseDrivers) func autoLoadGorm(isAutoMigrate bool, isTruncate bool, isAdminUIResource bool, tables ...interface{}) (error) {
 	if isAdminUI {
-		adminUI 	= 	admin.New(&qor.Config{DB: db.gormCli})
+		adminUI 	= 	admin.New(&qor.Config{DB: dbs.gormCli})
 	}
 	for _, table := range tables {
 		if isTruncate {
