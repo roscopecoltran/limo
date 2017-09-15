@@ -1,9 +1,10 @@
 package tensorflow
 
+/*
 import (
 	"errors" 																						// go-core
 	"reflect" 																						// go-core
-	framework "github.com/tensorflow/tensorflow/go/core/framework" 									// ai-tensorflow
+	framework "github.com/tensorflow/tensorflow/tensorflow/core/framework" 							// ai-tensorflow
 	pb "github.com/roscopecoltran/sniperkit-limo/model/generate/tensorflow/server" 					// ai-tensorflow-server
 	google_protobuf "github.com/golang/protobuf/ptypes/wrappers" 									// serialize-protobuf
 )
@@ -100,3 +101,4 @@ func addInput(pr *pb.PredictRequest, tensorName string, dataType framework.DataT
 	pr.Inputs[tensorName] = tp
 	return
 }
+*/

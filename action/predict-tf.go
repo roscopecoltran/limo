@@ -20,7 +20,7 @@ import (
 	"github.com/spf13/cobra" 																		// cli-cmd
 	"github.com/sirupsen/logrus" 																	// logs-logrus
 	"golang.org/x/net/context" 																		// net-context
-	framework "github.com/tensorflow/tensorflow/go/core/framework" 									// ai-tensorflow
+	framework "github.com/tensorflow/tensorflow/tensorflow/core/framework" 									// ai-tensorflow
 	pb "github.com/roscopecoltran/sniperkit-limo/plugins/tensorflow/server" 						// ai-tensorflow-server
 	"google.golang.org/grpc" 																		// net-grpc
 	"google.golang.org/grpc/credentials" 															// net-grpc

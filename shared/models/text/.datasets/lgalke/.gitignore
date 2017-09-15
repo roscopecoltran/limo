@@ -1,0 +1,8 @@
+*.pickle
+*.txt
+*.csv
+!.gitignore
+!*.tar.gz
+!*.gz
+!*.zip
+!*.bz2
