@@ -1,0 +1,26 @@
+package: github.com/roscopecoltran/elasticfeed
+import:
+- package: github.com/abbot/go-http-auth
+- package: github.com/astaxie/beego
+  subpackages:
+  - context
+  - session
+  - toolbox
+- package: github.com/gorilla/websocket
+- package: github.com/hashicorp/go-msgpack
+  subpackages:
+  - codec
+- package: github.com/hashicorp/go-version
+- package: github.com/hashicorp/yamux
+- package: github.com/mitchellh/mapstructure
+- package: github.com/mitchellh/osext
+- package: github.com/mitchellh/packer
+  subpackages:
+  - common/json
+- package: github.com/roscopecoltran/feedify
+  version: sniperkit
+  subpackages:
+  - contextor
+  - graph
+  - service
+  - stream
