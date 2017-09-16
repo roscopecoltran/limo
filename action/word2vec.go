@@ -15,16 +15,18 @@
 package action
 
 import (
-	"fmt"																								// go-core
-	"github.com/roscopecoltran/sniperkit-limo/config" 													// app-config
-	"github.com/roscopecoltran/sniperkit-limo/service" 													// svc-registry
-	"github.com/roscopecoltran/sniperkit-limo/model" 													// data-models
-	"github.com/spf13/cobra" 																			// cli-cmd
-	"github.com/sirupsen/logrus" 																		// logs-logrus
-	"github.com/ynqa/word-embedding/models/word2vec" 													// ai-word-embed-word2vec
-	"github.com/ynqa/word-embedding/models/word2vec/model" 												// ai-word-embed-word2vec
-	"github.com/ynqa/word-embedding/models/word2vec/opt" 												// ai-word-embed-word2vec
-	"github.com/ynqa/word-embedding/utils"																// ai-word-embed
+	"fmt"																				// go-core
+	//"github.com/roscopecoltran/sniperkit-limo/config" 								// app-config
+	//"github.com/roscopecoltran/sniperkit-limo/service" 								// svc-registry
+	//"github.com/roscopecoltran/sniperkit-limo/model" 									// data-models
+	"github.com/ynqa/word-embedding/models/word2vec" 									// ai-word-embed-word2vec
+	"github.com/ynqa/word-embedding/models/word2vec/model" 								// ai-word-embed-word2vec
+	"github.com/ynqa/word-embedding/models/word2vec/opt" 								// ai-word-embed-word2vec
+	"github.com/ynqa/word-embedding/utils"												// ai-word-embed
+	"github.com/spf13/cobra" 															// cli-cmd
+	"github.com/sirupsen/logrus" 														// logs-logrus
+	//"github.com/davecgh/go-spew/spew" 												// debug-print
+	//"github.com/k0kubun/pp" 															// debug-print
 )
 
 var (

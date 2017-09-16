@@ -433,7 +433,7 @@ type DatabaseDrivers struct {
 	neo4jCli 			*neoism.Database
 	cache 				*bigcache.BigCache
 	etcdKV				etcd.Client
-	etcdCli   			*EtcdClientPool
+	//etcdCli   			*EtcdClientPool
 	redisCli 			redis.Conn
 }
 
@@ -502,6 +502,7 @@ func (dbs *DatabaseDrivers) New(verbose bool, debug bool) (*DatabaseDrivers, err
 							}).Error("error while trying to init 'BoltDB' database driver")
 		return dbs, err
 	}
+	/*
 	etcdDefaultHost 	:= []string{"http://127.0.0.1:2379"}
 	etcdDefaultTimeout 	:= 1 * time.Second
 	if err := dbs.initEtcd(etcdDefaultHost, etcdDefaultTimeout, true); err != nil {
@@ -516,6 +517,7 @@ func (dbs *DatabaseDrivers) New(verbose bool, debug bool) (*DatabaseDrivers, err
 							}).Error("error while trying to auto-load all program the tables")
 		return dbs, err
 	}
+	*/
 	return dbs, nil
 }
 
@@ -968,7 +970,6 @@ func (dbs *DatabaseDrivers) initEtcd(hosts []string, timeout time.Duration, verb
 	dbs.etcdKeys 		= etcdClient
 	return nil
 }
-*/
 
 func (dbs *DatabaseDrivers) getEtcd() etcd.Client {
     return dbs.etcdCli
@@ -977,6 +978,7 @@ func (dbs *DatabaseDrivers) getEtcd() etcd.Client {
 func (dbs *DatabaseDrivers) closeEtcd() {
     dbs.etcdCli.Close()
 }
+*/
 
 //func (o *DatabaseDrivers) LoadDefaults() {
 //}

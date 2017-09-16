@@ -16,13 +16,15 @@ package action
 
 import (
 	"fmt"																							// go-core
-	"github.com/roscopecoltran/sniperkit-limo/config" 												// app-config
-	"github.com/roscopecoltran/sniperkit-limo/service" 												// svc-registry
-	"github.com/roscopecoltran/sniperkit-limo/model" 												// data-models
+	//"github.com/roscopecoltran/sniperkit-limo/config" 											// app-config
+	//"github.com/roscopecoltran/sniperkit-limo/service" 											// svc-registry
+	//"github.com/roscopecoltran/sniperkit-limo/model" 												// data-models
 	"github.com/spf13/cobra" 																		// cli-cmd
 	"github.com/sirupsen/logrus" 																	// logs-logrus
 	sim "github.com/ynqa/word-embedding/similarity" 												// ai-word-embed-word2vec
 	"github.com/ynqa/word-embedding/utils" 															// ai-word-embed
+	//"github.com/davecgh/go-spew/spew" 															// debug-print
+	//"github.com/k0kubun/pp" 																		// debug-print
 )
 
 var (

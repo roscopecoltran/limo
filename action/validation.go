@@ -20,6 +20,8 @@ import (
 	"github.com/sirupsen/logrus" 																// logs-logrus
 	"github.com/ynqa/word-embedding/utils/fileio" 												// ai-word-embed
 	"github.com/ynqa/word-embedding/utils/set" 													// ai-word-embed
+	//"github.com/davecgh/go-spew/spew" 														// debug-print
+	//"github.com/k0kubun/pp" 																	// debug-print
 )
 
 func inputFileIsExist() bool {

@@ -1,5 +1,3 @@
-# Created by https://www.gitignore.io/api/go
-
 ### Go ###
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o
@@ -25,18 +23,36 @@ _testmain.go
 *.test
 *.prof
 
-limo
 
 # Test coverage
 *.out
 
+### Staging ###
+#.staging
+#.staging/
+#.staging/**
+
+### Notes & Snippets ###
+#.notes
+#.notes/
+#.notes/**
+
+#.snippets
+#.snippets/
+#.snippets/**
+
+### Vendor ###
 vendor
 vendor/
 vendor/**
 
+### Cache ###
 cache
 cache/
 cache/**
+
+### App ###
+limo
 
 limo*
 limo-*
@@ -46,21 +62,15 @@ dist/linux/limo*
 dist/macos/limo*
 dist/windows/limo*
 
-*-alpine.env
-
 conf.d/limo.json
 conf.d/limo.yaml
 
+### Docker ###
+*-alpine.env
+
 sift-alpine.env
 
-.staging
-.staging/
-.staging/**
-
-.notes
-.notes/
-.notes/**
-
+### Big Files and Archives ###
 *.gz
 *.tar.gz
 *.pickle

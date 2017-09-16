@@ -18,89 +18,38 @@ import (
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"  										// logs-logrus
 )
 
-
-const defaultConfigFilePath 	= 	"~/.config/limo/limo.yaml"
-
-var (
-	configuration 				*config.Config 														// cfg-init
-	db 							= &model.DatabaseDrivers{} 											// data-drivers
-	log 						= logrus.New() 														// logs-logrus
-)
-
-var (
-	inputFile, outputFile 		string 																// ai-word-embed
-	dimension, window     		int 																// ai-word-embed
-	learningRate          		float64 															// ai-word-embed
-)
-
-//type queueDrivers struct {
-	//MQ 				map[string]*nsq.Producer
-	//NOSQL   			map[string]*gorm.DB
-	//SQL   			map[string]*gorm.DB
-	//IDX 				map[string]*bleve.Index
-	//KVS 				map[string]etcd.KeysAPI
-//}
-
-var queue struct {
-	Disabled 	bool 		
-	// QueueDrivers                 queueDrivers	
-}
-
-// https://github.com/toorop/tmail/blob/master/core/scope.go
-
-var options struct {
-	config 		string
-	language 	string
-	output   	string
-	service  	string
-	tag      	string
-	verbose  	bool
-	dir 		struct {
-		tmp 	string 
-		data 	string
-		conf 	string
-	}
-}
-
 // RootCmd is the root command for limo
 var RootCmd = &cobra.Command{
-	Use:   "limo",
-	Short: "A CLI for managing starred repositories",
-	Long: `limo allows you to manage your starred repositories on GitHub, GitLab, and Bitbucket.
-You can tag, display, and search your starred repositories.`,
+	Use:   fmt.Sprintf("%s", strings.ToLower(config.ProgramName)),
+	Short: "An advanced CLI/Web toolkit for managing starred repositories, and help you to keep an innovative projects.",
+	Long: fmt.Sprintf("%s allows you to manage your starred repositories on GitHub, GitLab, and Bitbucket. You can tag, display, and search your starred repositories.", config.ProgramName),
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		log.WithError(err).WithFields(logrus.Fields{"config": "Execute"}).Info("error while getting starting the program.")
+		log.WithError(err).WithFields(
+			logrus.Fields{	
+				"src.file": 					"action/root.go",
+				"prefix": 						"new-instance",
+				"method.name": 					"Execute(...)",
+				"method.prev": 					"RootCmd.Execute(...)",
+				}).Error("error while getting starting the program.")
 		os.Exit(-1)
 	}
 }
 
 func init() {
 
-	log.Out = os.Stdout 																	// logs
-	formatter := new(prefixed.TextFormatter)
-	formatter.FullTimestamp = true
-	formatter.SetColorScheme(&prefixed.ColorScheme{ 										// Set specific colors for prefix and timestamp
-		PrefixStyle:    "blue+b",
-		TimestampStyle: "white+h",
-	})
-	log.Formatter = formatter
+	log.Out 				= os.Stdout 													// logs 	- output
+	formatter 				:= new(prefixed.TextFormatter) 									// logs 	- prefix-formatter
+	log.Formatter 			= formatter 													// logs 	- msg themes
+	log.Level 				= logrus.DebugLevel 											// logs 	- set the log level
 
-	options.dir.tmp 		:= config.GetTmpDir()
+	dirTmp 					:= 	config.GetTmpDir() 											// dir 		- tmp
+	options.dir.tmp 		= 	dirTmp 														// options 	- dir - tmp
 
-	log.WithFields(
-		logrus.Fields{
-			"src.file": 			"action/root.go", 
-			"method.name": 			"init()", 
-			"method.prev": 			"config.GetTmpDir()",
-			"var.options.dir": 		options.dir, 
-			"var.log": 				log, 
-			}).Info("config adjusting defaults to current machine...")
-
-	flags := RootCmd.PersistentFlags()
+	flags := RootCmd.PersistentFlags() 														// flags
 	flags.StringVarP(&options.language, "language", "l", "", 								"language")
 	flags.StringVarP(&options.output, 	"output", 	"o", "color", 							"output type")
 	flags.StringVarP(&options.service, 	"service", 	"s", "github", 							"service")
@@ -111,224 +60,211 @@ func init() {
 	if options.verbose {
 		log.Level = logrus.InfoLevel
 	}
+
+	log.WithFields(
+		logrus.Fields{
+			"src.file": 				"action/root.go", 
+			"method.name": 				"init()", 
+			"method.prev": 				"config.GetTmpDir()",
+			"var.options.dir": 			options.dir, 
+			"var.log.Level": 			log.Level, 
+			"var.log": 					log, 
+			"var.options": 				options, 
+			}).Info("config adjusting defaults to current machine...")
+
 }																																	
 
-/*
-
-// Machine Learning
-
-// GetCommonFlagSet sets the common flags for models.
-func GetCommonFlagSet() *flag.FlagSet {
-	fs := flag.NewFlagSet(RootCmd.Name(), flag.ContinueOnError)
-	fs.StringVarP(&inputFile, "input", "i", "example/input.txt", "Input file path for learning")
-	fs.StringVarP(&outputFile, "output", "o", "example/word_vectors.txt", "Output file path for each learned word vector")
-	fs.IntVarP(&dimension, "dimension", "d", 10, "Set word vector dimension size")
-	fs.IntVarP(&window, "window", "w", 5, "Set window size")
-	fs.Float64Var(&learningRate, "lr", 0.025, "Set init learning rate")
-	return fs
-}
-
-// NewCommon creates the common struct.
-func NewCommon() models.Common {
-	return models.Common{
-		InputFile:    inputFile,
-		OutputFile:   outputFile,
-		Dimension:    dimension,
-		Window:       window,
-		LearningRate: learningRate,
-	}
-}
-*/
-
 func New(verbose bool) (*config.Config, *model.DatabaseDrivers, error) {
-	// if no user-defined config file to load, pick defaults filepaths
-	if options.config != "" {
+	if options.config != "" { 																// if no user-defined config file to load, pick defaults filepaths
 
 	}
 	configFiles 	:= []string{defaultConfigFilePath}
-	// init new configuration
-	if _, err 	:= config.New(configuration, true, true, true, configFiles); err != nil {
+	if _, err 	:= config.New(configuration, true, true, true, configFiles); err != nil { 	// init new configuration
 		log.WithError(err).WithFields(
 			logrus.Fields{	
-				"src.file": 		"action/root.go",
-				"action.type": 		"load-db",
-				"var.verbose": 		verbose,
+				"src.file": 					"action/root.go",
+				"action.type": 					"new-instance",
+				"var.verbose": 					verbose,
+				"var.options": 					options,
 				}).Fatal("error while loading the config files.")
-		return configuration, db, err
+		return configuration, dbs, err
 	}
 	// init new data clients
-	if _, err 		:= db.New(true, true); err != nil {
+	if _, err 		:= dbs.New(true, true); err != nil {
 		log.WithError(err).WithFields(
 			logrus.Fields{	
-				"src.file": 		"action/root.go",
-				"action.type": 		"load-db",
-				"var.verbose": 		verbose,
+				"src.file": 					"action/root.go",
+				"action.type": 					"new-instance",
+				"var.verbose": 					verbose,
+				"var.configuration": 			configuration,
+				"var.options": 					options,
 				}).Fatal("error while loading the databases drivers.")
-		return configuration, db, err
+		return configuration, dbs, err
 	}
 	if verbose {
 		log.WithFields(
 			logrus.Fields{	
-				"src.file": 		"action/root.go",
-				"action.type": 		"new-instance",
-				"var.cfg": 			cfg,
-				"var.db": 			db,
-				"var.verbose": 		verbose,
+				"src.file": 					"action/root.go",
+				"action.type": 					"new-instance",
+				"var.verbose": 					verbose,
+				"var.configuration": 			configuration,
+				"var.dbs": 						dbs,
+				"var.options": 					options,
 				}).Debug("error while loading the new sniperkit instance.")
 	}
-	return configuration, db, nil
+	return configuration, dbs, nil
 }
 
 func NewConfiguration() (*config.Config, error) {
-	configFilePath 	:= 	config.FindLocalConfig()
-	configuration 	:= 	&config.Config{}
+	configFilePath 		:= 	config.FindLocalConfig()
+	//configuration 	:= 	&config.Config{}
 	if configFilePath != "" {
 		log.WithFields(logrus.Fields{	
-			"src.file": 					"action/root.go",
-			"action.type": 					"new-config",
-			"method.name": 					"NewConfiguration(...)",
-			"method.prev": 					"config.FindLocalConfig(...)",
-			"var.configFilePath": 			configFilePath,
-			"var.defaultConfigFilePath": 	defaultConfigFilePath,
+			"src.file": 						"action/root.go",
+			"action.type": 						"new-config",
+			"method.name": 						"NewConfiguration(...)",
+			"method.prev": 						"config.FindLocalConfig(...)",
+			"var.configFilePath": 				configFilePath,
+			"var.defaultConfigFilePath": 		defaultConfigFilePath,
 			}).Info("found local config files")
 	}
 	if err := configor.Load(&configuration, configFilePath, defaultConfigFilePath); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{	
-			"src.file": 					"action/root.go",
-			"action.type": 					"new-config",
-			"method.name": 					"NewConfiguration(...)",
-			"method.prev": 					"configor.Load(...)",
-			"var.configFilePath": 			configFilePath,
-			"var.defaultConfigFilePath": 	defaultConfigFilePath,
+			"src.file": 						"action/root.go",
+			"action.type": 						"new-config",
+			"method.name": 						"NewConfiguration(...)",
+			"method.prev": 						"configor.Load(...)",
+			"var.configFilePath": 				configFilePath,
+			"var.defaultConfigFilePath": 		defaultConfigFilePath,
 			}).Error("error while loading configs with 'configor'")
-			//}).Fatal("error while loading the config files with configor package.")
 	}
 	return configuration, nil
 }
 
 func getConfiguration() (configuration config.Config, err error) {
-	configFilePath := config.FindLocalConfig()
+	configFilePath 	  := config.FindLocalConfig()
 	if configFilePath != "" {
 		log.WithFields(logrus.Fields{	
-			"src.file": 					"action/root.go",
-			"action.type": 					"new-config",
-			"method.name": 					"NewConfiguration(...)",
-			"method.prev": 					"config.FindLocalConfig(...)",
-			"var.configFilePath": 			configFilePath,
-			}).Info("found local config file")
+			"src.file": 						"action/root.go",
+			"action.type": 						"get-config",
+			"method.name": 						"NewConfiguration(...)",
+			"method.prev": 						"config.FindLocalConfig(...)",
+			"var.configFilePath": 				configFilePath,
+			}).Error("found local config file")
 	}
 	if err := configor.Load(&configuration, configFilePath, defaultConfigFilePath); err != nil {
-		log.WithError(err).WithFields(logrus.Fields{	
-			"src.file": 					"action/root.go",
-			"action.type": 					"new-config",
-			"method.name": 					"getConfiguration(...)",
-			"method.prev": 					"configor.Load(...)",
-			"var.configFilePath": 			configFilePath,
-			}).Fatal("error while loading configs with 'configor'")
+		log.WithError(err).WithFields(
+			logrus.Fields{	
+				"src.file": 						"action/root.go",
+				"action.type": 						"get-config",
+				"method.name": 						"getConfiguration(...)",
+				"method.prev": 						"configor.Load(...)",
+				"var.configFilePath": 				configFilePath,
+				}).Fatal("error while loading configs with 'configor'")
 	}
 	return configuration, nil
 }
 
 func getDatabase() (*gorm.DB, error) {
-	//db 				:= 	&model.DatabaseDrivers{}
-	if _, err 		:= 	db.New(true, true); err != nil {
-		log.WithError(err).WithFields(
-			logrus.Fields{	
-				"src.file": 					"action/root.go",
-				"action.type": 					"get-db",
-				"method.name": 					"getDatabase(...)",
-				"method.prev": 					"model.GetDatabases(...)",
-				"var.db": 						db,
-				}).Fatal("error while connecting to all active database drivers.")
-		return db.gormCli, err
-	}
-	pp.Println(db)
-	//db.gormCli = gormCli
-	/*
-	if db.gormCli == nil {
-		cfg, err 		:= getConfiguration()
-		if err != nil {
-			return nil, err
-		}
-		//db, err = model.InitDB(cfg.DatabasePath, true)
-		gormCli, err 	:= model.InitGorm(cfg.DatabasePath, "sqlite3", options.verbose)
-		if err != nil {
-			return nil, err
-		}
-		db.gormCli = gormCli
-	}
-	*/
-	return db.gormCli, nil
-}
-
-/*
-func getDatabase() (*gorm.DB, error) {
-	if db == nil {
-		cfg, err := getConfiguration()
-		if err != nil {
-			return nil, err
-		}
-		//db, err = model.InitDB(cfg.DatabasePath, true)
-		db, err = model.InitDB(cfg.DatabasePath, options.verbose)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return db, nil
-}
-*/
-
-func getBucket() (*bolt.DB, error) {
-	db, _ := model.GetDatabases()
-	if db.boltCli == nil {
-		cfg, err := getConfiguration()
+	if dbs.gormCli 	== nil {
+		gormCli, err 	:= 	dbs.New(true, true)
 		if err != nil {
 			log.WithError(err).WithFields(
-				logrus.Fields{	"config": "getBucket"}).Info("error while getting configuration.")
+				logrus.Fields{	
+					"src.file": 					"action/root.go",
+					"action.type": 					"get-db-sql",
+					"method.name": 					"getDatabase(...)",
+					"method.prev": 					"model.GetDatabases(...)",
+					"var.dbs": 						dbs,
+					}).Error("error while connecting to all active database drivers.")
+			return gormCli, err
+		}
+		dbs.gormCli 	= gormCli
+		pp.Println(dbs)
+		return gormCli, nil
+	}
+	return dbs.gormCli, nil
+}
+
+func getBucket() (*bolt.DB, error) {
+	if dbs.boltCli 	== nil {
+		cfg, err 	:= getConfiguration()
+		if err != nil {
+			log.WithError(err).WithFields(
+				logrus.Fields{	
+					"src.file": 					"action/root.go",
+					"action.type": 					"get-bucket",
+					"method.prev": 					"getConfiguration(...)",
+					"method.name": 					"getBucket(...)",
+					"var.cfg": 						cfg,
+					}).Error("error while getting configuration.")
 			return nil, err
 		}
 		boltCli, err := model.InitBoltDB(cfg.DatastorePath)
 		if err != nil {
 			log.WithError(err).WithFields(
-				logrus.Fields{	"config": 			 "getBucket", 
-								"cfg.DatastorePath": cfg.DatastorePath}).Warnf("error while init the BoltDB bucket at %#s", cfg.DatastorePath)
+				logrus.Fields{	
+					"src.file": 					"action/root.go",
+					"action.type": 					"get-bucket",
+					"method.prev": 					"model.InitBoltDB(...)",
+					"method.name": 					"getBucket(...)",
+					"var.cfg.DatastorePath": 		cfg.DatastorePath,
+					}).Error("error while initializing the BoltDB bucket.") 
 			return nil, err
 		}
-		db.boltCli = boltCli
+		dbs.boltCli = boltCli
+		return boltCli, nil
 	}	
-	return db.boltCli, nil
+	return dbs.boltCli, nil
 }
 
 func getIndex() (bleve.Index, error) {
-	db, _ := model.GetDatabases()
-	if db.bleveIdx == nil {
+	if dbs.bleveIdx == nil {
 		cfg, err := getConfiguration()
 		if err != nil {
 			log.WithError(err).WithFields(
-				logrus.Fields{"config": "getIndex"}).Info("error while getting configuration.")
+				logrus.Fields{	
+					"src.file": 					"action/root.go",
+					"action.type": 					"get-index",
+					"method.name": 					"getIndex(...)",
+					"method.prev": 					"getConfiguration(...)",
+					"var.cfg": 						cfg,
+					}).Error("error while getting configuration.") 
 			return nil, err
 		}
 		bleveIdx, err := model.InitIndex(cfg.IndexPath)
 		if err != nil {
 			log.WithError(err).WithFields(
-				logrus.Fields{	"config": "getIndex", 
-								"cfg.IndexPath": cfg.IndexPath}).Warnf("error while init the search engine index: %#s", cfg.IndexPath)
+				logrus.Fields{	
+					"src.file": 					"action/root.go",
+					"action.type": 					"get-index",
+					"method.prev": 					"model.InitIndex(...)",
+					"method.name": 					"getIndex(...)",
+					"var.cfg.IndexPath": 			cfg.IndexPath,
+					}).Error("error while initializing the BoltDB bucket.") 
 			return nil, err
 		}
-		db.bleveIdx = bleveIdx
+		dbs.bleveIdx = bleveIdx
+		return bleveIdx, nil
 	}
-	return db.bleveIdx, nil
+	return dbs.bleveIdx, nil
 }
 
 func getOutput() output.Output {
-	output := output.ForName(options.output)
-	oc, err := getConfiguration()
+	output 		:= output.ForName(options.output)
+	oCfg, err 	:= getConfiguration()
 	if err != nil {
 		log.WithError(err).WithFields(
-			logrus.Fields{	"config": 		  "getOutput", 
-							"options.output": options.output}).Warnf("error while getting output options.")
+			logrus.Fields{	
+				"src.file": 						"action/root.go",
+				"action.type": 						"get-bucket",
+				"method.name": 						"getOutput(...)",
+				"method.prev": 						"getConfiguration(...)",
+				"var.output": 						output,
+				"var.oCfg": 						oCfg,
+				}).Error("error while initializing the BoltDB bucket.") 
 	} else {
-		output.Configure(oc.GetOutput(options.output))
+		output.Configure(oCfg.GetOutput(options.output))
 	}
 	return output
 }
@@ -338,21 +274,42 @@ func getService() (service.Service, error) {
 }
 
 func checkOneStar(name string, stars []model.Star) {
-	output := getOutput()
-	if len(stars) == 0 {
-		output.Fatal(fmt.Sprintf("No stars match '%s'", name))
+	output 			:= getOutput()
+	starCount 		:= len(stars)
+	if starCount == 0 {
+		log.WithError(err).WithFields(
+			logrus.Fields{	
+				"src.file": 						"action/root.go",
+				"action.type": 						"check-star-count",
+				"method.name": 						"checkOneStar(...)",
+				"method.prev": 						"starCount == 0",
+				"var.name": 						fmt.Sprintf("%s", name),				
+				}).Error("No stars match") 
 	}
-	if len(stars) > 1 {
-		output.Error(fmt.Sprintf("Star '%s' ambiguous:\n", name))
+	if starCount > 1 {
 		for _, star := range stars {
 			output.StarLine(&star)
 		}
-		output.Fatal("Narrow your search")
+		log.WithError(err).WithFields(
+			logrus.Fields{	
+				"src.file": 						"action/root.go",
+				"action.type": 						"check-star-count",
+				"method.name": 						"checkOneStar(...)",
+				"method.prev": 						"starCount > 1",
+				"var.name": 						fmt.Sprintf("%s", name),				
+				"var.starCount": 					starCount,				
+				}).Errorf("Star '%s' name is ambiguous.", name) 
 	}
 }
 
 func fatalOnError(err error) {
 	if err != nil {
-		getOutput().Fatal(err.Error())
+		log.WithError(err).WithFields(
+			logrus.Fields{	
+				"src.file": 						"action/root.go",
+				"action.type": 						"get-bucket",
+				"method.name": 						"fatalOnError(...)",
+				"var.err": 							err.Error(),				
+				}).Fatal("fatal error triggered.") 
 	}
 }
