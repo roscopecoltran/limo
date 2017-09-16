@@ -69,11 +69,6 @@ dist/windows/limo*
 limo.json
 limo.yaml
 
-### Docker ###
-*-alpine.env
-
-sift-alpine.env
-
 ### Big Files and Archives ###
 *.gz
 *.tar.gz
@@ -81,7 +76,36 @@ sift-alpine.env
 *.txt
 *.csv
 
+## keep splitted archives (usually under 60Mb)
 !*.gz.*
 !*.zip.*
 !*.bz2.*
 !*.tar.gz.*
+
+### Config files ###
+# ignore production/local config files
+*.yaml
+*.json
+
+### Docker ###
+*-*.env
+.env
+
+!Dockerfile.*
+!dockerfile*
+!docker-compose*
+!crane.*
+
+# remove test or legacy config files/variables
+*.*-test*
+*.*-test*
+*.*-backup*
+*.*-bck*
+*.*-old*
+
+# skip from ignore any example config files
+!*.*-sample*
+!*.*-example*
+
+
+

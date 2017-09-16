@@ -1,0 +1,175 @@
+{
+  "databasePath": "/Users/lucmichalski/.config/limo/limo.db",
+  "indexPath": "/Users/lucmichalski/.config/limo/limo.idx",
+  "crawlers": {
+    "jobs": {
+      "parallel": 20
+    },
+    "engines": [
+      {
+        "engine": "nsq",
+        "driver": "nsq",
+        "parameters": {
+          "host": "nsq",
+          "port": 1111,
+          "protocol": "tcp",
+          "topics": [
+            "feed",
+            "star",
+            "academic",
+            "howdoi"
+          ]
+        }
+      }
+    ]
+  },
+  "plugins": {
+    "manager": {
+      "storage": "public/sniperkit-limo/plugin/imports",
+      "ports": {
+        "min": 41000
+      }
+    }
+  },
+  "database": {
+    "engines": [
+      {
+        "engine": "boltdb",
+        "driver": "bolt",
+        "parameters": {
+          "file_path": "/Users/lucmichalski/.config/limo/sniperkit-limo.db"
+        }
+      },
+      {
+        "engine": "sqlite3",
+        "driver": "gorm",
+        "parameters": {
+          "file_path": "/Users/lucmichalski/.config/limo/limo.db"
+        }
+      },
+      {
+        "engine": "mysql",
+        "driver": "gorm",
+        "parameters": {
+          "name": "sniperkit-limo",
+          "host": "mysql",
+          "port": 3306,
+          "user": "snk-mysql-limo",
+          "pass": "snk-mysql-limo123",
+          "protocol": "tcp",
+          "ssl": false
+        }
+      },
+      {
+        "engine": "postgresql",
+        "driver": "gorm",
+        "parameters": {
+          "name": "sniperkit-limo",
+          "host": "mysql",
+          "port": 5432,
+          "user": "snk-postgresql-limo",
+          "pass": "snk-postgresql-limo123",
+          "protocol": "tcp",
+          "ssl": false
+        }
+      },
+      {
+        "engine": "neo4j",
+        "driver": "neoism",
+        "parameters": {
+          "db": "db/data",
+          "host": "neo4j",
+          "port": 7474,
+          "user": "snk-neo4j-limo",
+          "pass": "snk-neo4j-limo123",
+          "protocol": "tcp"
+        }
+      },
+      {
+        "engine": "redis",
+        "driver": "redis",
+        "parameters": {
+          "db": 0,
+          "host": "redis",
+          "port": 6379,
+          "protocol": "tcp",
+          "auth": "",
+          "user": "snk-redis-limo",
+          "pass": "snk-redis-limo123"
+        }
+      },
+      {
+        "engine": "webdis",
+        "driver": "webdis",
+        "parameters": {
+          "host": "webdis",
+          "port": 7379,
+          "protocol": "tcp",
+          "threads": 4
+        }
+      },
+      {
+        "engine": "memcache",
+        "driver": "memcache",
+        "parameters": {
+          "host": "memcache",
+          "port": 11211,
+          "protocol": "tcp"
+        }
+      },
+      {
+        "engine": "caleygraphdb",
+        "driver": "caley",
+        "parameters": {
+          "timeout": 2,
+          "load": {
+            "ignore_missing": false,
+            "ignore_duplicate": false,
+            "batch": 10000
+          },
+          "store": {
+            "backend": "memstore",
+            "address": "/Users/lucmichalski/.config/limo/limo-caley.caley",
+            "read_only": false,
+            "options": {
+              "leveldb": {
+                "write_buffer_mb": 20,
+                "cache_size_mb": 2
+              },
+              "bolt": {
+                "nosync": false
+              },
+              "mongodb": {
+                "database_name": "limo-cayley"
+              },
+              "postgresql": {
+                "db_fill_factor": 50,
+                "local_optimize": true
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "services": {
+    "github": {
+      "token": "your_token",
+      "user": "your_username"
+    },
+    "providers": [
+      {
+        "name": "github",
+        "token": "your_token",
+        "user": "your_username"
+      },
+      {
+        "name": "gitlab",
+        "token": "your_token",
+        "user": "your_username"
+      }
+    ]
+  },
+  "outputs": {
+  }
+}

@@ -1,3 +1,30 @@
+### Go ###
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.so
+
+# Folders
+_obj
+_test
+
+# Architecture specific extensions/prefixes
+*.[568vq]
+[568vq].out
+
+*.cgo1.go
+*.cgo2.c
+_cgo_defun.c
+_cgo_gotypes.go
+_cgo_export.*
+
+_testmain.go
+
+*.test
+*.prof
+
+# Test coverage
+*.out
 
 .git
 .git/**
@@ -6,10 +33,6 @@
 
 *.yml
 *.md
-
-vendor
-vendor/
-vendor/**
 
 Godeps
 Godeps/
@@ -25,7 +48,41 @@ Godeps/**
 ./external/*
 ./external/**
 
+### Shared ###
+# shared
+# shared/
+# shared/**
+
+### Staging ###
 .staging
 .staging/
 .staging/**
+
+### Notes & Snippets ###
+.notes
+.notes/
+.notes/**
+
+.snippets
+.snippets/
+.snippets/**
+
+### Vendor ###
+vendor
+vendor/
+vendor/**
+
+### Cache ###
+cache
+cache/
+cache/**
+
+### Config files ###
+*.*-test*
+*.*-sample*
+*.*-example*
+*.*-test*
+*.*-backup*
+*.*-bck*
+*.*-old*
 

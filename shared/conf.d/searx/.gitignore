@@ -1,0 +1,9 @@
+.env
+*.yaml
+*.json
+!*.*-sample*
+!*.*-example*
+*.*-test*
+*.*-backup*
+*.*-bck*
+*.*-old*
