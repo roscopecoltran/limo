@@ -23,9 +23,13 @@ _testmain.go
 *.test
 *.prof
 
-
 # Test coverage
 *.out
+
+### Shared ###
+# shared
+# shared/
+# shared/**
 
 ### Staging ###
 .staging
@@ -52,18 +56,18 @@ cache/
 cache/**
 
 ### App ###
-limo
-
-limo*
+# limo
+# limo*
 limo-*
+limo_*
 
 bin/limo*
 dist/linux/limo*
 dist/macos/limo*
 dist/windows/limo*
 
-conf.d/limo.json
-conf.d/limo.yaml
+limo.json
+limo.yaml
 
 ### Docker ###
 *-alpine.env
