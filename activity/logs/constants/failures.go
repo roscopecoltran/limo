@@ -1,6 +1,0 @@
-package constants
-
-//import (
-//	"fmt"
-//)
-
