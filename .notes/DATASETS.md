@@ -1,5 +1,0 @@
-- https://github.com/mitchelljeff/fastqa4tackbp/tree/master/data
-- https://github.com/windweller/Trinket/tree/master/data
-- https://github.com/mitchelljeff/modelf/tree/master/quebap/data
-- https://github.com/wcmc-its/pubmed-retrieval-service/blob/master/model/scopus_article.go
-- 

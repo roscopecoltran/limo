@@ -28,18 +28,18 @@ _testmain.go
 *.out
 
 ### Staging ###
-#.staging
-#.staging/
-#.staging/**
+.staging
+.staging/
+.staging/**
 
 ### Notes & Snippets ###
-#.notes
-#.notes/
-#.notes/**
+.notes
+.notes/
+.notes/**
 
-#.snippets
-#.snippets/
-#.snippets/**
+.snippets
+.snippets/
+.snippets/**
 
 ### Vendor ###
 vendor
