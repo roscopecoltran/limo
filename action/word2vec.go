@@ -13,10 +13,10 @@
 // limitations under the License.
 
 package action
-
+/*
 import (
 	"fmt"																				// go-core
-	//"github.com/roscopecoltran/sniperkit-limo/config" 								// app-config
+	"github.com/roscopecoltran/sniperkit-limo/config" 									// app-config
 	//"github.com/roscopecoltran/sniperkit-limo/service" 								// svc-registry
 	//"github.com/roscopecoltran/sniperkit-limo/model" 									// data-models
 	"github.com/ynqa/word-embedding/models/word2vec" 									// ai-word-embed-word2vec
@@ -146,3 +146,4 @@ func init() {
 			}).Info("registering command...")
 	RootCmd.AddCommand(Word2VecCmd)
 }
+*/

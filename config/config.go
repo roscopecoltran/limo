@@ -25,29 +25,29 @@ var configDirectoryPath string 													// configuration path
 var flagConfigPath 		= flag.String("config", "", "Path to look for a config file. (directory)")
 
 func init() {
-	// Log as JSON instead of the default ASCII formatter.
-	// log.SetFormatter(&log.JSONFormatter{})
-	// Output to stdout instead of the default stderr
-	// Can be any io.Writer, see below for File example
-	log.Out = os.Stdout
-
-	// Only log the warning severity or above.
-	log.Level = logrus.InfoLevel
-
-	formatter := new(prefixed.TextFormatter)
-	log.Formatter = formatter
+	log.Out 				= os.Stdout 													// logs 	- output
+	formatter 				:= new(prefixed.TextFormatter) 									// logs 	- prefix-formatter
+	log.Formatter 			= formatter 													// logs 	- msg themes
+	log.Level 				= logrus.DebugLevel 											// logs 	- set the log level
 
 	baseDir, err := xdgbasedir.ConfigHomeDirectory()
 	if err != nil {
-		log.WithFields(logrus.Fields{"config": "init"}).Fatal("Can't find XDG BaseDirectory")
-		// log.Fatal("Can't find XDG BaseDirectory")
+		log.WithError(err).WithFields(
+			logrus.Fields{
+				"src.file": 			"config/config.go",
+				"method.name": 			"init()",
+				}).Fatal("Can't find XDG BaseDirectory")
 	}
 
 	configDirectoryPath = path.Join("shared", "conf.d", ProgramName)
+	log.WithFields(
+		logrus.Fields{
+			"src.file": 				"config/config.go",
+			"method.name": 				"init()",
+			"var.baseDir": 				baseDir,
+			"var.configDirectoryPath": 	configDirectoryPath,
+			}).Info("Default config values")
 
-	//}
-	log.WithFields(logrus.Fields{"config": "init"}).Infof("baseDir: %#v", baseDir)
-	log.WithFields(logrus.Fields{"config": "init"}).Infof("configDirectoryPath: %#v", configDirectoryPath)
 }
 
 type ServiceConfig struct {			// ServiceConfig contains configuration information for a service
@@ -326,7 +326,12 @@ type DirectoriesConfig struct {
 }
 
 func GetTmpDir() (string) {
-	fmt.Println("OS default temp is " + osTmpDir)
+	log.WithFields(
+		logrus.Fields{
+			"src.file": 				"config/config.go", 
+			"method.name": 				"GetTmpDir()", 
+			"var.scope.osTmpDir": 		osTmpDir, 
+			}).Infof("operating system temp dir: '%s'", osTmpDir)
 	return osTmpDir
 }
 
@@ -477,7 +482,11 @@ func (config *Config) WriteConfig() error {
 	if err != nil {
 		return err
 	}
-	log.WithFields(logrus.Fields{"config": "WriteConfig"}).Infof("configDirectoryPath: %#v", configDirectoryPath)
+	log.WithFields(logrus.Fields{
+		"src.file":	 						"config/config.go", 
+		"method.name":					 	"WriteConfig(...)",
+		"var.configDirectoryPath": 			configDirectoryPath,
+		}).Info("set configDirectoryPath...")
 	data, err := yaml.Marshal(config)
 	if err != nil {
 		return err
@@ -489,7 +498,11 @@ func FindLocalConfig() (string) {
 //func (config *Config) FindLocalConfig() (string) {
 	configFilePath := configFilePath()
 	if configFilePath == "" {
-		log.WithFields(logrus.Fields{"config": "getConfiguration"}).Info("error while getting global configuration data.")
+		log.WithFields(logrus.Fields{
+			"src.file":	 				"config/config.go", 
+			"var.configFilePath": 		configFilePath,
+			"method.name": 				"FindLocalConfig(...)",
+			}).Error("error while getting global configuration params.")
 	}
 	return configFilePath
 }
@@ -502,29 +515,49 @@ func configFilePath() string {
 	if err != nil {
 		curdir = "."
 	}
-	log.WithFields(logrus.Fields{"config": "configFilePath", "curdir": curdir}).Infof("currendir: %#v", curdir)
+	log.WithFields(logrus.Fields{
+		"src.file":	 				"config/config.go", 
+		"method.name": 				"configFilePath(...)", 
+		"var.curdir": 				curdir,
+		}).Info("get current dir")
 	path, err := filepath.Abs(curdir)
 	if err != nil || path == "" {
 		return ""
 	}
-	log.WithFields(logrus.Fields{"config": "configFilePath", "path": path}).Infof("path: %#v", path)
+	log.WithFields(logrus.Fields{
+		"src.file":	 				"config/config.go", 
+		"method.name": 				"configFilePath(...)", 
+		"var.curdir": 				curdir,
+		"var.path": 				path,
+		}).Info("get current absolute path")
 	//lp := ""
 	for _, cfgPrefixPath := range configPrefixPaths {
-		log.WithFields(logrus.Fields{"config": "configFilePath", "cfgPrefixPath": cfgPrefixPath}).Infof("path: %#v", path)
+		log.WithFields(logrus.Fields{
+			"src.file":	 				"config/config.go", 
+			"method.name":	 			"configFilePath(...)", 
+			"var.cfgPrefixPath": 		cfgPrefixPath,
+			"var.path": 				path,
+			"prefix": 					"config-path",
+			}).Info("checking path")
 		for _, cfgFormat := range configFormats {
 			confpath := filepath.Join(path, cfgPrefixPath, fmt.Sprintf("%s.%s", ProgramName, cfgFormat))
 			// log.WithFields(logrus.Fields{"config": "configFilePath", "cfgPrefixPath": cfgPrefixPath, "cfgFormat": cfgFormat}).Infof("confpath: %#v", confpath)
 			if _, err := os.Stat(confpath); err == nil {
-				log.WithFields(logrus.Fields{"config": "configFilePath", "confpath": confpath, "cfgFormat": cfgFormat, "cfgPrefixPath": cfgPrefixPath}).Infof("FOUND: %#v", confpath)
+				log.WithFields(logrus.Fields{
+					"src.file":	 			"config/config.go", 
+					"method.name": 			"configFilePath(...)", 
+					"var.path": 			path,
+					"var.confpath": 		confpath, 
+					"var.cfgFormat": 		cfgFormat, 
+					"var.cfgPrefixPath": 	cfgPrefixPath,
+					"prefix": 				"config-path",
+					}).Warn("config file was FOUND")
 				return confpath
 			}
-
 			// lp = path
 			// path = filepath.Dir(path)
-			// log.WithFields(logrus.Fields{"config": "configFilePath", "path": path}).Infof("path: %#v", path)
 		}
 	}
-
 	return ""
 }
 

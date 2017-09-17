@@ -43,7 +43,7 @@ type User struct {
 	Gender            string 		`default:"u" json:"gender,omitempty" yaml:"gender,omitempty"`
 	Birthday          *time.Time 	`json:"birthday,omitempty" yaml:"birthday,omitempty"`
 	Emails        	  []Email 		`gorm:"many2many:user_emails;" json:"emails,omitempty" yaml:"emails,omitempty"`
-	Mentions          []Mention     `gorm:"many2many:user_mentions;"`
+	//Mentions          []Mention     `gorm:"many2many:user_mentions;"`
 	Languages         []Language    `gorm:"many2many:user_languages;"`
 }
 

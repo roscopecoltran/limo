@@ -1,1 +1,1 @@
-package ai_trainers
+package trainers

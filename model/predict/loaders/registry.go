@@ -1,1 +1,1 @@
-package ai_model_loaders
+package loaders

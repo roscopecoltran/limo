@@ -1,1 +1,1 @@
-package ai_aux_loaders
+package aux

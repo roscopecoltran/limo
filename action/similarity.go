@@ -13,10 +13,11 @@
 // limitations under the License.
 
 package action
-
+/*
 import (
 	"fmt"																							// go-core
-	//"github.com/roscopecoltran/sniperkit-limo/config" 											// app-config
+	"errors"																						// go-core
+	"github.com/roscopecoltran/sniperkit-limo/config" 												// app-config
 	//"github.com/roscopecoltran/sniperkit-limo/service" 											// svc-registry
 	//"github.com/roscopecoltran/sniperkit-limo/model" 												// data-models
 	"github.com/spf13/cobra" 																		// cli-cmd
@@ -94,3 +95,4 @@ func init() {
 			}).Info("registering command...")
 	RootCmd.AddCommand(SimilarityCmd)
 }
+*/

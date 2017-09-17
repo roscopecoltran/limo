@@ -6,6 +6,7 @@ import (
 	"strings"																						// go-core
 	"github.com/roscopecoltran/sniperkit-limo/config" 												// app-config
 	"github.com/roscopecoltran/sniperkit-limo/model" 												// data-models
+	"github.com/blevesearch/bleve" 																	// data-idx
 	"github.com/spf13/cobra" 																		// cli-cmd
 	"github.com/sirupsen/logrus" 																	// logs-logrus
 	//"github.com/davecgh/go-spew/spew" 															// debug-print

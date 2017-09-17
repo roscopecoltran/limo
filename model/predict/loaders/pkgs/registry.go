@@ -1,1 +1,1 @@
-package ai_pkgs_loaders
+package pkgs

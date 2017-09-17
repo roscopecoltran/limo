@@ -13,7 +13,7 @@
 // limitations under the License.
 
 package action
-
+/*
 import (
 	"errors"																					// go-core
 	"fmt"																						// go-core
@@ -38,11 +38,41 @@ func inputVectorFileIsExist() bool {
 
 func validateCommonParams() error {
 	if dimension <= 0 {
-		return errors.New("Set dimension > 0")
+		err := errors.New("Set dimension > 0")
+		log.WithError(err).WithFields(
+			logrus.Fields{
+				"src.file": 			"action/validation.go", 
+				"method.prev": 			"if dimension <= 0",
+				"method.name": 			"validateCommonParams()", 
+				"var.learningRate": 	learningRate, 
+				"var.window": 			window, 
+				"var.dimension": 		dimension, 
+				}).Error("could not validate common parameters, set dimension > 0...")
+		return err
 	} else if window <= 0 {
-		return errors.New("Set window > 0")
+		err := errors.New("Set window > 0")
+		log.WithError(err).WithFields(
+			logrus.Fields{
+				"src.file": 			"action/validation.go", 
+				"method.prev": 			"if window <= 0",
+				"method.name": 			"validateCommonParams()", 
+				"var.learningRate": 	learningRate, 
+				"var.dimension": 		dimension, 
+				"var.window": 			window, 
+				}).Error("could not validate common parameters, set window > 0")
+		return err 
 	} else if learningRate <= 0 {
-		return errors.New("Set learning rate > 0")
+		err := errors.New("Set learning rate > 0")
+		log.WithError(err).WithFields(
+			logrus.Fields{
+				"src.file": 			"action/validation.go", 
+				"method.prev": 			"if learningRate <= 0",
+				"method.name": 			"validateCommonParams()", 
+				"var.window": 			window, 
+				"var.dimension": 		dimension, 
+				"var.learningRate": 	learningRate, 
+				}).Error("could not validate common parameters, set learning rate > 0")
+		return err
 	}
 	return nil
 }
@@ -63,3 +93,5 @@ func validateWord2vecParams() error {
 	}
 	return nil
 }
+
+*/

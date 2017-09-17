@@ -1,1 +1,2 @@
-package ai_aux_gensim
+package gensim
+

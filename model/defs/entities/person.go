@@ -1,4 +1,4 @@
-package news
+package entities
 
 import (
 	"github.com/jmcvetta/neoism" 															// data-neo4j

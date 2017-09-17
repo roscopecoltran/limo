@@ -89,7 +89,7 @@ var UpdateCmd = &cobra.Command{ 																	// UpdateCmd lets you log in
 							"var.totalUpdated": 					totalUpdated,
 							"var.totalErrors": 						totalErrors,
 							"var.starChanCount": 					starChanCount,
-							"var.starResult.Star.RemoteURI": 		*starResult.Star.RemoteURI,
+							"var.starResult.Star.RemoteURI": 		starResult.Star.RemoteURI,
 							}).Error("error while getting creating/updating the starred repo into the data-store.")
 					//output.Error(fmt.Sprintf("Error %s: %s", *starResult.Star.FullName, err.Error()))
 				} else {
@@ -111,7 +111,7 @@ var UpdateCmd = &cobra.Command{ 																	// UpdateCmd lets you log in
 								"var.totalUpdated": 					totalUpdated,
 								"var.totalErrors": 						totalErrors,
 								"var.starChanCount": 					starChanCount,
-								"var.starResult.Star.RemoteURI": 		*starResult.Star.RemoteURI,
+								"var.starResult.Star.RemoteURI": 		starResult.Star.RemoteURI,
 								}).Error("error while indexing the star into the full-text engine.")
 						//output.Error(fmt.Sprintf("Error %s: %s", *starResult.Star.FullName, err.Error()))
 					}

@@ -37,13 +37,13 @@ _testmain.go
 .staging/**
 
 ### Notes & Snippets ###
-.notes
-.notes/
-.notes/**
+# .notes
+# .notes/
+# .notes/**
 
-.snippets
-.snippets/
-.snippets/**
+# .snippets
+# .snippets/
+# .snippets/**
 
 ### Vendor ###
 vendor
@@ -56,15 +56,9 @@ cache/
 cache/**
 
 ### App ###
-# limo
-# limo*
-limo-*
-limo_*
-
+dist/*/limo-*
+dist/*/limo_*
 bin/limo*
-dist/linux/limo*
-dist/macos/limo*
-dist/windows/limo*
 
 limo.json
 limo.yaml

@@ -21,5 +21,12 @@ var VersionCmd = &cobra.Command{
 }
 
 func init() {
+	log.WithFields(
+		logrus.Fields{
+			"src.file": 			"action/version.go", 
+			"cmd.name": 			"VersionCmd",
+			"method.name": 			"init()", 
+			"var.options": 			options, 
+			}).Info("registering command...")
 	RootCmd.AddCommand(VersionCmd)
 }
