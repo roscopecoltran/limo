@@ -15,10 +15,10 @@
 package action
 
 import (
-	"fmt"																					// go-core
+	"fmt" // go-core
 	//"github.com/roscopecoltran/sniperkit-limo/config" 										// app-config
-	"github.com/spf13/cobra" 																// cli-cmd
-	"github.com/sirupsen/logrus" 															// logs-logrus
+	"github.com/sirupsen/logrus" // logs-logrus
+	"github.com/spf13/cobra"     // cli-cmd
 )
 
 var PluginCmd = &cobra.Command{
@@ -33,11 +33,12 @@ var PluginCmd = &cobra.Command{
 func init() {
 	log.WithFields(
 		logrus.Fields{
-			"src.file": 			"action/plugin.go", 
-			"cmd.name": 			"PluginCmd",
-			"method.name": 			"init()", 
-			"var.options": 			options, 
-			}).Info("registering command...")
+			"prefix":      "app-action",
+			"src.file":    "action/plugin.go",
+			"cmd.name":    "PluginCmd",
+			"method.name": "init()",
+			"var.options": options,
+		}).Info("registering command...")
 	RootCmd.AddCommand(PluginCmd)
 	// Here you will define your flags and configuration settings.
 

@@ -295,10 +295,10 @@ type SQLiteConfig struct {
 
 // config.Files.Extensions.Allowed
 type FilesConfig struct {
-	Active 			bool 				`default:"true"`
+	Active 						bool 				`default:"true"`
 	//Extensions struct {
-	//	Allowed 	[]string 	`default:"go|py|md|cpp|h|php|java|cmake|txt|ini|yml|yaml|toml|ini|conf|log|js|html|htm|jx|jsx" json:"allowed,omitempty" yaml:"allowed,omitempty"`
-	//	Blocked 	[]string 	`default:"epub|mobi|mp3|flac|mkv|avi|log" json:"forbidden,omitempty" yaml:"forbidden,omitempty"`
+	//	Allowed 				[]string 			`default:"go|py|md|cpp|h|php|java|cmake|txt|ini|yml|yaml|toml|ini|conf|log|js|html|htm|jx|jsx" json:"allowed,omitempty" yaml:"allowed,omitempty"`
+	//	Blocked 				[]string 			`default:"epub|mobi|mp3|flac|mkv|avi|log" json:"forbidden,omitempty" yaml:"forbidden,omitempty"`
 	//} 
 }
 
@@ -316,13 +316,78 @@ type SMTPConfig struct {
 }
 
 type DirectoriesConfig struct {
-	Shared 						string 			`default:"shared" json:"shared_dir,omitempty" yaml:"shared_dir,omitempty"`
-	Conf 						string 			`default:"conf.d" json:"conf_dir,omitempty" yaml:"conf_dir,omitempty"`
-	Data 						string 			`default:"data" json:"conf_dir,omitempty" yaml:"data_dir,omitempty"`
-	Load 						string 			`default:"load" json:"conf_dir,omitempty" yaml:"load_dir,omitempty"`
-	Logs 						string 			`default:"logs" json:"conf_dir,omitempty" yaml:"logs_dir,omitempty"`
-	Certs 						string 			`default:"certs" json:"certs_dir,omitempty" yaml:"certs_dir,omitempty"`
-	Debug 						string 			`default:"debug" json:"debug_dir,omitempty" yaml:"debug_dir,omitempty"`
+	Shared 						string 				`default:"shared" json:"shared_dir,omitempty" yaml:"shared_dir,omitempty"`
+	Conf 						string 				`default:"conf.d" json:"conf_dir,omitempty" yaml:"conf_dir,omitempty"`
+	Data 						string 				`default:"data" json:"conf_dir,omitempty" yaml:"data_dir,omitempty"`
+	Load 						string 				`default:"load" json:"conf_dir,omitempty" yaml:"load_dir,omitempty"`
+	Logs 						string 				`default:"logs" json:"conf_dir,omitempty" yaml:"logs_dir,omitempty"`
+	Certs 						string 				`default:"certs" json:"certs_dir,omitempty" yaml:"certs_dir,omitempty"`
+	Debug 						string 				`default:"debug" json:"debug_dir,omitempty" yaml:"debug_dir,omitempty"`
+}
+
+
+// RedisConfig for redis
+type RedisConfig struct {
+	InitRedis 					bool 				`default:"true" json:"enable,omitempty" yaml:"enable,omitempty"`
+	Ping      					bool 				`default:"false" json:"ping,omitempty" yaml:"ping,omitempty"`
+	Retry     					uint 				`default:"3" json:"retry,omitempty" yaml:"retry,omitempty"`
+	RedisInstance 									`json:"instance,omitempty" yaml:"instance,omitempty"`
+}
+
+// RedisInstance represents a single instance of redis server
+type RedisInstance struct {
+	Name 						string 				`json:"name,omitempty" yaml:"name,omitempty"`
+	Host 						string 				`json:"host,omitempty" yaml:"host,omitempty"`
+	Pwd 						string 				`json:"password,omitempty" yaml:"password,omitempty"`
+	Port 						int    				`default:"6379" json:"port,omitempty" yaml:"port,omitempty"`
+	Db   						int    				`default:"0" json:"database,omitempty" yaml:"database,omitempty"`
+}
+
+// AppConfig for application
+type AppConfig struct {
+	Name  						string  			`json:"name,omitempty" yaml:"name,omitempty"`
+	Mode  						string 				`default:"dev" json:"mode,omitempty" yaml:"mode,omitempty"`
+	Port  						int 				`default:"8888" json:"port,omitempty" yaml:"port,omitempty"`
+	Log   						LogsConfig 			`json:"log_config,omitempty" yaml:"log_config,omitempty"`
+	Mysql 						MysqlConfig 		`json:"mysql_config,omitempty" yaml:"mysql_config,omitempty"`
+	Redis 						RedisConfig 		`json:"redis_config,omitempty" yaml:"redis_config,omitempty"`
+}
+
+type sessionConfig struct {
+	Providor  					string 				`json:"provider,omitempty" yaml:"provider,omitempty"`
+	StorePath 					string 				`json:"store_path,omitempty" yaml:"store_path,omitempty"`
+	Enable    					bool 				`default:"true" json:"enable,omitempty" yaml:"enable,omitempty"`
+}
+
+// LogConfig for logger
+type LogsConfig struct {
+	Name         				string 				`json:"name,omitempty" yaml:"name,omitempty"`
+	Providor     				string 				`json:"provider,omitempty" yaml:"provider,omitempty"`
+	LogPath      				string 				`json:"log_path,omitempty" yaml:"log_path,omitempty"`
+	RotateMode   				string 				`json:"rotate_mode,omitempty" yaml:"rotate_mode,omitempty"`
+	RotateLimit  				string 				`json:"rotate_limit,omitempty" yaml:"rotate_limit,omitempty"`
+	Suffix       				string  			`json:"suffix,omitempty" yaml:"suffix,omitempty"`
+	RotateEnable 				bool 				`default:"true" json:"rotate_enable,omitempty" yaml:"rotate_enable,omitempty"`
+}
+
+// MysqlConfig for MySQL
+type MysqlConfig struct {
+	Instances 					[]MysqlInstance 	`json:"instances,omitempty" yaml:"instances,omitempty"`
+	InitMySQL 					bool 				`default:"true" json:"enable,omitempty" yaml:"enable,omitempty"`
+	Ping      					bool 				`default:"true" json:"ping,omitempty" yaml:"ping,omitempty"`
+	Retry     					uint 				`default:"3" json:"retry,omitempty" yaml:"retry,omitempty"`
+}
+
+// MysqlInstance represents a single instance of mysql server
+type MysqlInstance struct {
+	Name     					string  			`yaml:"name" json:"name"`
+	Host     					string  			`yaml:"host" son:"host"`
+	User     					string  			`yaml:"user" json:"user"`
+	Pwd      					string  			`yaml:"password" json:"password"`
+	Db       					string  			`yaml:"db" json:"db"`
+	Version  					string  			`yaml:"version" json:"version"`
+	Port     					int     			`default:"3306" yaml:"port" json:"port"`
+	ReadOnly 					bool    			`default:"false" yaml:"read_only" json:"read_only"`
 }
 
 func GetTmpDir() (string) {

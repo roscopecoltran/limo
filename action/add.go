@@ -1,24 +1,24 @@
 package action
 
 import (
-	"fmt"																					// go-core
-	"github.com/roscopecoltran/sniperkit-limo/config" 										// app-config
-	"github.com/roscopecoltran/sniperkit-limo/model" 										// data-models
-	"github.com/spf13/cobra" 																// cli-cmd
-	"github.com/sirupsen/logrus" 															// logs-logrus
+	"fmt"                                             // go-core
+	"github.com/roscopecoltran/sniperkit-limo/config" // app-config
+	"github.com/roscopecoltran/sniperkit-limo/model"  // data-models
+	"github.com/sirupsen/logrus"                      // logs-logrus
+	"github.com/spf13/cobra"                          // cli-cmd
 	//"github.com/davecgh/go-spew/spew" 													// debug-print
 	//"github.com/k0kubun/pp" 																// debug-print
 )
 
 var adders = map[string]func([]string){
-	"star": addStar,
-	"tag":  addTag,
-	"topic": addTopic,
+	"star":     addStar,
+	"tag":      addTag,
+	"topic":    addTopic,
 	"language": addLanguage,
 	"academic": addAcademic,
-	"readme": addReadme,
-	"tree": addTree,
-	"package": addPackage,
+	"readme":   addReadme,
+	"tree":     addTree,
+	"package":  addPackage,
 }
 
 // AddCmd adds stars and tags
@@ -93,11 +93,12 @@ func init() {
 
 	log.WithFields(
 		logrus.Fields{
-			"src.file": 			"action/add.go", 
-			"cmd.name": 			"AddCmd",
-			"method.name": 			"init()", 
-			"var.options": 			options, 
-			}).Info("registering command...")
+			"prefix":      "app-action",
+			"src.file":    "action/add.go",
+			"cmd.name":    "AddCmd",
+			"method.name": "init()",
+			"var.options": options,
+		}).Info("registering command...")
 
 	RootCmd.AddCommand(AddCmd)
 }

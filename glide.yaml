@@ -10,6 +10,10 @@ owners:
   email: michalski.luc@gmail.com
   homepage: https://github.com/lucmichalski
 ignore:
+- github.com/jeffail/tunny
+- github.com/roscopecoltran/sniperkit-limo/model/generate
+- github.com/roscopecoltran/sniperkit-limo/plugin
+- github.com/roscopecoltran/sniperkit-limo/plugins/docker
 - gob
 - enterprise.getqor.com
 - enterprise.getqor.com/microsite
@@ -19,6 +23,185 @@ ignore:
 - github.com/docker/docker
 - github.com/Sirupsen/logrus
 import:
+- package: github.com/spf13/cobra
+  version: master
+- package: github.com/caltechlibrary/datatools
+  subpackages:
+  - timefmt
+  - reldate
+#- package: github.com/caltechlibrary/cli
+- package: github.com/khezen/hunt
+- package: github.com/mingrammer/commonregex
+- package: github.com/jmcvetta/napping
+- package: github.com/alixaxel/pagerank
+- package: github.com/jinzhu/copier
+- package: github.com/go-xorm/xorm
+- package: github.com/graphql-go/graphql
+  subpackages:
+  - gqlerrors
+  - language/ast 
+  - language/kinds
+  - language/lexer
+  - language/location 
+  - language/printer
+  - language/source
+  - language/typeinfo 
+  - language/visitor
+- package: github.com/blevesearch/blevex
+  subpackages:
+  - batcher
+  - cznicb
+  - detectlang
+  - icu
+  - lang/en 
+  - lang/fr 
+  - lang/ja
+  - lang/es 
+  - leveldb
+  - preload
+  - rocksdb
+  - stemmer
+- package: github.com/danieldk/go2vec
+- package: gopkg.in/mgo.v2
+  version: v2-unstable
+  repo: https://github.com/go-mgo/mgo.git
+  vcs: git
+  subpackages:
+  - bson
+  - txn
+  - internal/scram 
+  - internal/sasl 
+  - internal/json 
+- package: github.com/bbalet/stopwords
+- package: github.com/bradfitz/gomemcache
+  subpackages:
+  - memcache
+- package: github.com/barthr/newsapi
+- package: github.com/plutov/bigfloat
+- package: github.com/yunge/sphinx
+- package: github.com/slvmnd/gosphinx
+- package: github.com/kpacha/bloomis
+- package: github.com/kpacha/gin-jwks
+  subpackages:
+  - gin
+- package: github.com/kpacha/gin-auth0-profile
+- package: github.com/phamhongviet/godsv
+- package: github.com/laher/nilcheck
+- package: github.com/olivere/nullable
+- package: github.com/olivere/validation
+- package: github.com/kamildrazkiewicz/go-flow
+- package: github.com/fabulousduck/Librarian
+- package: github.com/MixedMessages/taskrunner
+- package: github.com/unchartedsoftware/deluge
+  subpackages:
+  - document
+  - elastic/v2
+  - elastic/v5
+  - equalizer
+  - hdfs
+  - input/elastic 
+  - input/file 
+  - input/hdfs
+  - pool
+  - progress
+  - threshold
+  - util 
+- package: github.com/dixonwille/skywalker
+- package: github.com/dc0d/workerpool
+- package: github.com/orcaman/concurrent-map
+- package: github.com/AlexSteele/deref
+- package: github.com/gofan1776/safe_panic
+- package: github.com/cjrd/allocate
+- package: github.com/rikonor/go-mapstruct
+- package: github.com/rafaeldias/async
+- package: github.com/bluele/gcache
+- package: github.com/bluele/go-flow
+  subpackages:
+  - flow
+# mentions
+- package: github.com/knakk/mormor
+  subpackages:
+  - entity
+- package: github.com/gtfierro/hod
+  subpackages:
+  - db
+  - goraptor
+  - query
+  - server 
+  - buildings
+  - clients/go
+- package: github.com/koding/multiconfig
+- package: github.com/bigdrum/godataloader
+- package: github.com/foolin/gocsv
+# - package: github.com/gogather/safemap
+# task flow
+- package: github.com/richardwilkes/taskqueue
+- package: github.com/drrzmr/taskqueue-go
+- package: github.com/oleksandr/fbp
+- package: github.com/xgfone/go-taskflow
+- package: github.com/xh3b4sd/taskq
+- package: github.com/dogtools/dog
+  subpackages:
+  - extras
+  - run
+# garbage collector
+- package: github.com/atdiar/sac
+- package: github.com/apex/log
+- package: github.com/goeuro/myke
+  subpackages:
+  - core
+  - cmd
+- package: github.com/ngorm/ngorm
+- package: github.com/gernest/nutz
+# promises
+- package: github.com/jochasinga/go-promise
+# requests
+- package: github.com/jochasinga/requests
+# rx
+- package: github.com/jochasinga/rxgo-lite
+  subpackages:
+  - interfaces
+  - types
+# data processing
+- package: github.com/Jeffail/gabs
+# MQ
+- package: github.com/jeffail/tunny
+  vcs: git 
+  repo: https://github.com/jeffail/tunny.git
+- package: github.com/nickalie/go-queue
+- package: github.com/donutloop/taskqueue
+- package: github.com/bubble501/taskQueue
+- package: github.com/phf/go-queue
+  subpackages:
+  - queue
+- package: github.com/unikorp/workmq
+- package: github.com/Damnever/goqueue
+- package: github.com/jeffail/benthos
+  subpackages:
+  - config
+  - lib/broker
+  - lib/buffer 
+  - lib/buffer/impl
+  - lib/input 
+  - lib/output 
+  - lib/types 
+  - lib/util
+# goroutines
+- package: github.com/jochasinga/tooth
+- package: github.com/sbogacz/go-pipeline
+- package: github.com/fortytw2/leaktest
+- package: github.com/ivpusic/grpool
+- package: github.com/Code-Hex/golet
+  subpackages:
+  - internal/port
+- package: github.com/Code-Hex/retrygroup
+- package: github.com/silentred/gid
+- package: github.com/workanator/go-floc
+  subpackages:
+  - guard
+  - pred 
+  - run
+# uuid
 - package: github.com/pborman/uuid
 - package: golang.org/x/text
   repo: https://github.com/golang/text.git
@@ -186,6 +369,30 @@ import:
   - fileutil
   - interp
   - syntax
+- package: gopkg.in/go-playground/webhooks.v3
+  subpackages:
+  - github
+  - gitlab 
+  - bitbucket
+- package: github.com/sadlil/go-trigger
+- package: github.com/ulule/deepcopier
+- package: github.com/go-playground/locales
+  subpackages:
+  - currency
+  - en_US
+  - fr_FR
+- package: github.com/txgruppi/command
+- package: github.com/Medium/medium-sdk-go
+- package: github.com/dghubble/go-twitter
+  subpackages:
+  - twitter
+- package: github.com/andygrunwald/go-trending
+- package: github.com/PaulRosset/go-hacknews
+- package: github.com/huandu/xstrings
+- package: github.com/shurcooL/githubql
+- package: github.com/huandu/facebook
+- package: github.com/Clarifai/clarifai-go
+- package: github.com/codemodus/parth
 - package: github.com/mvdan/xurls
 # - package: github.com/ross-spencer/nerlinks
 - package: github.com/hiteshjoshi/go-mitie-ner
@@ -288,6 +495,28 @@ import:
   - protobuf/managerpb
   - protobuf/tensorflow
   - tf
+# - package: github.com/linxGnu/gouv
+- package: github.com/sourcegraph/jsonrpc2
+  subpackages:
+  - websocket
+- package: github.com/beyang/go-astquery
+- package: github.com/go-playground/validator
+  subpackages:
+  - translations/en
+- package: github.com/asaskevich/govalidator
+- package: github.com/sourcegraph/go-vcs
+  subpackages:
+  - vcs/git
+  - vcs/gitcmd  
+  - vcs/hg
+  - vcs/hgcmd
+  - vcs/internal
+  - vcs/ssh
+  - vcs/util
+- package: github.com/linxGnu/goseaweedfs
+  subpackages:
+  - model
+  - libs
 - package: github.com/mellistibco/DataPrep
   subpackages:
   - HumanActivity/PreProcessData
@@ -390,6 +619,7 @@ import:
   subpackages:
   - ioctl
 - package: github.com/tebeka/selenium
+# - package: gopkg.in/redis.v3
 - package: gopkg.in/redis.v5
 - package: github.com/tensorflow/tensorflow
   subpackages:
@@ -480,11 +710,6 @@ import:
   - tensorflow/go
 - package: github.com/jmcvetta/neoism
 - package: github.com/jmcvetta/randutil
-- package: gopkg.in/mgo.v2
-  version: v2-unstable
-  subpackages:
-  - bson
-  - txn
 - package: github.com/gregjones/httpcache
 - package: golang.org/x/net
   version: release-branch.go1.9
@@ -495,7 +720,11 @@ import:
   - webdav
   - http2
   - http2/hpack
+- package: github.com/microcosm-cc/bluemonday
+- package: github.com/parnurzeal/gorequest
+- package: github.com/DeanThompson/syncmap
 - package: github.com/ChimeraCoder/gojson
+- package: github.com/tuvistavie/structomap
 - package: github.com/mitchellh/mapstructure
 - package: github.com/kylelemons/godebug
   subpackages:
@@ -936,6 +1165,10 @@ import:
   subpackages:
   - sift
   - plugins/gitignore
+- package: github.com/gosimple/listdict
+- package: github.com/leonelquinteros/gotext
+- package: github.com/jteeuwen/go-pkg-xmlx
+- package: github.com/jteeuwen/go-pkg-rss
 - package: github.com/dustin/go-humanize
 - package: github.com/fatih/color
   version: v1.5.0
@@ -995,8 +1228,6 @@ import:
   - gogoproto
   - proto
   - sortkeys
-- package: github.com/spf13/cobra
-  version: master
 - package: github.com/xanzy/go-gitlab
   version: v0.5.1
 - package: google.golang.org/genproto

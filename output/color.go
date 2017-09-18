@@ -221,11 +221,14 @@ func (c *Color) Topic(topic *model.Topic) {
 }
 
 // Tree displays a tree
-func (c *Color) Tree(file *model.Tree) {
+func (c *Color) Tree(tree *model.Tree) {
 	var buffer bytes.Buffer
-	_, err := buffer.WriteString(color.BlueString(file.Name))
+	_, err := buffer.WriteString(color.BlueString(tree.RemoteURI))
 	if err != nil {
 		c.Error(err.Error())
+	}
+	if tree.SHA != nil && *tree.SHA != "" {
+		color.White(*tree.SHA)
 	}
 	fmt.Println(buffer.String())
 }

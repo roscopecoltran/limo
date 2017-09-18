@@ -1,25 +1,25 @@
 package action
 
 import (
-	"context"																				// go-core
-	"fmt"																					// go-core
-	"github.com/roscopecoltran/sniperkit-limo/config" 										// app-config
-	"github.com/roscopecoltran/sniperkit-limo/model" 										// data-models
-	"github.com/roscopecoltran/sniperkit-limo/service" 										// svc-registry
-	"github.com/spf13/cobra" 																// cli-cmd
-	"github.com/fatih/color" 																// cli-colors
-	"github.com/hoop33/entrevista"															// cli-interactions
-	"github.com/sirupsen/logrus" 															// logs-logrus
+	"context"                                          // go-core
+	"fmt"                                              // go-core
+	"github.com/fatih/color"                           // cli-colors
+	"github.com/hoop33/entrevista"                     // cli-interactions
+	"github.com/roscopecoltran/sniperkit-limo/config"  // app-config
+	"github.com/roscopecoltran/sniperkit-limo/model"   // data-models
+	"github.com/roscopecoltran/sniperkit-limo/service" // svc-registry
+	"github.com/sirupsen/logrus"                       // logs-logrus
+	"github.com/spf13/cobra"                           // cli-cmd
 	//"github.com/davecgh/go-spew/spew" 													// debug-print
 	//"github.com/k0kubun/pp" 																// debug-print
 )
 
-var any 			= false
-var browse 			= false
-var notTagged 		= false
-var page 			= 1
-var count 			= 1
-var user 			= ""
+var any = false
+var browse = false
+var notTagged = false
+var page = 1
+var count = 1
+var user = ""
 
 var listers = map[string]func(ctx context.Context, args []string){
 	"events":    listEvents,
@@ -30,7 +30,7 @@ var listers = map[string]func(ctx context.Context, args []string){
 	"trending":  listTrending,
 }
 
-var ListCmd = &cobra.Command{ 																// ListCmd lists stars, tags, or trending
+var ListCmd = &cobra.Command{ // ListCmd lists stars, tags, or trending
 	Use:     "list <events|languages|stars|tags|trending>",
 	Aliases: []string{"ls"},
 	Short:   "List events, languages, stars, tags, or trending",
@@ -251,16 +251,17 @@ func listTopics(ctx context.Context, args []string) {
 func init() {
 	log.WithFields(
 		logrus.Fields{
-			"src.file": 			"action/list.go", 
-			"cmd.name": 			"ListCmd",
-			"method.name": 			"init()", 
-			"var.options": 			options, 
-			}).Info("registering command...")
-	ListCmd.Flags().BoolVarP(&any, 			"any", 			"a", 	false, 		"Show stars matching any arguments")
-	ListCmd.Flags().BoolVarP(&browse, 		"browse", 		"b", 	false, 		"Open listed items in your default browser")
-	ListCmd.Flags().BoolVarP(&notTagged, 	"notTagged", 	"n", 	false, 		"Show stars without any tags")
-	ListCmd.Flags().IntVarP(&page, 			"page", 		"p", 	1, 			"First event page to list")
-	ListCmd.Flags().IntVarP(&count,			"count", 		"c", 	1, 			"Count of event pages to list")
-	ListCmd.Flags().StringVarP(&user, 		"user", 		"u", 	"", 		"User for event list")
+			"prefix":      "app-action",
+			"src.file":    "action/list.go",
+			"cmd.name":    "ListCmd",
+			"method.name": "init()",
+			"var.options": options,
+		}).Info("registering command...")
+	ListCmd.Flags().BoolVarP(&any, "any", "a", false, "Show stars matching any arguments")
+	ListCmd.Flags().BoolVarP(&browse, "browse", "b", false, "Open listed items in your default browser")
+	ListCmd.Flags().BoolVarP(&notTagged, "notTagged", "n", false, "Show stars without any tags")
+	ListCmd.Flags().IntVarP(&page, "page", "p", 1, "First event page to list")
+	ListCmd.Flags().IntVarP(&count, "count", "c", 1, "Count of event pages to list")
+	ListCmd.Flags().StringVarP(&user, "user", "u", "", "User for event list")
 	RootCmd.AddCommand(ListCmd)
 }

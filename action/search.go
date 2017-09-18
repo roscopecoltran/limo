@@ -1,14 +1,14 @@
 package action
 
 import (
-	"fmt"																							// go-core
-	"strconv"																						// go-core
-	"strings"																						// go-core
-	"github.com/roscopecoltran/sniperkit-limo/config" 												// app-config
-	"github.com/roscopecoltran/sniperkit-limo/model" 												// data-models
-	"github.com/blevesearch/bleve" 																	// data-idx
-	"github.com/spf13/cobra" 																		// cli-cmd
-	"github.com/sirupsen/logrus" 																	// logs-logrus
+	"fmt"                                             // go-core
+	"github.com/blevesearch/bleve"                    // data-idx
+	"github.com/roscopecoltran/sniperkit-limo/config" // app-config
+	"github.com/roscopecoltran/sniperkit-limo/model"  // data-models
+	"github.com/sirupsen/logrus"                      // logs-logrus
+	"github.com/spf13/cobra"                          // cli-cmd
+	"strconv"                                         // go-core
+	"strings"                                         // go-core
 	//"github.com/davecgh/go-spew/spew" 															// debug-print
 	//"github.com/k0kubun/pp" 																		// debug-print
 )
@@ -39,9 +39,9 @@ var SearchCmd = &cobra.Command{
 		if len(args) == 0 {
 
 			log.WithFields(logrus.Fields{
-				"actions": "SearchCmd", 
+				"actions":   "SearchCmd",
 				"len(args)": len(args),
-				}).Warnf("You must specify a search string")
+			}).Warnf("You must specify a search string")
 
 			output.Fatal("You must specify a search string")
 		}
@@ -77,10 +77,11 @@ var SearchCmd = &cobra.Command{
 func init() {
 	log.WithFields(
 		logrus.Fields{
-			"src.file": 			"action/search.go", 
-			"cmd.name": 			"SearchCmd",
-			"method.name": 			"init()", 
-			"var.options": 			options, 
-			}).Info("registering command...")
+			"prefix":      "app-action",
+			"src.file":    "action/search.go",
+			"cmd.name":    "SearchCmd",
+			"method.name": "init()",
+			"var.options": options,
+		}).Info("registering command...")
 	RootCmd.AddCommand(SearchCmd)
 }

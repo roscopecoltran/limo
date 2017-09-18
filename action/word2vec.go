@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package action
+
 /*
 import (
 	"fmt"																				// go-core
@@ -139,10 +140,11 @@ func start() {
 func init() {
 	log.WithFields(
 		logrus.Fields{
-			"src.file": 			"action/word2vec.go", 
+			"prefix":      "app-action",
+			"src.file": 			"action/word2vec.go",
 			"cmd.name": 			"Word2VecCmd",
-			"method.name": 			"init()", 
-			"var.options": 			options, 
+			"method.name": 			"init()",
+			"var.options": 			options,
 			}).Info("registering command...")
 	RootCmd.AddCommand(Word2VecCmd)
 }

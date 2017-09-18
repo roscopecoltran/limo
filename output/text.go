@@ -172,8 +172,8 @@ func (t *Text) Topic(topic *model.Topic) {
 }
 
 // Tree displays a tree
-func (t *Text) Tree(file *model.Tree) {
-	fmt.Printf("%s \n", file.Name)
+func (t *Text) Tree(tree *model.Tree) {
+	fmt.Printf("%s/tree/%s\n", tree.RemoteURI, tree.SHA)
 }
 
 // Software displays a software

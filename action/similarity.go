@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package action
+
 /*
 import (
 	"fmt"																							// go-core
@@ -37,9 +38,9 @@ const helpSimilarityInstructions = `
 
 	1. Please remove any protocol prefix from the url (eg. Golang like remote URIs)
 	   - example: 'https://github.com/tensorflow/tensorflow' -> 'github.com/tensorflow/tensorflow'
-	   - notes: 
-	   		- the system will 'automatically-remove' the protocol part, like http:// or https://, 
-	          but please note that for batch processing it will increase the overall performances 
+	   - notes:
+	   		- the system will 'automatically-remove' the protocol part, like http:// or https://,
+	          but please note that for batch processing it will increase the overall performances
 	          if the input is already prefixed correctly and consistently.
 
 	2. 'Similarity scoring' works with the following 'VCS' providers:
@@ -88,10 +89,11 @@ func describe(w string) {
 func init() {
 	log.WithFields(
 		logrus.Fields{
-			"src.file": 			"action/similarity.go", 
+			"prefix":      "app-action",
+			"src.file": 			"action/similarity.go",
 			"cmd.name": 			"SimilarityCmd",
-			"method.name": 			"init()", 
-			"var.options": 			options, 
+			"method.name": 			"init()",
+			"var.options": 			options,
 			}).Info("registering command...")
 	RootCmd.AddCommand(SimilarityCmd)
 }

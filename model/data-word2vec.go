@@ -30,14 +30,14 @@ func (m *Word2VecModel) Load(fn string) {
 		// log.Fatal(err)
 		log.WithError(err).WithFields(logrus.Fields{
 			"method": "Load",
-			"fn": fn,
-			}).Fatalf("failed while trying to load the model: %#s", fn)		
+			"fn":     fn,
+		}).Fatalf("failed while trying to load the model: %#s", fn)
 	}
 
 	fmt.Fscanf(file, "%d", &m.words)
 	fmt.Fscanf(file, "%d", &m.size)
 
-   // m.words = 1000
+	// m.words = 1000
 	var ch string
 	m.vocab = make([]string, m.words)
 	m.M = make([]float32, m.size*m.words)
@@ -60,8 +60,8 @@ func (m *Word2VecModel) Load(fn string) {
 }
 
 func (m *Word2VecModel) MostSimilar(seedWords []string) ([]Word2VecData, error) {
-    inputPosition := make([]int, 100)
-    for k, v := range seedWords {
+	inputPosition := make([]int, 100)
+	for k, v := range seedWords {
 		var b int
 		for b = 0; b < m.words; b++ {
 			if m.vocab[b] == v {
@@ -70,21 +70,21 @@ func (m *Word2VecModel) MostSimilar(seedWords []string) ([]Word2VecData, error) 
 		}
 		if b == m.words {
 			log.WithFields(logrus.Fields{
-				"method": "MostSimilar",
+				"method":    "MostSimilar",
 				"seedWords": seedWords,
-				"m.words": m.words,
-				"b": b,
-				"k": k,
-				"v": v,
-				}).Errorf("Word %s out of dictionary", v)	
+				"m.words":   m.words,
+				"b":         b,
+				"k":         k,
+				"v":         v,
+			}).Errorf("Word %s out of dictionary", v)
 			return make([]Word2VecData, 0), errors.New(fmt.Sprintf("Word %s out of dictionary", v))
 		}
 		inputPosition[k] = b
 		//fmt.Printf("Word %v Position %v \n", v, b)
 		log.WithFields(logrus.Fields{
-			"method": "MostSimilar",
+			"method":    "MostSimilar",
 			"seedWords": seedWords,
-			}).Infof("Word %#v Position %#v \n", v, b)		
+		}).Infof("Word %#v Position %#v \n", v, b)
 	}
 	vec := make([]float32, maxSize)
 	for i, _ := range seedWords {

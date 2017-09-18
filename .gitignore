@@ -51,9 +51,9 @@ vendor/
 vendor/**
 
 ### Cache ###
-cache
-cache/
-cache/**
+# cache
+# cache/
+# cache/**
 
 ### App ###
 dist/*/limo-*

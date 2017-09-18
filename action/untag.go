@@ -1,18 +1,18 @@
 package action
 
 import (
-	"fmt"																							// go-core
-	"github.com/roscopecoltran/sniperkit-limo/config" 												// app-config
-	"github.com/roscopecoltran/sniperkit-limo/model" 												// data-models
-	"github.com/spf13/cobra" 																		// cli-cmd
-	"github.com/sirupsen/logrus" 																	// logs-logrus
+	"fmt"                                             // go-core
+	"github.com/roscopecoltran/sniperkit-limo/config" // app-config
+	"github.com/roscopecoltran/sniperkit-limo/model"  // data-models
+	"github.com/sirupsen/logrus"                      // logs-logrus
+	"github.com/spf13/cobra"                          // cli-cmd
 	//"github.com/davecgh/go-spew/spew" 															// debug-print
 	//"github.com/k0kubun/pp" 																		// debug-print
 )
 
-var UntagCmd = &cobra.Command{ 																				// UntagCmd tags a star
+var UntagCmd = &cobra.Command{ // UntagCmd tags a star
 	Use:     "untag <star> [tag]...",
-	Short:   "Untag a star", 
+	Short:   "Untag a star",
 	Long:    "Untag the star identified by <star> with the tags specified by [tag], or all if [tag] not specified.",
 	Example: fmt.Sprintf("  %s untag limo gui", config.ProgramName),
 	Aliases: []string{"untag", "utag", "ut"},
@@ -35,7 +35,7 @@ var UntagCmd = &cobra.Command{ 																				// UntagCmd tags a star
 
 		if len(args) == 1 {
 
-			fatalOnError(stars[0].RemoveAllTags(db)) 														// Untag all
+			fatalOnError(stars[0].RemoveAllTags(db)) // Untag all
 
 			output.Info(fmt.Sprintf("Removed all tags"))
 
@@ -80,10 +80,11 @@ var UntagCmd = &cobra.Command{ 																				// UntagCmd tags a star
 func init() {
 	log.WithFields(
 		logrus.Fields{
-			"src.file": 			"action/untag.go", 
-			"cmd.name": 			"UntagCmd",
-			"method.name": 			"init()", 
-			"var.options": 			options, 
-			}).Info("registering command...")
+			"prefix":      "app-action",
+			"src.file":    "action/untag.go",
+			"cmd.name":    "UntagCmd",
+			"method.name": "init()",
+			"var.options": options,
+		}).Info("registering command...")
 	RootCmd.AddCommand(UntagCmd)
 }

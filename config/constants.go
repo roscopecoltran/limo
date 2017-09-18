@@ -17,6 +17,17 @@ const _sep 							= string(os.PathSeparator) 	 							// path separator
 // locales
 const clientLocaleDefault = "en_US.UTF-8"
 
+const (
+	ModeDev  = "dev"
+	ModeProd = "prod"
+
+	ProvidorFile   = "file"
+	ProvidorStdOut = "stdout"
+
+	RotateByDay  = "day"
+	RotateBySize = "size"
+)
+
 // cfg paths (can be overriden by the config.yaml file)
 const DefaultConfigFormatExtension 	= "yml"
 const DefaultConfigPrefixPath 		= "config"
