@@ -25,7 +25,7 @@ type User struct {
 	Company                *string            `gorm:"column:company" json:"company,omitempty" yaml:"company,omitempty"`
 	Blog                   *string            `gorm:"column:blog" json:"blog,omitempty" yaml:"blog,omitempty"`
 	Location               *string            `gorm:"column:location" json:"location,omitempty" yaml:"location,omitempty"`
-	Languages              []Language         `gorm:"many2many:user_languages;"`
+	Languages              []Language         `gorm:"many2many:programming_languages;" json:"programming_languages,omitempty" yaml:"programming_languages,omitempty"`
 	Email                  string             `gorm:"column:email" json:"email,omitempty" yaml:"email,omitempty"`
 	Position               string             `gorm:"column:position" json:"position,omitempty" yaml:"position,omitempty"`
 	Hireable               *bool              `gorm:"column:hireable" json:"hireable,omitempty" yaml:"hireable,omitempty"`

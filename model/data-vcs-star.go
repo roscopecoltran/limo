@@ -69,33 +69,33 @@ results, err := linguist.GetLanguageDetailsMultiple(context.Background(), files)
 type Star struct {
 	gorm.Model `json:"-" yaml:"-"`
 	//sorting.SortingDESC
-	RemoteID     string    `json:"remote_id,omitempty" yaml:"remote_id,omitempty"`
-	OwnerID      string    `json:"owner_id,omitempty" yaml:"owner_id,omitempty"`
-	RemoteURI    string    `json:"remote_uri,omitempty" yaml:"remote_uri,omitempty" gorm:"type:varchar(128);not null;"`
-	OwnerLogin   *string   `json:"owner_login,omitempty" yaml:"owner_login,omitempty" gorm:"type:varchar(128);not null;"`
-	Name         *string   `json:"name,omitempty" yaml:"name,omitempty" gorm:"type:varchar(128);not null;"`
-	FullName     *string   `json:"full_name,omitempty" yaml:"full_name,omitempty" gorm:"type:varchar(128);not null;"`
-	Description  *string   `json:"description,omitempty" yaml:"description,omitempty"`
-	Homepage     *string   `json:"home_page,omitempty" yaml:"home_page,omitempty"`
-	URL          *string   `json:"url,omitempty" yaml:"url,omitempty"`
-	Language     *string   `json:"language,omitempty" yaml:"language,omitempty"`
-	Avatar       *string   `json:"avatar,omitempty" yaml:"avatar,omitempty"`
-	HasWiki      *bool     `json:"has_wiki,omitempty" yaml:"has_wiki,omitempty"`
-	Stargazers   int       `json:"stargazers_count,omitempty" yaml:"stargazers_count,omitempty"`
-	Watchers     int       `json:"watchers_count,omitempty" yaml:"watchers_count,omitempty"`
-	Forks        int       `json:"forks_count,omitempty" yaml:"forks_count,omitempty"`
-	StarredAt    time.Time `json:"starred_at" yaml:"starred_at"`
-	LastUpdate   time.Time `json:"last_update" yaml:"last_update"`
-	CreationDate time.Time `json:"creation_date" yaml:"creation_date"`
-	PushedAt     time.Time `json:"pushed_at" yaml:"pushed_at"`
-	ServiceID    uint      `json:"service_id" yaml:"service_id"`
+	RemoteID     string    `gorm:"column:remote_id" json:"remote_id,omitempty" yaml:"remote_id,omitempty"`
+	OwnerID      string    `gorm:"column:owner_id" json:"owner_id,omitempty" yaml:"owner_id,omitempty"`
+	RemoteURI    string    `gorm:"column:remote_uri" json:"remote_uri,omitempty" yaml:"remote_uri,omitempty" gorm:"type:varchar(128);not null;"`
+	OwnerLogin   *string   `gorm:"column:owner_login" json:"owner_login,omitempty" yaml:"owner_login,omitempty" gorm:"type:varchar(128);not null;"`
+	Name         *string   `gorm:"column:name" json:"name,omitempty" yaml:"name,omitempty" gorm:"type:varchar(128);not null;"`
+	FullName     *string   `gorm:"column:full_name" json:"full_name,omitempty" yaml:"full_name,omitempty" gorm:"type:varchar(128);not null;"`
+	Description  *string   `gorm:"column:description" json:"description,omitempty" yaml:"description,omitempty"`
+	Homepage     *string   `gorm:"column:home_page" json:"home_page,omitempty" yaml:"home_page,omitempty"`
+	URL          *string   `gorm:"column:url" json:"url,omitempty" yaml:"url,omitempty"`
+	Language     *string   `gorm:"column:language" json:"language,omitempty" yaml:"language,omitempty"`
+	Avatar       *string   `gorm:"column:avatar" json:"avatar,omitempty" yaml:"avatar,omitempty"`
+	HasWiki      *bool     `gorm:"column:has_wiki" json:"has_wiki,omitempty" yaml:"has_wiki,omitempty"`
+	Stargazers   int       `gorm:"column:stargazers_count" json:"stargazers_count,omitempty" yaml:"stargazers_count,omitempty"`
+	Watchers     int       `gorm:"column:watchers_count" json:"watchers_count,omitempty" yaml:"watchers_count,omitempty"`
+	Forks        int       `gorm:"column:forks_count" json:"forks_count,omitempty" yaml:"forks_count,omitempty"`
+	StarredAt    time.Time `gorm:"column:starred_at" json:"starred_at" yaml:"starred_at"`
+	LastUpdate   time.Time `gorm:"column:last_update" json:"last_update" yaml:"last_update"`
+	CreationDate time.Time `gorm:"column:creation_date" json:"creation_date" yaml:"creation_date"`
+	PushedAt     time.Time `gorm:"column:pushed_at" json:"pushed_at" yaml:"pushed_at"`
+	ServiceID    uint      `gorm:"column:service_id" json:"service_id" yaml:"service_id"`
 	// Extra
-	Readme         string `json:"readme,omitempty" yaml:"readme,omitempty"`
-	TopicsList     string `json:"topic_list,omitempty" yaml:"topic_list,omitempty"`
-	BranchesList   string `json:"branches,omitempty" yaml:"branches,omitempty"`             // gorm:"many2many:star_branches;"`
-	ReleasesList   string `json:"releases,omitempty" yaml:"releases,omitempty"`             // gorm:"many2many:star_releases;"`
-	ReleaseLatest  string `json:"release_latest,omitempty" yaml:"release_latest,omitempty"` // gorm:"many2many:star_release_latest;"`
-	StargazersList string `json:"stargazers,omitempty" yaml:"stargazers,omitempty"`         // gorm:"many2many:star_stargazers;"`
+	Readme         string `gorm:"column:readme" json:"readme,omitempty" yaml:"readme,omitempty"`
+	TopicsList     string `gorm:"column:topics" json:"topics,omitempty" yaml:"topics,omitempty"`
+	BranchesList   string `gorm:"column:branches" json:"branches,omitempty" yaml:"branches,omitempty"`                   // gorm:"many2many:star_branches;"`
+	ReleasesList   string `gorm:"column:releases" json:"releases,omitempty" yaml:"releases,omitempty"`                   // gorm:"many2many:star_releases;"`
+	ReleaseLatest  string `gorm:"column:release_latest" json:"release_latest,omitempty" yaml:"release_latest,omitempty"` // gorm:"many2many:star_release_latest;"`
+	StargazersList string `gorm:"column:stargazers" json:"stargazers,omitempty" yaml:"stargazers,omitempty"`             // gorm:"many2many:star_stargazers;"`
 
 	UserInfo    User        `gorm:"many2many:star_users_info;" json:"user_info,omitempty" yaml:"user_info,omitempty"`             // *github.User  gorm:"many2many:star_users;"`
 	UserInfoVCS UserInfoVCS `gorm:"many2many:star_users_info_vcs;" json:"user_info_vcs,omitempty" yaml:"user_info_vcs,omitempty"` // *github.User  gorm:"many2many:star_users;"`
@@ -104,9 +104,7 @@ type Star struct {
 	Trees     []Tree     `gorm:"many2many:star_trees;" json:"trees,omitempty" yaml:"trees,omitempty"` // gorm:"many2many:star_trees;"`
 	Languages []Language `gorm:"many2many:star_languages;" json:"languages,omitempty" yaml:"languages,omitempty"`
 	Tags      []Tag      `gorm:"many2many:star_tags;" json:"tags,omitempty" yaml:"tags,omitempty" gorm:"many2many:star_tags;"`
-
 	//Detections   		[]Detection 				`gorm:"many2many:star_detection;" json:"languages_detected,omitempty" yaml:"languages_detected,omitempty"` // gorm:"many2many:star_languages_detected;"`
-
 }
 
 // https://github.com/GrantSeltzer/go-baseball-savant/blob/master/bbsavant/read_file.go

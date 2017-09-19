@@ -1,5 +1,5 @@
-hash: 1f13292377a9d6977812edf1480a4eb464a3cc978a10f25c1eb21b246a044857
-updated: 2017-09-19T00:05:19.675714815+02:00
+hash: beb2c8c437a9dd52f22e3b77290c24d8465b496b27f0f7154fa5733b21c0cac6
+updated: 2017-09-19T01:03:09.802092074+02:00
 imports:
 - name: github.com/aaasen/kapok
   version: b3a454001825c4e26fe21fac61f214c1a6c284ed
@@ -235,13 +235,6 @@ imports:
   version: fc79d2cedbd40c6922febf5575b3278e3a33c8d4
 - name: github.com/BurntSushi/toml
   version: a368813c5e648fee92e5f6c30e3944ff9d5e8895
-- name: github.com/caltechlibrary/cli
-  version: 32d44c4bab41a75dc1d6b3e2049cd33a8376a568
-- name: github.com/caltechlibrary/datatools
-  version: a812d3b88a56421bbee98f590bda48afc4cb94be
-  subpackages:
-  - reldate
-  - timefmt
 - name: github.com/cayleygraph/cayley
   version: d972f98ad3458d830a2136d1c963f86712beaa87
   subpackages:
@@ -697,8 +690,6 @@ imports:
   version: 817915b46b97fd7bb80e8ab6b69f01a53ac3eebf
 - name: github.com/go-swagger/go-swagger
   version: dbc9b9734c604a6c813be4240c4931dc9d169742
-- name: github.com/go-xorm/xorm
-  version: d9565718bc41c8a6a02f6073979bade790cb3e45
 - name: github.com/gocarina/gocsv
   version: f266cf0be5f037d9a61782dafa0f342f96919188
 - name: github.com/goeuro/myke
@@ -1007,8 +998,6 @@ imports:
   - util
 - name: github.com/kelseyhightower/envconfig
   version: 462fda1f11d8cad3660e52737b8beefd27acfb3f
-- name: github.com/khezen/hunt
-  version: 7a54d3c35cff9694fb3bf34e7f4abfb75ae773ec
 - name: github.com/klauspost/compress
   version: f3dce52e0576655d55fd69e74b63da96ad1108f3
   subpackages:
@@ -1180,8 +1169,6 @@ imports:
   version: 68fecaef60268522d2ac3f0123cec9d3bcab7b6e
 - name: github.com/Microsoft/go-winio
   version: 78439966b38d69bf38227fbf57ac8a6fee70f69a
-- name: github.com/mingrammer/commonregex
-  version: 9cb326b0ad344c9d01b24ca5c9df6ecdbcb867b9
 - name: github.com/mitchellh/go-homedir
   version: b8bc1bf767474819792c23f32d8286a45736f1c6
 - name: github.com/mitchellh/mapstructure

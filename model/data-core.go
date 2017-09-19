@@ -36,6 +36,7 @@ import (
 	// "github.com/davecgh/go-spew/spew" 										// data-debug
 	"github.com/k0kubun/pp" // debug-print
 	// "github.com/astaxie/beego" 												// web-cms
+	"github.com/o1egl/gormrus"                             // logs-logrus
 	"github.com/qor/admin"                                 // web-qor-admin-ui
 	"github.com/qor/qor"                                   // web-qor-admin-ui
 	"github.com/roscopecoltran/sniperkit-limo/config"      // app-config
@@ -394,7 +395,9 @@ func InitGorm(filepath string, adapter string) (*gorm.DB, error) {
 			}).Warn("error while init the database with gorm.")
 		return gormDB, err
 	}
-	gormDB.LogMode(false) // cfg.App.DebugMode
+	// gormDB.LogMode(false) // cfg.App.DebugMode
+	gormDB.LogMode(true)
+	gormDB.SetLogger(gormrus.New())
 	RootDrivers.Gorm.Ok = true
 	RootDrivers.Gorm.Cli = gormDB
 	return gormDB, nil
@@ -447,7 +450,8 @@ func (dbs *DatabaseDrivers) initGorm(filepath string, adapter string) error {
 			}).Warn("error while init the database with gorm.")
 		return err
 	}
-	gormDB.LogMode(false) // cfg.App.DebugMode
+	gormDB.LogMode(true)
+	gormDB.SetLogger(gormrus.New())
 	dbs.Gorm.Ok = true
 	dbs.Gorm.Cli = gormDB
 	if err := dbs.autoLoadGorm(true, true, false, Tables...); err != nil {

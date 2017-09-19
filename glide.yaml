@@ -23,19 +23,59 @@ ignore:
 - github.com/docker/docker
 - github.com/Sirupsen/logrus
 import:
-- package: github.com/spf13/cobra
-  version: master
-- package: github.com/caltechlibrary/datatools
+- package: github.com/dpb587/metalink
   subpackages:
-  - timefmt
-  - reldate
+  - verification
+  - transfer 
+  - storage 
+  - repository
+  - file 
+- package: github.com/vsrc/qdb
+- package: github.com/sas1024/gorm-jsonb
+  subpackages:
+  - jsonb 
+- package: github.com/plopezm/goedb
+  subpackages:
+  - config
+  - metadata
+  - manager
+- package: github.com/hwfy/expression
+- package: ithub.com/chronitonapp/gormseries
+- package: github.com/etcinit/ohmygorm
+  subpackages:
+  - config
+- package: github.com/lvzhihao/gormigrate
+  subpackages:
+  - libs 
+  - cmd 
+- package: github.com/wenzhenxi/phalgo
+  subpackages:
+  - validation
+  - httplib
+  - errors 
+- package: github.com/o1egl/gormrus
+- package: github.com/go-gormigrate/gormigrate
+- package: github.com/qor/transition
+- package: github.com/kalafut/imohash
+- package: github.com/gonyi/yIndex
+- package: github.com/danward79/csvtool
+- package: github.com/waluigi27/gocsv
+- package: github.com/rubinovitz/faviconfetch
+- package: github.com/sabhiram/go-gitignore
+- package: github.com/Rompei/arxiv
+- package: github.com/spf13/cobra
+#  version: master
+#- package: github.com/caltechlibrary/datatools
+#  subpackages:
+#  - timefmt
+#  - reldate
 #- package: github.com/caltechlibrary/cli
-- package: github.com/khezen/hunt
-- package: github.com/mingrammer/commonregex
+# - package: github.com/khezen/hunt
+# - package: github.com/mingrammer/commonregex
 - package: github.com/jmcvetta/napping
 - package: github.com/alixaxel/pagerank
 - package: github.com/jinzhu/copier
-- package: github.com/go-xorm/xorm
+# - package: github.com/go-xorm/xorm
 - package: github.com/graphql-go/graphql
   subpackages:
   - gqlerrors

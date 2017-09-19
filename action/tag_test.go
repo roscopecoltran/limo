@@ -1,9 +1,8 @@
 package action
 
 import (
-	"testing"
-
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestTagCmdHasUse(t *testing.T) {
