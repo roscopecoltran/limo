@@ -59,6 +59,8 @@ import (
 	//"github.com/roscopecoltran/sniperkit-limo/model/drivers/cache/memcache" 	// dbs-client-memory
 )
 
+// https://github.com/gkontos/gasket/blob/master/acedb/dbstore.go
+
 var validDataOutput = []string{"md", "csv", "yaml", "json", "xlsx", "xml", "tsv", "mysql", "postgres", "html", "ascii"} // datasets - formats
 var availableLocales = []string{"en-US", "fr-FR", "pl-PL"}
 
@@ -72,12 +74,25 @@ var (
 	}
 )
 
+/*
 var (
-	DefaultSql         = "sqlite3"
-	DefaultKvs         = map[string]bool{"boltdb": true, "etcd": true}
-	DefaultGraphs      = map[string]bool{"neo4j": true, "cayley": true}
-	Default_Date_Short = "0000-00-00 00:00:00 -0000 UTC"
-	Default_Date_Long  = "0000-00-00T00:00:00Z"
+	usrbkt    = []byte("User")
+	usrinvbkt = []byte("User.[]Repo")
+	usrinvbkt = []byte("User.[]Starred")
+)
+*/
+
+// https://github.com/ejamesc/bgtracker/blob/master/bgtracker.go
+//
+var membersBucketName = []byte("members")
+var trackerInfoBucketName = []byte("trackerinfo")
+
+var (
+	DefaultSql       = "sqlite3"
+	DefaultKvs       = map[string]bool{"boltdb": true, "etcd": true}
+	DefaultGraphs    = map[string]bool{"neo4j": true, "cayley": true}
+	defaultDateShort = "2006-01-02 15:04:05 -0700 UTC"
+	//defaultDateShort = "0000-00-00T00:00:00Z"
 )
 
 const Default_VCS_Github_Domain = "github.com"

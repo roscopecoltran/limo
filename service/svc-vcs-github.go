@@ -9,11 +9,16 @@ import (
 	//"regexp"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
+	"net/http"
 	"path"
 	//log "github.com/sirupsen/logrus"
 	"github.com/google/go-github/github"
 	"github.com/hoop33/entrevista"
 	"github.com/roscopecoltran/sniperkit-limo/model"
+	// "github.com/gregjones/httpcache"
+	// "github.com/patrickmn/go-cache"
+	"github.com/gregjones/httpcache"
+	"github.com/gregjones/httpcache/diskcache"
 	// cregex "github.com/mingrammer/commonregex"
 	// "gopkg.in/libgit2/git2go.v26"
 	// "github.com/sourcegraph/go-vcs/vcs/git"
@@ -351,28 +356,22 @@ func (g *Github) ParseFullName(fullName string) (owner string, name string, err 
 	return
 }
 
-func (g *Github) stringify(message interface{}) string {
+func (g *Github) Stringify(message interface{}) string {
 	var str string
 	str = github.Stringify(message)
 	str = strings.Replace(str, "\"", "", 2)
 	return str
 }
 
-/*
-func (g *Github) FetchRepository(ctx context.Context, token string, fullName string) (repo *Repository, err error) {
+func (g *Github) GetRateLimit(ctx context.Context, token string) (int, int, error) {
 	client := g.getClient(token)
-	owner, name, err := g.ParseFullName(fullName)
+	r, _, err := client.RateLimits(ctx)
 	if err != nil {
-		return nil, err
+		fmt.Errorf("Error getting core remaining: %v\n\n", err)
+		return -1, -1, err
 	}
-	info, _, err := g.Client.Repositories.Get(ctx, owner, name, &github.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-	repo = &Repository{*info.Description, *info.Homepage}
-	return
+	return r.Core.Remaining, r.Core.Limit, nil
 }
-*/
 
 // https://github.com/parnurzeal/gorequest
 func (g *Github) GetLatestSHA(ctx context.Context, token string, user string, name string) (string, error) {
@@ -382,7 +381,7 @@ func (g *Github) GetLatestSHA(ctx context.Context, token string, user string, na
 	if err != nil {
 		return "", err
 	}
-	latestSHA := g.stringify(commits[0].SHA)
+	latestSHA := g.Stringify(commits[0].SHA)
 	return latestSHA, nil
 }
 
@@ -709,6 +708,19 @@ func (g *Github) GetStars(ctx context.Context, starChan chan<- *model.StarResult
 						fmt.Printf("g.GetStargazers returned error: %v", err)
 					}
 
+					rateRemaining, rateLimit, err := g.GetRateLimit(ctx, token)
+					if err != nil {
+						fmt.Printf("g.GetRateLimit returned error: %v", err)
+					}
+
+					log.WithFields(logrus.Fields{
+						"prefix":            "svc-github",
+						"parent":            "(g *Github) GetStars(...)",
+						"method.name":       "g.GetRateLimit(...)",
+						"var.rateLimit":     rateLimit,
+						"var.rateRemaining": rateRemaining,
+					}).Info("get the api ratelimit...")
+
 					extraInfo = &model.GatewayBucket_GithubRepoExtraInfo{
 						UserInfo:      userInfo,
 						Readme:        readmeInfo,
@@ -731,11 +743,11 @@ func (g *Github) GetStars(ctx context.Context, starChan chan<- *model.StarResult
 
 				currentStar++
 				log.WithFields(logrus.Fields{
-					"prefix":      "svc-github",
-					"parent":      "(g *Github) GetStars(...)",
-					"method.name": "starChan <- &model.StarResult{...}",
-					"currentStar": currentStar,
-					"currentPage": currentPage,
+					"prefix":          "svc-github",
+					"parent":          "(g *Github) GetStars(...)",
+					"method.name":     "starChan <- &model.StarResult{...}",
+					"var.currentStar": currentStar,
+					"var.currentPage": currentPage,
 				}).Info("fetching content from new pages...")
 			}
 		}
@@ -904,12 +916,37 @@ func (g *Github) getDateSearchString() string {
 	return dateStr
 }
 
+// https://github.com/timakin/octop/blob/master/client/interface.go
 func (g *Github) getClient(token string) *github.Client {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
 	tc := oauth2.NewClient(context.Background(), ts)
+	// https://github.com/aerokite/go-github-watcher
+	// https://github.com/hairyhenderson/github-sync-labels-milestones/blob/master/sync/client.go
+	//
+	// https://github.com/tmthrgd/jekyll-history-service/blob/local/github-client.go
+	// client := github.NewClient(transport.Client())
+	//
 	return github.NewClient(tc)
+}
+
+// https://github.com/HailoOSS/build-service/blob/master/githubrepo.go#L21
+//
+// NewGitHubClient - creates a client, authenticated by OAuth2 via a static token
+func (g *Github) getClientCached(token string, cachePath string) *github.Client {
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	c := diskcache.New(cachePath)
+	t := httpcache.NewTransport(c)
+	hc := &http.Client{
+		Transport: &oauth2.Transport{
+			Base:   t,
+			Source: ts,
+		},
+	}
+	return github.NewClient(hc)
 }
 
 func init() {

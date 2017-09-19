@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"github.com/jinzhu/gorm"
+	"strconv"
 	"time"
 	//"github.com/qor/sorting"
 	"github.com/google/go-github/github"
@@ -14,7 +15,7 @@ type UserInfoVCS struct {
 	gorm.Model `json:"-" yaml:"-"`
 	//sorting.SortingDESC
 	ServiceID         uint               `gorm:"column:service_id" json:"service_id,omitempty" yaml:"service_id,omitempty"`
-	UserID            *int               `gorm:"column:user_id" json:"user_id,omitempty" yaml:"user_id,omitempty"`
+	UserID            string             `gorm:"column:user_id" json:"user_id,omitempty" yaml:"user_id,omitempty"`
 	Login             *string            `gorm:"column:username" json:"username,omitempty" yaml:"username,omitempty"`
 	LoginEmail        string             `gorm:"column:login_email" json:"login_email,omitempty" yaml:"login_email,omitempty"`
 	AvatarURL         *string            `gorm:"column:avatar_url" json:"avatar_url,omitempty" yaml:"avatar_url,omitempty"`
@@ -72,9 +73,9 @@ func NewUserFromGithub(userVCS *github.User) (*UserInfoVCS, error) {
 	ownedPrivateReposCount := nullable.IntWithDefault(userVCS.OwnedPrivateRepos, 0) // Set 'owned_private_repos' count to 0 if nil
 	privateGistsCount := nullable.IntWithDefault(userVCS.PrivateGists, 0)           // Set 'private_gists' count to 0 if nil
 
-	createdAt, _ := time.Parse(Default_Date_Short, userVCS.CreatedAt.String())     // convert 'created_at' date to short format "2017-01-02 15:04:05 -0700 UTC"
-	updatedAt, _ := time.Parse(Default_Date_Short, userVCS.UpdatedAt.String())     // convert 'created_at' date to short format "2017-01-02 15:04:05 -0700 UTC"
-	suspendedAt, _ := time.Parse(Default_Date_Short, userVCS.SuspendedAt.String()) // convert 'created_at' date to short format "2017-01-02 15:04:05 -0700 UTC"
+	createdAt, _ := time.Parse(defaultDateShort, userVCS.CreatedAt.String())     // convert 'created_at' date to short format "2017-01-02 15:04:05 -0700 UTC"
+	updatedAt, _ := time.Parse(defaultDateShort, userVCS.UpdatedAt.String())     // convert 'created_at' date to short format "2017-01-02 15:04:05 -0700 UTC"
+	suspendedAt, _ := time.Parse(defaultDateShort, userVCS.SuspendedAt.String()) // convert 'created_at' date to short format "2017-01-02 15:04:05 -0700 UTC"
 
 	// general info
 	userMetaInfo := &User{
@@ -103,7 +104,7 @@ func NewUserFromGithub(userVCS *github.User) (*UserInfoVCS, error) {
 
 	// VCS related info
 	userVcsGithubMetaInfo := &UserInfoVCS{
-		UserID:            userVCS.ID,
+		UserID:            strconv.Itoa(*userVCS.ID),
 		LoginEmail:        userAccountEmail,
 		Login:             userVCS.Login,
 		PublicRepos:       publicReposCount,

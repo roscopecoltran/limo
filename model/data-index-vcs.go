@@ -4,7 +4,7 @@ import (
 	// golang
 	"fmt"
 	// "strings"
-	// vcs api wrappers 
+	// vcs api wrappers
 	"github.com/google/go-github/github"
 	// data processing
 	// "github.com/roscopecoltran/sniperkit-limo/utils"
@@ -17,6 +17,12 @@ import (
 	// logs
 	"github.com/sirupsen/logrus"
 )
+
+/*
+	refs:
+		- https://github.com/banlong/bleve (Indexing for Key-Value Bolt DB)
+		-
+*/
 
 /*
 // elasticsearch mapping
@@ -251,4 +257,3 @@ func walkForIndexing(path string, index bleve.Index, repo *github.Repository) {
 	}
 }
 */
-

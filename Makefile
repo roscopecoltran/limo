@@ -9,6 +9,15 @@ else
   GO_BUILD_OS 		:= linux
 endif
 
+GREEN 				:= "\\033[1;32m"
+NORMAL				:= "\\033[0;39m"
+RED					:= "\\033[1;31m"
+PINK				:= "\\033[1;35m"
+BLUE				:= "\\033[1;34m"
+WHITE				:= "\\033[0;02m"
+YELLOW				:= "\\033[1;33m"
+CYAN				:= "\\033[1;36m"
+
 # git
 GIT_BRANCH			:= $(shell git rev-parse --abbrev-ref HEAD)
 GIT_VERSION			:= $(shell git describe --always --long --dirty --tags)
@@ -78,10 +87,13 @@ build: check
 
 dist: macos linux windows
 
+deps: glide golang-logrus-fix 
+
 darwin:
 	clear
 	echo ""
 	rm -f ./limo
+	# gox -verbose -os="darwin" -arch="amd64" -output="{{.Dir}}" $(glide novendor)
 	gox -verbose -os="darwin" -arch="amd64" -output="{{.Dir}}" ./cmd/limo/...
 	echo ""
 
@@ -89,7 +101,7 @@ darwin-tests:
 	clear
 	echo ""
 	rm -f ./limo
-	gox -verbose -os="darwin" -arch="amd64" -output="{{.Dir}}" ./cmd/tests/...
+	gox -verbose -os="darwin" -arch="amd64" -output="{{.Dir}}" ./cmd/limo/...
 	echo ""
 
 # darwin:
@@ -101,7 +113,7 @@ git-status: ## checkout/check the app active branch for building the project
 gox: golang-install-deps gox-xbuild ## install missing dependencies and cross-compile app for macosx, linux and windows platforms
 
 gox-dist: ## generate all binaries for the project with gox utility
-	@gox -verbose -os="darwin linux windows" -arch="amd64" -output="$(APP_DIST_DIR)/{{.Os}}/{{.Dir}}_{{.Os}}_{{.Arch}}" $(APP_PKGS) # $(glide novendor)
+	@gox -verbose -os="darwin linux windows" -arch="amd64" -output="$(APP_DIST_DIR)/{{.Os}}/{{.Dir}}_{{.Os}}_{{.Arch}}" $(APP_PKGS) # $(shell glide novendor)
 
 glide: glide-create glide-install ## install and manage all project dependencies via glide utility
 
@@ -112,7 +124,7 @@ glide-create: ## create the list of used dependencies in this golang project, vi
 	@if [ ! -f $(CURDIR)/glide.yaml ]; then glide create --non-interactive ; fi
 
 glide-install: ## install app/pkg dependencies via glide utility
-	@if [ -f $(CURDIR)/glide.yaml ]; then glide install --strip-vendor ; fi
+	@if [ -f $(CURDIR)/glide.lock ]; then glide update --strip-vendor ; else glide install --strip-vendor ; fi
 
 golang-install-deps: golang-package-deps golang-embedding-deps golang-test-deps ## install global golang pkgs/deps
 
@@ -172,12 +184,13 @@ pkg-uri-revert: install-ag pkg-uri-clean clear-screen ## fix limo, fork, pkg uri
 	@$(AG_EXEC) -l 'github.com/roscopecoltran/sniperkit-limo' --ignore Makefile --ignore *.md . | xargs sed -i -e 's/roscopecoltran\/sniperkit-limo/hoop33\/limo/g'
 	@find . -name "*-e" -exec rm -f {} \; 
 
-golang-logrus-fix2: install-ag pkg-uri-clean clear-screen ## fix limo, fork, pkg uri for golang package import
+golang-logrus-fix: install-ag clear-screen ## fix limo, fork, pkg uri for golang package import
+	@if [ -d $(CURDIR)/vendor/github.com/Sirupsen ]; then rm -fr vendor/github.com/Sirupsen ; fi
 	@echo "fix limo, fork, pkg uri for golang package import"
-	@$(AG_EXEC) -l 'github.com/Sirupsen/logrus' --ignore Makefile --ignore *.md . | xargs sed -i -e 's/Sirupsen\/logrus/sirupsen\/logrus/g'
+	@$(AG_EXEC) -l 'github.com/Sirupsen/logrus' --ignore Makefile --ignore *.md vendor | xargs sed -i -e 's/Sirupsen\/logrus/sirupsen\/logrus/g'
 	@find . -name "*-e" -exec rm -f {} \; 
 
-golang-logrus-fix: install-ag clear-screen ## fix logrus case for golang package import
+golang-logrus-fix-old: install-ag clear-screen ## fix logrus case for golang package import
 	@if [ -d $(CURDIR)/vendor/github.com/Sirupsen ]; then rm -fr vendor/github.com/Sirupsen ; fi
 	@$(AG_EXEC) -l 'github.com/Sirupsen/logrus' vendor | xargs sed -i 's/Sirupsen/sirupsen/g'
 
@@ -267,7 +280,7 @@ clean:
 	@go clean && rm -rf dist/*
 	@find . -name "*-e" -exec rm -f {} \; 
 
-deps:
+deps-dev:
 	go get -u github.com/FiloSottile/vendorcheck
 	go get -u github.com/golang/lint/golint
 	go get -u github.com/golang/dep/cmd/dep

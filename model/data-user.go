@@ -14,7 +14,7 @@ type User struct {
 	gorm.Model `json:"-" yaml:"-"`
 	//sorting.SortingDESC
 	ServiceID              uint               `gorm:"column:service_id" json:"service_id,omitempty" yaml:"service_id,omitempty"`
-	OpenID                 int                `gorm:"column:open_id" json:"open_id" yaml:"open_id"`
+	OpenID                 string             `gorm:"column:open_id" json:"open_id" yaml:"open_id"`
 	Login                  *string            `gorm:"column:login" json:"login,omitempty" yaml:"login,omitempty"`
 	Role                   string             `gorm:"column:role" json:"role,omitempty" yaml:"role,omitempty"`
 	AvatarURL              *string            `gorm:"column:avatar_url" json:"avatar_url,omitempty" yaml:"avatar_url,omitempty"`

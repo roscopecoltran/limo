@@ -28,7 +28,7 @@ type Tree struct {
 
 // Tree represents a tree in the database
 type TreeEntry struct {
-	gorm.Model
+	gorm.Model `json:"-" yaml:"-"`
 	//sorting.SortingDESC
 	Mode      *string `json:"mode,omitempty" yaml:"mode,omitempty"`
 	SHA       *string `json:"sha,omitempty" yaml:"sha,omitempty"`

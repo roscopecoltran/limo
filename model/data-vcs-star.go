@@ -11,9 +11,11 @@ import (
 	"github.com/blevesearch/bleve"
 	"github.com/google/go-github/github"
 	"github.com/jinzhu/gorm"
+	//"github.com/qor/sorting"
 	"github.com/xanzy/go-gitlab"
-	// "github.com/qor/sorting"
+	// "github.com/amller/time/relative"
 	jsoniter "github.com/json-iterator/go"
+	// "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
 	// el "github.com/src-d/enry"
@@ -142,27 +144,36 @@ func NewStarFromGithub(timestamp *github.Timestamp, repo github.Repository, extr
 		starredAt = timestamp.Time
 	}
 
-	createdAt, _ := time.Parse(Default_Date_Short, repo.CreatedAt.String()) // convert 'created_at' date to short format "2017-01-02 15:04:05 -0700 UTC"
-	updatedAt, _ := time.Parse(Default_Date_Short, repo.UpdatedAt.String()) // convert 'updated_at' date to short format "2017-01-02 15:04:05 -0700 UTC"
-	pushedAt, _ := time.Parse(Default_Date_Short, repo.PushedAt.String())   // convert 'pushed_at' date to short format "2017-01-02 15:04:05 -0700 UTC"
+	ctime, _ := time.Parse(defaultDateShort, fmt.Sprintf("%s", repo.CreatedAt))
+
+	// time.Time
+	createdAt := repo.CreatedAt.Time
+	updatedAt := repo.UpdatedAt.Time
+	pushedAt := repo.PushedAt.Time
+
+	// createdAt, _ := time.Parse(defaultDateShort, repo.CreatedAt.String()) // convert 'created_at' date to short format "2017-01-02 15:04:05 -0700 UTC"
+	// updatedAt, _ := time.Parse(defaultDateShort, repo.UpdatedAt.String()) // convert 'updated_at' date to short format "2017-01-02 15:04:05 -0700 UTC"
+	// pushedAt, _ := time.Parse(defaultDateShort, repo.PushedAt.String())   // convert 'pushed_at' date to short format "2017-01-02 15:04:05 -0700 UTC"
 
 	remoteURI := path.Join(Default_VCS_Github_Domain, // register the remote URI in the database (without any protocol prefix, eg 'https://')
 		fmt.Sprintf("%s", *repo.Owner.Login),
 		fmt.Sprintf("%s", *repo.Name))
 
+	// rt := relative.Convert(time.Now())
+
 	log.WithFields(
 		logrus.Fields{
-			"src.file":           "model/vcs-star.go",
-			"prefix":             "vcs-github-new-star",
-			"method.name":        "NewStarFromGithub(...)",
-			"var.remoteURI":      remoteURI,
-			"var.createdAt":      createdAt,
-			"var.updatedAt":      updatedAt,
-			"var.pushedAt":       pushedAt,
-			"var.repo.CreatedAt": repo.CreatedAt.String(),
-			"var.repo.UpdatedAt": repo.UpdatedAt.String(),
-			"var.repo.PushedAt":  repo.PushedAt.String(),
+			"src.file":                    "model/vcs-star.go",
+			"prefix":                      "vcs-github-new-star",
+			"method.name":                 "NewStarFromGithub(...)",
+			"var.remoteURI":               remoteURI,
+			"var.repo.createdAt":          createdAt,
+			"var.ctime":                   ctime,
+			"var.repo.CreatedAt.String()": repo.CreatedAt.String(),
+			"var.repo.CreatedAtShort":     createdAt,
 		}).Info("checking repo timeline information.")
+
+	// 2016-04-04 15:19:46 +0000 UTC
 
 	/*
 			// https://stackoverflow.com/questions/18926303/iterate-through-a-struct-in-go
@@ -232,7 +243,7 @@ func NewStarFromGithub(timestamp *github.Timestamp, repo github.Repository, extr
 	followingCount := nullable.IntWithDefault(extraInfo.UserInfo.Following, 0)     // Set 'collaborators' count to 0 if nil
 
 	userGithubMetaInfo := &UserInfoVCS{
-		UserID:            extraInfo.UserInfo.ID,
+		UserID:            strconv.Itoa(*repo.Owner.ID), //strconv.Itoa(extraInfo.UserInfo.ID),
 		Login:             extraInfo.UserInfo.Login,
 		LoginEmail:        userAccountEmail,
 		PublicRepos:       publicReposCount,

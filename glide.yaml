@@ -15,6 +15,7 @@ ignore:
 - github.com/roscopecoltran/sniperkit-limo/plugin
 - github.com/roscopecoltran/sniperkit-limo/plugins/docker
 - gob
+- gopkg.in/libgit2/git2go.v26
 - enterprise.getqor.com
 - enterprise.getqor.com/microsite
 - github.com/qor/qor-example
@@ -23,6 +24,114 @@ ignore:
 - github.com/docker/docker
 - github.com/Sirupsen/logrus
 import:
+- package: github.com/peterbourgon/diskv
+- package: github.com/gregjones/httpcache
+  subpackages:
+  - diskcache
+  - leveldbcache
+  - memcache
+  - redis 
+- package: github.com/qor/audited
+- package: github.com/onsi/ginkgo
+- package: github.com/smartystreets/goconvey
+  subpackages:
+  - convey
+- package: github.com/agrison/go-tablib
+- package: gopkg.in/gin-contrib/cors.v1
+- package: github.com/geekypanda/httpcache
+- package: github.com/prometheus/client_golang
+  subpackages:
+  - prometheus
+- package: github.com/zbindenren/negroni-prometheus
+- package: github.com/gorilla/pat
+- package: github.com/aerokite/go-github-watcher
+  subpackages:
+  - pkg/transport
+  - pkg/watcher
+  - pkg/github
+- package: github.com/src-d/rovers
+  subpackages:
+  - commands
+  - core 
+  - providers
+  - utils
+- package: github.com/aviddiviner/gin-limit
+- package: github.com/generaltso/git4go
+- package: github.com/nhurel/dim
+  subpackages:
+  - cli
+- package: gopkg.in/unrolled/secure.v1
+- package: github.com/gin-gonic/contrib
+  subpackages:
+  - cache 
+  - jwt
+  - sse 
+- package: github.com/src-d/berserker
+  subpackages:
+  - extractor
+- package: gopkg.in/d4l3k/messagediff.v1
+- package: github.com/andybalholm/cascadia
+  subpackages:
+  - fuzz
+- package: github.com/Code-Hex/exit
+- package: github.com/src-d/borges
+- package: gopkg.in/src-d/enry.v1
+  subpackages:
+  - internal/tokenizer
+  - internal/code-generator
+  - shared
+  - data
+- package: github.com/PuerkitoBio/goquery
+- package: github.com/anschelsc/finder
+- package: github.com/tobyhede/go-underscore
+- package: github.com/motemen/ghq
+  subpackages:
+  - utils
+- package: github.com/fzzy/radix
+  subpackages:
+  - redis
+  - extra/pubsub
+- package: github.com/disintegration/mqmq
+- package: github.com/tobyhede/go-underscore
+- package: github.com/siesta/neo4j
+- package: gopkg.in/libgit2/git2go.v26
+- package: github.com/sotetsuk/gobibtex
+- package: github.com/sotetsuk/goscholar
+- package: github.com/advancedlogic/GoOse
+- package: github.com/ChimeraCoder/anaconda
+- package: github.com/alexedwards/scs
+- package: github.com/dgrijalva/jwt-go
+- package: gopkg.in/gcfg.v1
+  version: v1.2.0
+- package: github.com/nicksnyder/go-i18n
+  version: v1.8.1
+- package: github.com/nfnt/resize
+  version: master 
+- package: gopkg.in/natefinch/lumberjack.v2
+  version: v2.1
+  vcs: git 
+  repo: https://github.com/natefinch/lumberjack.git
+- package: github.com/urandom/readeef
+  version: v2.0
+  vcs: git 
+  repo: https://github.com/urandom/readeef.git
+  subpackages:
+  - parser 
+  - content
+  - content/base
+  - content/repo
+  - content/data
+  - content/sql
+  - locale 
+  - popularity
+  - web
+  - api 
+  - internal/legacy
+  - log
+  - pool
+- package: github.com/DevMine/srctool
+  subpackages:
+  - tool
 - package: github.com/dpb587/metalink
   subpackages:
   - verification
@@ -40,7 +149,7 @@ import:
   - metadata
   - manager
 - package: github.com/hwfy/expression
-- package: ithub.com/chronitonapp/gormseries
+- package: github.com/chronitonapp/gormseries
 - package: github.com/etcinit/ohmygorm
   subpackages:
   - config
@@ -217,8 +326,10 @@ import:
 - package: github.com/unikorp/workmq
 - package: github.com/Damnever/goqueue
 - package: github.com/jeffail/benthos
+  version: master
+  vcs: git 
+  repo: https://github.com/jeffail/benthos.git
   subpackages:
-  - config
   - lib/broker
   - lib/buffer 
   - lib/buffer/impl
@@ -426,6 +537,19 @@ import:
 - package: github.com/dghubble/go-twitter
   subpackages:
   - twitter
+- package: github.com/alecthomas/chroma
+  subpackages:
+  - lexers
+  - formatters
+  - quick
+  - styles
+- package: github.com/dlclark/regexp2
+  subpackages:
+  - syntax
+  - 
+- package: github.com/likexian/whois-parser-go
+- package: github.com/amller/goRex
+- package: github.com/amller/time-relative
 - package: github.com/andygrunwald/go-trending
 - package: github.com/PaulRosset/go-hacknews
 - package: github.com/huandu/xstrings
@@ -750,7 +874,6 @@ import:
   - tensorflow/go
 - package: github.com/jmcvetta/neoism
 - package: github.com/jmcvetta/randutil
-- package: github.com/gregjones/httpcache
 - package: golang.org/x/net
   version: release-branch.go1.9
   subpackages:
@@ -771,9 +894,11 @@ import:
   - pretty
   - diff
 - package: github.com/urandom/text-summary
+  version: master
   subpackages:
   - summarize
 - package: github.com/urandom/handler
+  version: 0.8.0
   subpackages:
   - lang
 - package: github.com/inconshreveable/log15
