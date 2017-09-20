@@ -60,6 +60,8 @@ dist/*/limo-*
 dist/*/limo_*
 bin/limo*
 
+limo-*
+
 limo.json
 limo.yaml
 
